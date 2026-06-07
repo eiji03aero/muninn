@@ -5,13 +5,15 @@
 Claudeで調べて学んだ知識を、ツェッテルカステン的に蓄積・リンク・見直しするためのリポジトリ。
 
 - **正本はこのリポジトリのmarkdown群**。Obsidianは閲覧専用ビューア（任意）。
-- **捕捉**: `inbox.md` に雑に追記する。
-- **管理**: Claude Codeに「inboxを処理して」と指示すると、原子化・リンク・タグ付与・MOC更新をしてmainに直コミットする。人間はサマリと `git show` で事後レビューし、問題があれば `git revert` で戻す。
+- **直接ルート** `/mc-research`: Claude Codeに調査を依頼すると、その場で原子化して `notes/` / `moc/` に記録される。
+- **inboxルート** `/mc-process-inbox`: その場で原子化できないもの（スマホの雑メモ、チャット結果の貼り付け）は `inbox.md` に溜めて後日バッチ処理する。
+- どちらもmainに直コミット。人間はサマリと `git show` で事後レビューし、問題があれば `git revert` で戻す。
 - 運用ルールの詳細は [CLAUDE.md](CLAUDE.md) を参照。
 
 ```
-inbox.md          # 捕捉用
+inbox.md          # 捕捉用（その場で原子化できなかったものの受け皿）
 notes/            # 原子ノート（1ノート1アイデア）
 moc/              # Map of Content（home.md が入口）
 templates/note.md # ノートテンプレート
+.claude/skills/   # 作業手順（mc-research / mc-process-inbox / mc-regen-moc）
 ```
