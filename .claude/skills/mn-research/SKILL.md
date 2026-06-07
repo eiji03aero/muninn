@@ -1,9 +1,9 @@
 ---
-name: mc-research
+name: mn-research
 description: 調査を依頼されたとき、結果をその場で原子化して notes/ と moc/ に記録する。「〜について調べて」「調べてまとめて」「これナレッジに追加して」など、調査や知識の記録を頼まれたら使う。inboxは経由しない（直接ルート）。
 ---
 
-# mc-research: 調査→原子化→記録
+# mn-research: 調査→原子化→記録
 
 CLAUDE.md の規約（命名・原子化・リンク・タグ・コミット運用）に必ず従うこと。
 

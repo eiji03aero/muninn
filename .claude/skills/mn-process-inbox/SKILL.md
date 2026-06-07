@@ -1,9 +1,9 @@
 ---
-name: mc-process-inbox
+name: mn-process-inbox
 description: inbox.md に溜まった雑メモをバッチ処理して原子化し、notes/ と moc/ に整理する。「inboxを処理して」「inbox整理して」などと頼まれたら使う。
 ---
 
-# mc-process-inbox: inboxバッチ処理
+# mn-process-inbox: inboxバッチ処理
 
 CLAUDE.md の規約（命名・原子化・リンク・タグ・コミット運用）に必ず従うこと。
 

@@ -4,8 +4,8 @@
 
 記録のルートは2つある:
 
-- **直接ルート（`/mc-research`）**: Claude Codeに調査を依頼した場合、inboxを経由せず**調査したその場で**原子化して `notes/` / `moc/` に記録する。調査セッションが一番リッチな文脈を持っているため、2段圧縮（inbox書き出し→後日再要約）による意味の歪みを避ける。
-- **inboxルート（`/mc-process-inbox`）**: その場で原子化できないもの（スマホからの雑メモ、claude.aiチャットで調べた内容の貼り付け、思いつき）は人間が `inbox.md` に雑に追記し、後日バッチ処理する。inboxは「その場で原子化できなかったもの専用の受け皿」。
+- **直接ルート（`/mn-research`）**: Claude Codeに調査を依頼した場合、inboxを経由せず**調査したその場で**原子化して `notes/` / `moc/` に記録する。調査セッションが一番リッチな文脈を持っているため、2段圧縮（inbox書き出し→後日再要約）による意味の歪みを避ける。
+- **inboxルート（`/mn-process-inbox`）**: その場で原子化できないもの（スマホからの雑メモ、claude.aiチャットで調べた内容の貼り付け、思いつき）は人間が `inbox.md` に雑に追記し、後日バッチ処理する。inboxは「その場で原子化できなかったもの専用の受け皿」。
 
 ## ディレクトリ構成
 
@@ -14,7 +14,7 @@ inbox.md          # 捕捉用。雑な追記場所。処理済み項目は削除
 notes/            # 原子ノート置き場（1ノート1アイデア）
 moc/              # Map of Content。テーマごとの索引。home.md が全体の入口
 templates/note.md # ノートテンプレート
-.claude/skills/   # 作業手順（mc-research / mc-process-inbox / mc-regen-moc）
+.claude/skills/   # 作業手順（mn-research / mn-process-inbox / mn-regen-moc）
 ```
 
 ## 命名規則
@@ -64,9 +64,9 @@ tags: [dev/react]
 
 具体的な作業手順は `.claude/skills/` の各skillに書かれている。スラッシュコマンドで呼ばれた場合はもちろん、**同種の作業を自然言語で頼まれた場合（「inboxを処理して」「〜について調べてまとめて」等）も必ず該当skillを使うこと**。
 
-- `/mc-research` — 調査して、結果をその場で原子化し `notes/` / `moc/` に記録する
-- `/mc-process-inbox` — `inbox.md` をバッチ処理して原子化する
-- `/mc-regen-moc` — MOCを再生成し、壊れリンクを検出する
+- `/mn-research` — 調査して、結果をその場で原子化し `notes/` / `moc/` に記録する
+- `/mn-process-inbox` — `inbox.md` をバッチ処理して原子化する
+- `/mn-regen-moc` — MOCを再生成し、壊れリンクを検出する
 
 このCLAUDE.mdは規約（命名・原子化・リンク・タグ・コミット運用）の正本であり、skillはこの規約に従った手順を定義する。規約と手順が矛盾する場合はこのファイルを優先し、矛盾を報告する。
 

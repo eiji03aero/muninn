@@ -1,9 +1,9 @@
 ---
-name: mc-regen-moc
+name: mn-regen-moc
 description: notes/ 全体を走査してMOC（Map of Content）を再生成し、壊れリンク・孤児ノートを検出する。「MOCを再生成して」「索引を作り直して」「壊れリンクをチェックして」などと頼まれたら使う。
 ---
 
-# mc-regen-moc: MOC再生成＋壊れリンク検出
+# mn-regen-moc: MOC再生成＋壊れリンク検出
 
 CLAUDE.md の規約（命名・リンク・タグ・コミット運用）に必ず従うこと。MOCは `notes/` からいつでも再生成できる派生物であり、作り直してよい。
 
