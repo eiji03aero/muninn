@@ -13,3 +13,9 @@ tags: [moc]
 - [[biotin-lacks-evidence-for-hair-growth]] — ビオチンサプリにエビデンスはない
 - [[hair-supplements-without-deficiency-not-recommended]] — 欠乏なしのサプリは非推奨。ビタミンA・セレンは過剰で逆効果
 - [[cost-effective-foods-for-hair-nutrients]] — 卵・納豆・サバ缶・レバー＋日光でコスパよく揃える
+- [[my-diet-hair-nutrient-gaps]] — 自分の食生活の穴は魚（ビタミンD・オメガ3）。サバ缶で補う
+
+## 髪と生活習慣
+
+- [[smoking-accelerates-hair-loss]] — 喫煙は脱毛リスクを高める（生活習慣で最もエビデンスが強い）
+- [[stress-and-poor-sleep-cause-hair-shedding]] — ストレス・睡眠不足は毛周期を乱し休止期脱毛を招く

@@ -19,6 +19,7 @@ tags: [health/hair, health/nutrition]
 - [[protein-deficiency-causes-hair-shedding]] — なぜタンパク質が最優先なのかの根拠
 - [[iron-vitamin-d-zinc-deficiency-linked-to-hair-loss]] — ここで揃えている栄養素のエビデンス
 - [[hair-supplements-without-deficiency-not-recommended]] — サプリではなく食事で摂るべき理由とレバーの注意点
+- [[my-diet-hair-nutrient-gaps]] — この一般論を自分の食生活に当てはめた個別適用（魚＝ビタミンD・オメガ3の穴）
 
 ## Sources
 - https://fooddb.mext.go.jp/ (文部科学省 食品成分データベース)

@@ -13,6 +13,7 @@ tags: [health/hair, health/nutrition]
 ## Links
 - [[iron-vitamin-d-zinc-deficiency-linked-to-hair-loss]] — タンパク質の次に効く微量栄養素（同テーマの深掘り）
 - [[cost-effective-foods-for-hair-nutrients]] — タンパク質を安く摂る具体的な食品
+- [[stress-and-poor-sleep-cause-hair-shedding]] — 同じ休止期脱毛を栄養以外（ストレス・睡眠）が引き起こすケース
 
 ## Sources
 - https://pmc.ncbi.nlm.nih.gov/articles/PMC5315033/ (Guo & Katta 2017, Diet and hair loss)
