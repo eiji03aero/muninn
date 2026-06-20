@@ -1,7 +1,13 @@
 ---
 title: ビオチンは髪サプリの定番だが健常者の髪を育てるエビデンスはない
 created: 2026-06-07
+kind: knowledge
 tags: [health/hair, health/nutrition]
+srs:
+  last: null
+  interval: 0
+  ease: 2.5
+  next: 2026-06-20
 ---
 
 「hair, skin & nails」系サプリの主役ビオチンだが、ビオチン欠乏でない人が飲んで髪が増える・太くなるというエビデンスはない。ビオチン欠乏は脱毛を起こすが、欠乏自体が稀（腸内細菌も作るし普通の食事で足りる）。

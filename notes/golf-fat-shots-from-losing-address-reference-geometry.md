@@ -1,6 +1,7 @@
 ---
 title: ダフりはアドレスで作った参照ジオメトリを本番までに失いインパクトが即興になることで起きる
 created: 2026-06-19
+kind: insight
 tags: [sports/golf]
 ---
 

@@ -1,7 +1,13 @@
 ---
 title: 髪の主成分はケラチン（タンパク質）であり、タンパク質不足は脱毛を引き起こす
 created: 2026-06-07
+kind: knowledge
 tags: [health/hair, health/nutrition]
+srs:
+  last: null
+  interval: 0
+  ease: 2.5
+  next: 2026-06-20
 ---
 
 髪はほぼケラチンというタンパク質でできている。だから髪の健康の土台はまずタンパク質で、微量栄養素より優先順位が高い。

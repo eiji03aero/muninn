@@ -1,7 +1,13 @@
 ---
 title: 髪の主要栄養素（タンパク質・鉄・亜鉛・ビタミンD）は卵・納豆・サバ缶・レバー＋日光でコスパよく揃う
 created: 2026-06-07
+kind: knowledge
 tags: [health/hair, health/nutrition]
+srs:
+  last: null
+  interval: 0
+  ease: 2.5
+  next: 2026-06-20
 ---
 
 髪に効く栄養素（タンパク質・鉄・ビタミンD・亜鉛）は高いサプリなしで、安い定番食品の組み合わせで揃う:

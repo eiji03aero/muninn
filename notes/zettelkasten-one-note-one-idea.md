@@ -1,6 +1,7 @@
 ---
 title: ツェッテルカステンの原子ノートは1ノート1アイデアにする
 created: 2026-06-07
+kind: insight
 tags: [knowledge/zettelkasten]
 ---
 

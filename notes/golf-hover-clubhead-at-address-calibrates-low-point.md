@@ -1,6 +1,7 @@
 ---
 title: ゴルフのアドレスでヘッドを1mm浮かせると最下点の基準が体に入りダフりを防ぐ
 created: 2026-06-19
+kind: insight
 tags: [sports/golf]
 ---
 

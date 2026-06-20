@@ -1,7 +1,13 @@
 ---
 title: 微量栄養素では鉄・ビタミンD・亜鉛の欠乏が脱毛と関連するエビデンスが比較的強い
 created: 2026-06-07
+kind: knowledge
 tags: [health/hair, health/nutrition]
+srs:
+  last: null
+  interval: 0
+  ease: 2.5
+  next: 2026-06-20
 ---
 
 髪に関わる微量栄養素は色々言われるが、欠乏と脱毛の関連エビデンスが比較的強いのはこの3つ:
