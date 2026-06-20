@@ -4,10 +4,10 @@ created: 2026-06-07
 kind: knowledge
 tags: [health/hair, health/nutrition]
 srs:
-  last: null
-  interval: 0
-  ease: 2.5
-  next: 2026-06-20
+  last: 2026-06-20
+  interval: 1
+  ease: 2.36
+  next: 2026-06-21
 ---
 
 主要な総説（Almohanna 2019, Guo & Katta 2017）の共通結論: **欠乏が確認されていない人へのサプリ補給はエビデンスがなく推奨されない**。それどころか一部は過剰摂取で脱毛を悪化させる:
