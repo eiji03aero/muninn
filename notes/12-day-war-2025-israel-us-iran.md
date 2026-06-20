@@ -1,0 +1,27 @@
+---
+title: 2025年6月の「12日間戦争」でイスラエルと米国がイランの核施設を直接空爆した
+created: 2026-06-20
+kind: knowledge
+tags: [geopolitics/middle-east]
+srs:
+  last: null
+  interval: 0
+  ease: 2.5
+  next: 2026-06-20
+---
+
+イラン・イスラエルは1985年以降の代理戦争、2024年以降の直接交戦を経て、2025年6月に短期の直接戦争に至った。これが「12日間戦争（Twelve-Day War）」。
+
+- **2025年6月13日**: イスラエルが200機超の戦闘機でイランの核施設・軍施設・住宅地100か所超を空爆。核科学者や軍司令官を殺害。
+- **6月22日**: アメリカが参戦し、フォルドウ・ナタンズ・イスファハンの核施設をバンカーバスターで攻撃。
+- **6月24日**: イランがカタールの米軍基地にミサイルを撃った数時間後、米仲介で停戦。
+
+背景は、JCPOA（イラン核合意）崩壊後の核交渉の行き詰まり、イランの弾道ミサイルと地域への軍事的影響力。この戦争でイランは核計画と軍指導部に大ダメージを受け、制裁・国内不安・同盟勢力（ハマス、ヒズボラ）の弱体化と相まって、極めて弱った状態に置かれた。これが翌2026年の「とどめの一撃」の前提になる。
+
+## Links
+- [[2026-iran-war-khamenei-assassination]] — 続き: 弱ったイランに2026年2月にさらに大規模攻撃が入る
+
+## Sources
+- https://en.wikipedia.org/wiki/Iran%E2%80%93Israel_war
+- https://www.britannica.com/event/12-Day-War
+- https://www.aljazeera.com/news/2025/6/26/visualising-12-days-of-the-israel-iran-conflict

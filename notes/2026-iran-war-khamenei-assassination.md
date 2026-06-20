@@ -1,0 +1,29 @@
+---
+title: 2026年2月の戦争で米・イスラエルがイラン最高指導者ハメネイを暗殺し指導部空白を生んだ
+created: 2026-06-20
+kind: knowledge
+tags: [geopolitics/middle-east]
+srs:
+  last: null
+  interval: 0
+  ease: 2.5
+  next: 2026-06-20
+---
+
+2025年の12日間戦争で弱体化したイランに対し、核交渉の再決裂を経て、2026年に米・イスラエルがさらに大規模な攻撃を仕掛けた。構図は「核計画を阻止したいイスラエル＋アメリカ 対 すでに弱ったイラン」。
+
+- **2026年2月28日**: 米・イスラエルが最初の12時間で約900回という大規模攻撃を発動。
+- 最高指導者ハメネイ師を含む**40人以上のイラン高官を殺害**（3月1日にイラン政府が死亡を確認）。ハメネイ暗殺はテヘランでの一連の空爆の一部。
+- イランはミサイル・ドローンでイスラエルと米国に反撃。
+- イランは指導部の空白による**前例のない後継者危機（leadership crisis）**に陥り、40日間の国家服喪を宣言。
+
+一度目（2025年）の戦争で弱ったイランに、二度目（2026年）で指導部斬首のとどめが入った、という流れ。この攻撃が引き金となってヒズボラを通じレバノンに戦火が波及した。
+
+## Links
+- [[12-day-war-2025-israel-us-iran]] — 前提: 一度目の戦争でイランが弱体化していた
+- [[lebanon-hezbollah-front-2026-war]] — 波及: ハメネイ暗殺への報復でヒズボラが参戦しレバノンが戦場に
+
+## Sources
+- https://www.britannica.com/event/2026-Iran-war
+- https://en.wikipedia.org/wiki/Assassination_of_Ali_Khamenei
+- https://en.wikipedia.org/wiki/2026_Iranian_leadership_crisis
