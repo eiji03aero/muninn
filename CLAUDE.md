@@ -13,8 +13,9 @@
 inbox.md          # 捕捉用。雑な追記場所。処理済み項目は削除する
 notes/            # 原子ノート置き場（1ノート1アイデア）
 moc/              # Map of Content。テーマごとの索引。home.md が全体の入口
+review-log.jsonl  # クイズ解答履歴の追記ログ（1行1解答、append-only）
 templates/note.md # ノートテンプレート
-.claude/skills/   # 作業手順（mn-research / mn-process-inbox / mn-regen-moc）
+.claude/skills/   # 作業手順（mn-research / mn-process-inbox / mn-regen-moc / mn-review）
 ```
 
 ## 命名規則
@@ -38,7 +39,13 @@ templates/note.md # ノートテンプレート
 ---
 title: 内容を言い切るタイトル
 created: YYYY-MM-DD
+kind: knowledge
 tags: [dev/react]
+srs:
+  last: null
+  interval: 0
+  ease: 2.5
+  next: YYYY-MM-DD
 ---
 
 自分の言葉での要約。
@@ -46,6 +53,8 @@ tags: [dev/react]
 ## Links
 - [[related-note]] — なぜ関連するか一言
 ```
+
+`kind` と `srs` の意味は「種別（kind）とクイズによる定着」を参照。`insight` ノートでは `srs` ブロックごと省略する。
 
 ## リンク規約
 
@@ -60,6 +69,29 @@ tags: [dev/react]
 - 階層タグ可。例: `dev/react`, `knowledge/zettelkasten`, `health/sleep`
 - **新タグの乱造禁止**。タグを付ける前に既存ノートの `tags:` を走査（Grep）し、既存タグで表現できないか確認する。新タグを作る場合はコミットメッセージにその旨を書く。
 
+## 種別（kind）とクイズによる定着
+
+この仕組みの目的は **調べて得た客観的な知識を自分の頭に増やし、定着させる** こと。そのため全ノートに `kind` を付け、客観知識だけを間隔反復クイズで回す。
+
+- `kind: knowledge` — 調査で得た**客観的な知識**（外部の事実）。**クイズ対象**。`srs` ブロックを持つ。
+- `kind: insight` — 自分で言語化した**独自の知見・身体知・メタ原則**（例: ゴルフのスイング感覚、このKBの運用原則）。**クイズ対象外**。`srs` は付けない。
+- 仕分けに迷うものは「外部の事実を調べて得たか（knowledge）／自分の経験・解釈から来るか（insight）」で判断する。
+
+### srs フィールド（SM-2簡易版）
+
+`kind: knowledge` のノートだけが持つ。間隔反復のスケジューリング状態をノート自身に同居させる。
+
+- `last`: 最後に復習した日（`YYYY-MM-DD`、未復習は `null`）
+- `interval`: 現在の復習間隔（日）
+- `ease`: 易しさ係数（初期 2.5、最低 1.3）
+- `next`: 次の復習日。`next <= 今日` のノートが出題母集団になる。**新規ノートは `next` を作成日にして即対象化**する。
+
+### クイズの運用
+
+- 出題・採点・スケジュール更新は `/mn-review` skill が行う。**1セッション=1問**が基本。
+- 解答の詳細履歴は `review-log.jsonl` に1行ずつ追記（append-only）。`srs` の更新と履歴追記をまとめて**1コミット**で push する。
+- クイズ中にノート本文の誤り・古さが判明したら、その場で本文を修正してよい（能動的修正も定着になる）。修正理由はコミットメッセージに書く。
+
 ## 作業手順はskillにある
 
 具体的な作業手順は `.claude/skills/` の各skillに書かれている。スラッシュコマンドで呼ばれた場合はもちろん、**同種の作業を自然言語で頼まれた場合（「inboxを処理して」「これnotesにしておいて」「保存して」等）も必ず該当skillを使うこと**。ただし `/mn-research` は**明示的に記録を頼まれたときだけ**起動する（単なる「調べて」では起動しない。下記参照）。
@@ -67,6 +99,7 @@ tags: [dev/react]
 - `/mn-research` — 明示的に記録を頼まれたとき（「notesにして」「保存して」等）、調査結果をその場で原子化し `notes/` / `moc/` に記録 → commit → push する。単なる「調べて」ではチャットで答えるだけで記録しない
 - `/mn-process-inbox` — `inbox.md` をバッチ処理して原子化する
 - `/mn-regen-moc` — MOCを再生成し、壊れリンクを検出する
+- `/mn-review` — `kind: knowledge` かつ復習日が来たノートから1問出題し、採点・理解度記録・SRS更新 → commit → push する
 
 このCLAUDE.mdは規約（命名・原子化・リンク・タグ・コミット運用）の正本であり、skillはこの規約に従った手順を定義する。規約と手順が矛盾する場合はこのファイルを優先し、矛盾を報告する。
 
