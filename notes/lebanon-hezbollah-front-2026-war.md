@@ -22,6 +22,8 @@ srs:
 
 ## Links
 - [[2026-iran-war-khamenei-assassination]] — 起点: ハメネイ暗殺への報復としてヒズボラが参戦した
+- [[hezbollah-state-within-a-state]] — 構造: なぜヒズボラの判断でレバノンが戦争に巻き込まれるか
+- [[hezbollah-iran-created-shia-organization]] — 前提: ヒズボラとは何者か（イランが作ったシーア派組織）
 
 ## Sources
 - https://en.wikipedia.org/wiki/2026_Lebanon_war
