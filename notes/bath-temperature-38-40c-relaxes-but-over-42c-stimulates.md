@@ -15,6 +15,7 @@ srs:
 ## Links
 - [[warm-bath-activates-parasympathetic-serotonin-endorphin]] — ぬるめだと副交感神経優位になる機序
 - [[warm-bath-immersion-reduces-stress-and-negative-mood]] — この温度帯で得られる気分改善の実証
+- [[quick-wakefulness-methods-activate-sympathetic-nervous-system]] — 42℃以上の熱い湯が目覚めに向くのと同じ「交感神経賦活」の原理
 
 ## Sources
 - ぬるめのお湯で気持ちもほぐれる(公立学校共済組合) — https://www.kouritu.or.jp/kokoro/column/bathing/index.html
