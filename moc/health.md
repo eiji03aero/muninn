@@ -13,3 +13,9 @@ tags: [moc]
 - [[biotin-lacks-evidence-for-hair-growth]] — ビオチンサプリにエビデンスはない
 - [[hair-supplements-without-deficiency-not-recommended]] — 欠乏なしのサプリは非推奨。ビタミンA・セレンは過剰で逆効果
 - [[cost-effective-foods-for-hair-nutrients]] — 卵・納豆・サバ缶・レバー＋日光でコスパよく揃える
+
+## 入浴とストレス
+
+- [[warm-bath-immersion-reduces-stress-and-negative-mood]] — 40℃前後の湯船はシャワーより怒り・緊張・抑うつを下げる（RCT）
+- [[warm-bath-activates-parasympathetic-serotonin-endorphin]] — ぬるめの湯で副交感神経優位＋セロトニン・βエンドルフィン
+- [[bath-temperature-38-40c-relaxes-but-over-42c-stimulates]] — 38〜40℃はリラックス、42℃以上は逆効果
