@@ -15,3 +15,4 @@ muninn の入口。テーマごとのMOCはここから辿る。
 ## 未分類
 
 - [[zettelkasten-one-note-one-idea]] — このナレッジベースの基本原則
+- [[cliche-overused-not-necessarily-old]] — クリシェの意味（使い古されて陳腐が核）
