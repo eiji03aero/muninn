@@ -12,3 +12,4 @@ tags: [sports/golf]
 ## Links
 - [[golf-fat-shots-from-losing-address-reference-geometry]] — これは統一原理の「腕（半径）側の基準」を保つ具体策
 - [[golf-hover-clubhead-at-address-calibrates-low-point]] — 同じく構造維持の話。こちらは手首側の基準
+- [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — 「手・腕主導にせず体の回転に付随させる」注意で共通。あちらはフェース管理の側面
