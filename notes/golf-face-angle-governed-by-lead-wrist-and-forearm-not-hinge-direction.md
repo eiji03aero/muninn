@@ -22,3 +22,4 @@ srs:
 
 ## Links
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — この原理を「フェースを開かせない」実用感覚に落とし込んだ具体策
+- [[golf-slice-comes-from-open-face-not-hand-lead]] — この原理の応用。スライスは手の先行ではなくフェース開きが原因と切り分ける

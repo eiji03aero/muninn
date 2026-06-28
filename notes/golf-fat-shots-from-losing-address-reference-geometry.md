@@ -17,3 +17,4 @@ tags: [sports/golf]
 - [[golf-hover-clubhead-at-address-calibrates-low-point]] — 手首側の基準を作る具体策
 - [[golf-dont-lock-lead-arm-in-backswing]] — 腕（半径）側の基準を保つ具体策
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — 後ろ足残り（ハングバック）は最下点の基準を「後方へ」失う一例
+- [[golf-shallow-backswing-hand-and-shaft-in-line-reduces-fat]] — 入射角・プレーン側からのダフり対策。最下点を鋭角にしすぎない

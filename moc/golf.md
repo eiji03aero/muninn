@@ -11,11 +11,13 @@ tags: [moc]
 - [[golf-fat-shots-from-losing-address-reference-geometry]] — 統一仮説。ダフりは最下点の基準を本番までに失うことから起きる
 - [[golf-hover-clubhead-at-address-calibrates-low-point]] — 手首側の基準。アドレスでヘッドを1mm浮かせる
 - [[golf-dont-lock-lead-arm-in-backswing]] — 腕（半径）側の基準。リード腕を伸ばし切って固めない
+- [[golf-shallow-backswing-hand-and-shaft-in-line-reduces-fat]] — 入射角・プレーン側の基準。シャフトを立てすぎず手の甲とシャフトを一直線にしてシャローに上げる
 
 ## フェース管理（向き・スクエアに返す）
 
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — 原理。フェースの開閉はコックの方向ではなくリード手首の掌背屈・前腕回旋で決まる
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアンのセットアップ〜テークアウェイの具体策。スクエア＋軽いハンドファースト＋リード手首フラット
+- [[golf-slice-comes-from-open-face-not-hand-lead]] — 切り分け。スライスは手の先行ではなくフェースが開いていることが原因
 
 ## 体重移動・フィニッシュ（前足に乗り切る）
 
