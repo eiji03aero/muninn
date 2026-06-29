@@ -24,8 +24,11 @@ tags: [moc]
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — ドライバー。ハンドファーストにせず前傾なしで構えてアッパーに打つ
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアン（対比）。軽いハンドファーストでダウンブロー
 
-## 体重移動・フィニッシュ（前足に乗り切る）
+## 体重移動・スイングシーケンス・フィニッシュ
 
+- [[golf-backswing-load-pressure-into-inside-of-trail-foot-not-sway]] — バックスイング。後ろ足の内側に圧を積む（スウェー／リバースピボット回避）
+- [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — ダウン。地面から順に動き、前足への圧移動が回転に先行する
+- [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — ドライバー特有。圧は前・上体は後ろに残してアッパーに打つ
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — 診断。フィニッシュのそり返りは後ろ足残りのサインで飛距離・ミート・腰にマイナス
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 矯正方針。切り返しで先に圧を前足へ→前脚を支柱に立ち上がる
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — 振り抜きのイメージ。インパクト後の通過点でクラブ位置を確認して振り抜く

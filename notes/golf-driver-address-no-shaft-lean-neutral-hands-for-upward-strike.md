@@ -18,3 +18,4 @@ tags: [sports/golf]
 - [[golf-fat-shots-from-losing-address-reference-geometry]] — 最下点の参照を作る話。こちらはドライバーで最下点をボール手前に置く設計
 - [[golf-slice-comes-from-open-face-not-hand-lead]] — 両振れの片側（スライス）の原因はフェース開きという切り分け
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — 最下点をボール手前、振り抜きをその先に作るイメージと一致
+- [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 同じアッパーの狙いを体重移動側で作る（圧は前・上体は後ろ）。これは構え側
