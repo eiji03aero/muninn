@@ -20,3 +20,4 @@ tags: [sports/golf]
 ## Links
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — フェースをスクエアに保てる理由（原理）。手首の掌背屈・前腕回旋がフェース向きを決める
 - [[golf-dont-lock-lead-arm-in-backswing]] — 「手・腕主導にせず体の回転に付随させる」点で共通の注意。あちらは半径維持の側面
+- [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — 対比。ドライバーはハンドファーストにせず前傾なしで構える（アッパーに打つため）。アイアンの軽いハンドファースト（ダウンブロー）とは逆
