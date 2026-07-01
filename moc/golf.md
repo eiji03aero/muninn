@@ -24,6 +24,10 @@ tags: [moc]
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — ドライバー。ハンドファーストにせず前傾なしで構えてアッパーに打つ
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアン（対比）。軽いハンドファーストでダウンブロー
 
+## ダウンブロー（アイアン・すくい打ち矯正）
+
+- [[golf-iron-downblow-preset-impact-then-swing-drill]] — インパクトの形を先に作ってから振るプリセット・ドリル（＋ポンプ）。前に乗って覆ってダウンに打つ
+
 ## 体重移動・スイングシーケンス・フィニッシュ
 
 - [[golf-backswing-load-pressure-into-inside-of-trail-foot-not-sway]] — バックスイング。後ろ足の内側に圧を積む（スウェー／リバースピボット回避）

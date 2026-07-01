@@ -28,3 +28,4 @@ tags: [sports/golf]
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — なぜ直す必要があるか（そり返りの正体とマイナス）
 - [[golf-fat-shots-from-losing-address-reference-geometry]] — 前足に乗り切ることは最下点の参照を保つ＝ダフり対策とも一致する
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — 「回す前に踏む」の背景にある一般原理（圧移動が回転に先行する）
+- [[golf-iron-downblow-preset-impact-then-swing-drill]] — 前足に乗ったインパクトを刷り込むドリル（アイアンのすくい打ち矯正）

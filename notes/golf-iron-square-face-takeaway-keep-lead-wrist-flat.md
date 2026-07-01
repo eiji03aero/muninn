@@ -22,3 +22,4 @@ tags: [sports/golf]
 - [[golf-dont-lock-lead-arm-in-backswing]] — 「手・腕主導にせず体の回転に付随させる」点で共通の注意。あちらは半径維持の側面
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — 対比。ドライバーはハンドファーストにせず前傾なしで構える（アッパーに打つため）。アイアンの軽いハンドファースト（ダウンブロー）とは逆
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — 「コックは回転の代わりにしない」を一般化した原則（手で操作せず体に付随させる）
+- [[golf-iron-downblow-preset-impact-then-swing-drill]] — この構えをインパクトで再現し、すくい打ちを直すプリセット・ドリル
