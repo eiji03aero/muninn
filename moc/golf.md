@@ -33,6 +33,12 @@ tags: [moc]
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 矯正方針。切り返しで先に圧を前足へ→前脚を支柱に立ち上がる
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — 振り抜きのイメージ。インパクト後の通過点でクラブ位置を確認して振り抜く
 
+## スイングの原動力（体と手の役割）
+
+- [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — 原則。エンジンは体、手はフェース管理と受動的リリース（手打ちは再現性が低い／デッドハンドも誤り）
+- [[golf-lever-double-pendulum-is-valid-physics-but-not-a-hands-manipulation-method]] — 梃子（二重振り子）は物理として正しいが、手で操作する打法は非主流
+- [[golf-pros-share-body-led-sequence-individual-differences-are-feel-and-release-style]] — プロは体主導とシーケンスが共通、個人差はFeelとリリーススタイルだけ
+
 ## パッティング（マレット型）
 
 - [[putter-mallet-high-moi-face-balanced-suits-straight-stroke]] — クラブ特性。高MOI＋フェースバランスでストレートストローク向き

@@ -21,3 +21,4 @@ srs:
 ## Links
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — この順序を「回す前に踏む」という矯正キューに落とした具体策
 - [[golf-backswing-load-pressure-into-inside-of-trail-foot-not-sway]] — 順序の前提になる、積んだ圧の作り方
+- [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — このシーケンスが「体主導＝再現性の基盤」である理由

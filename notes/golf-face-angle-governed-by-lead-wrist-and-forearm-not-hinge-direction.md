@@ -23,3 +23,4 @@ srs:
 ## Links
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — この原理を「フェースを開かせない」実用感覚に落とし込んだ具体策
 - [[golf-slice-comes-from-open-face-not-hand-lead]] — この原理の応用。スライスは手の先行ではなくフェース開きが原因と切り分ける
+- [[golf-pros-share-body-led-sequence-individual-differences-are-feel-and-release-style]] — プロのリリーススタイルの差（ボウイング/ローテーション）はこの手首・前腕の使い方の違い
