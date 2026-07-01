@@ -16,3 +16,4 @@ tags: [sports/golf]
 - [[putting-setup-weak-grip-eyes-over-ball-ball-position-forward]] — この打ち方の前提になるアドレス
 - [[putting-distance-control-is-the-priority-three-putts-are-distance-errors]] — 「振り幅で距離」が効く理由（距離が最重要）
 - [[putter-mallet-high-moi-face-balanced-suits-straight-stroke]] — フェース開閉を抑えた振り子と合うクラブ特性
+- [[putting-stability-keep-everything-constant-only-shoulders-swing]] — この振り子をブレさせない条件（握圧一定・手首角度キープ・支点固定など）

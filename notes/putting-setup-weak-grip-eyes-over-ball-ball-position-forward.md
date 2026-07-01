@@ -15,3 +15,4 @@ tags: [sports/golf]
 ## Links
 - [[putting-stroke-shoulder-pendulum-stroke-length-controls-distance]] — このセットアップから入る実際のストローク
 - [[putter-mallet-high-moi-face-balanced-suits-straight-stroke]] — まっすぐ構えてまっすぐ出す前提になるクラブ特性
+- [[putting-stability-keep-everything-constant-only-shoulders-swing]] — この構えを保ってストロークをブレさせない条件

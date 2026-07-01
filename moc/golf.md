@@ -44,5 +44,6 @@ tags: [moc]
 - [[putter-mallet-high-moi-face-balanced-suits-straight-stroke]] — クラブ特性。高MOI＋フェースバランスでストレートストローク向き
 - [[putting-setup-weak-grip-eyes-over-ball-ball-position-forward]] — セットアップ。握りを弱く手首を殺す／目はボール真上／ボールやや左で順回転
 - [[putting-stroke-shoulder-pendulum-stroke-length-controls-distance]] — ストローク。肩の振り子で振り幅が距離、テンポ一定・減速しない・頭を残す
+- [[putting-stability-keep-everything-constant-only-shoulders-swing]] — 安定。肩の振り子以外（握圧・手首角度・土台・支点・目線）を一定に保つ
 - [[putting-distance-control-is-the-priority-three-putts-are-distance-errors]] — 優先順位。方向より距離感が最重要（スリーパットの主因は距離ミス）
 - [[putting-aim-at-virtual-cup-and-stroke-straight]] — ライン取り。仮想カップにまっすぐ打ち出し、読みと打ちを分離する
