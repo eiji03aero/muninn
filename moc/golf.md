@@ -43,6 +43,11 @@ tags: [moc]
 - [[golf-lever-double-pendulum-is-valid-physics-but-not-a-hands-manipulation-method]] — 梃子（二重振り子）は物理として正しいが、手で操作する打法は非主流
 - [[golf-pros-share-body-led-sequence-individual-differences-are-feel-and-release-style]] — プロは体主導とシーケンスが共通、個人差はFeelとリリーススタイルだけ
 
+## 飛距離アップ（ドライバー）
+
+- [[golf-driver-distance-is-ballspeed-smash-is-free-but-capped-300-needs-speed]] — 原則。飛距離＝HS×ミート率。芯化はタダの距離だが上限~1.5、大幅増はHS向上
+- [[golf-my-driver-distance-roadmap-smash-first-then-speed]] — 自分の方針。現状値と優先順位（まず芯で~280、300はスピードトレ、クラブは補助）
+
 ## パッティング（マレット型）
 
 - [[putter-mallet-high-moi-face-balanced-suits-straight-stroke]] — クラブ特性。高MOI＋フェースバランスでストレートストローク向き

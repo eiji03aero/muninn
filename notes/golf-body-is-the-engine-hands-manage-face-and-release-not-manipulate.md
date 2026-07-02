@@ -21,3 +21,4 @@ srs:
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — 「コックは回転の代わりにしない」＝手で操作しない実例（体に付随させる）
 - [[golf-lever-double-pendulum-is-valid-physics-but-not-a-hands-manipulation-method]] — レバーは物理として正しいが手で操作しない、の対
 - [[golf-pros-share-body-led-sequence-individual-differences-are-feel-and-release-style]] — この土台がプロで普遍的に共通という話
+- [[golf-driver-distance-is-ballspeed-smash-is-free-but-capped-300-needs-speed]] — 遠心力・しなり戻りは"出力"であって意識で稼ぐ手品ではない、という飛距離側の応用
