@@ -26,3 +26,4 @@ tags: [sports/golf]
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — スピードの源（地面から順のシーケンス）
 - [[golf-my-driver-speed-training-plan]] — 優先順位②スピードトレの具体メニュー
 - [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — なぜトレで速くなるか（HSはチェーンの出力）
+- [[golf-my-swing-low-spin-loft-optimize-with-loft-and-vertical-strike]] — 弾道の癖（低スピンロフト体質）と打ち出し/スピンの最適化方針
