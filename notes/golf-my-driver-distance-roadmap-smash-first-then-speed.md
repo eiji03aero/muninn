@@ -22,3 +22,5 @@ tags: [sports/golf]
 - [[golf-driver-distance-is-ballspeed-smash-is-free-but-capped-300-needs-speed]] — この方針の根拠（飛距離＝HS×ミートの一般原則）
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 現状の強み（アッパー×低スピンの型）
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — スピードの源（地面から順のシーケンス）
+- [[golf-my-driver-speed-training-plan]] — 優先順位②スピードトレの具体メニュー
+- [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — なぜトレで速くなるか（HSはチェーンの出力）

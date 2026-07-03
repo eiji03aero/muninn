@@ -47,6 +47,8 @@ tags: [moc]
 
 - [[golf-driver-distance-is-ballspeed-smash-is-free-but-capped-300-needs-speed]] — 原則。飛距離＝HS×ミート率。芯化はタダの距離だが上限~1.5、大幅増はHS向上
 - [[golf-my-driver-distance-roadmap-smash-first-then-speed]] — 自分の方針。現状値と優先順位（まず芯で~280、300はスピードトレ、クラブは補助）
+- [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — 原則。HSは腕速度でなくチェーンの出力。上げる鍵はブレーキを外す効率化
+- [[golf-my-driver-speed-training-plan]] — 自分のスピードトレ計画（オーバースピード＋パワー＋可動域）
 
 ## パッティング（マレット型）
 
