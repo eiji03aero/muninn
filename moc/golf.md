@@ -59,3 +59,4 @@ tags: [moc]
 - [[putting-stability-keep-everything-constant-only-shoulders-swing]] — 安定。肩の振り子以外（握圧・手首角度・土台・支点・目線）を一定に保つ
 - [[putting-distance-control-is-the-priority-three-putts-are-distance-errors]] — 優先順位。方向より距離感が最重要（スリーパットの主因は距離ミス）
 - [[putting-aim-at-virtual-cup-and-stroke-straight]] — ライン取り。仮想カップにまっすぐ打ち出し、読みと打ちを分離する
+- [[golf-my-putter-arrowtube-rf-is-toe-hang-use-slight-arc]] — 実物のパター（Arrowtube RF）はトウハング＝ゆるいアークで振る（フェース回転を許す）

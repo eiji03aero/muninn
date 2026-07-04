@@ -14,3 +14,4 @@ tags: [sports/golf]
 ## Links
 - [[putter-mallet-high-moi-face-balanced-suits-straight-stroke]] — まっすぐ出しやすいマレットだからこそ「狙い＝スパットへの直線」に集中できる
 - [[putting-distance-control-is-the-priority-three-putts-are-distance-errors]] — 距離側の管理。方向（スパット）と距離を分けて管理する
+- [[golf-my-putter-arrowtube-rf-is-toe-hang-use-slight-arc]] — 自分のパターはトウハング＝アーク。「真っ直ぐ出す」は打ち出しラインの意味で、パターの軌道は直線ではない

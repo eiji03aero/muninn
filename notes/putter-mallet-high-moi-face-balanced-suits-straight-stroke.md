@@ -17,3 +17,4 @@ srs:
 ## Links
 - [[putting-stroke-shoulder-pendulum-stroke-length-controls-distance]] — この特性を活かす打ち方（フェース開閉を抑えた肩の振り子）
 - [[putting-aim-at-virtual-cup-and-stroke-straight]] — まっすぐ出せるので狙い（スパットへの直線）に集中できる
+- [[golf-my-putter-arrowtube-rf-is-toe-hang-use-slight-arc]] — 自分の実物（Arrowtube RF）はトウハング＝アーク側の例外。実物のバランスが優先
