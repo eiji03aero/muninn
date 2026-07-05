@@ -42,6 +42,7 @@ tags: [moc]
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — 原則。エンジンは体、手はフェース管理と受動的リリース（手打ちは再現性が低い／デッドハンドも誤り）
 - [[golf-lever-double-pendulum-is-valid-physics-but-not-a-hands-manipulation-method]] — 梃子（二重振り子）は物理として正しいが、手で操作する打法は非主流
 - [[golf-pros-share-body-led-sequence-individual-differences-are-feel-and-release-style]] — プロは体主導とシーケンスが共通、個人差はFeelとリリーススタイルだけ
+- [[golf-driver-grip-secure-but-relaxed-stable-lead-wrist-no-flip]] — 実用。グリップは確実だが力まない・一定／親指側コックは許し掌屈背屈は安定させフリップさせない
 
 ## 飛距離アップ（ドライバー）
 
