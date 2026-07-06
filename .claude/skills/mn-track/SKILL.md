@@ -16,8 +16,9 @@ CLAUDE.md の規約（命名・タグ・**コミット運用**）に必ず従う
 tracks/<track-name>/
   profile.md            # 目的・機材/前提・現在の基準値・目標・変遷タイムライン
   sessions/YYYY-MM-DD.md # 各回の観測（アップしたデータ＋所見＋前回からの変化＋アドバイス）
-  assets/               # アップロードした写真・動画（YYYY-MM-DD-*.jpg など）
 ```
+
+- **写真・動画はリポジトリに保存・コミットしない**。アップされた画像/動画は vision で**内容を読み取るだけ**にとどめ、読み取った計測値・所見を `sessions/` に**テキストで**書き出す。バイナリはコミットに含めない。
 
 - `<track-name>` は kebab-case で内容を表す。例: `golf-driver-distance`, `english-speaking`。
 - `profile.md` は `templates/track-profile.md`、セッションは `templates/track-session.md` に従う。
@@ -37,7 +38,7 @@ tracks/<track-name>/
 
 1. **最新化**: `git fetch origin` → ローカル `main` を remote の最新に揃える（CLAUDE.md のコミット運用）。
 2. **データ受け取り**: 写真・動画・計測値を受け取る。
-   - **写真/動画をリポジトリに残す場合**: ユーザーからファイルパスで渡してもらい `tracks/<track-name>/assets/YYYY-MM-DD-<説明>.jpg` に配置する（チャットに貼られただけの画像はバイナリのパスが取れないことがある。その場合はパスで渡すよう依頼するか、テキスト所見のみ記録する旨を伝える）。
+   - **写真・動画はコミットしない**。vision で内容を読み取り、読み取った計測値・所見を `sessions/` にテキストで書き出すだけにとどめる（画像バイナリはリポジトリに保存しない）。
    - 計測値（数値）は所見にそのまま書き出す。
 3. **分析**: アップされたデータを vision 等で客観的に分析する。前提条件（機材・環境）が前回と揃っているかも確認する。
 4. **前回と比較**: 直近セッション（無ければ profile のベースライン）と比べ、良化・悪化・不変を切り分ける。**これが定点観測の核**。
@@ -57,7 +58,7 @@ tracks/<track-name>/
 
 - push 前に必ず `git fetch origin` → ローカル `main` を最新化 → `main` にコミット → **remote `main` に push**。
   session で別ブランチが指定されていても、最終 push は必ずローカル `main` 経由で remote `main` へ（CLAUDE.md「コミット運用」参照）。
-- コミットは意味のある単位で分ける（例: セッション記録追加 / profile基準値更新 / 写真追加）。
+- コミットは意味のある単位で分ける（例: セッション記録追加 / profile基準値更新）。
 - コミットメッセージ例:
   - `track(golf-driver-distance): 2026-07-06 の観測を記録（アドバイス: 打点安定）`
   - `track(golf-driver-distance): 基準値を更新（ミート1.39→1.42、理由: 新計測）`
