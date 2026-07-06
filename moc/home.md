@@ -16,3 +16,9 @@ muninn の入口。テーマごとのMOCはここから辿る。
 
 - [[zettelkasten-one-note-one-idea]] — このナレッジベースの基本原則
 - [[cliche-overused-not-necessarily-old]] — クリシェの意味（使い古されて陳腐が核）
+
+## 定点観測トラック（tracks/）
+
+スキル上達の時系列ジャーナル。`/mn-track` で運用（notes/ とは別concern）。
+
+- [[golf-driver-distance/profile|ゴルフ ドライバー飛距離]] — スイングを定点観測して飛距離アップを追う（`tracks/golf-driver-distance/`）
