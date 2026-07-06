@@ -23,6 +23,7 @@ tags: [moc]
 
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — ドライバー。ハンドファーストにせず前傾なしで構えてアッパーに打つ
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアン（対比）。軽いハンドファーストでダウンブロー
+- [[golf-driver-address-connection-without-tension-relax-into-low-trail-shoulder]] — ドライバーの腕/肩の力加減。連結は残しテンションだけ抜く、緩めは右肩を下へ
 
 ## ダウンブロー（アイアン・すくい打ち矯正）
 

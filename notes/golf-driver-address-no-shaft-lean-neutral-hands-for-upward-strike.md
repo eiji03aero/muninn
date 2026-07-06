@@ -19,3 +19,4 @@ tags: [sports/golf]
 - [[golf-slice-comes-from-open-face-not-hand-lead]] — 両振れの片側（スライス）の原因はフェース開きという切り分け
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — 最下点をボール手前、振り抜きをその先に作るイメージと一致
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 同じアッパーの狙いを体重移動側で作る（圧は前・上体は後ろ）。これは構え側
+- [[golf-driver-address-connection-without-tension-relax-into-low-trail-shoulder]] — 腕/肩の力加減の補足（連結は残しテンションだけ抜く、緩めは右肩を下へ）
