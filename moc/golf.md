@@ -28,6 +28,7 @@ tags: [moc]
 ## ダウンブロー（アイアン・すくい打ち矯正）
 
 - [[golf-iron-downblow-preset-impact-then-swing-drill]] — インパクトの形を先に作ってから振るプリセット・ドリル（＋ポンプ）。前に乗って覆ってダウンに打つ
+- [[golf-downblow-spin-loft-face-compresses-ball-not-scoop]] — 原理。すくわず、スピンロフトで面を擦り上げてバックスピン。ロフトより低く斜め上へ
 
 ## 体重移動・スイングシーケンス・フィニッシュ
 

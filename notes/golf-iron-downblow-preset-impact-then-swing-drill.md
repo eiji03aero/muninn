@@ -27,3 +27,4 @@ tags: [sports/golf]
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — すくいの主因（後ろ足残りで最下点が後方へ）
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 前足に乗る具体動作（ステップスルー等）と整合
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 対比。ドライバーは上体を残してアッパー、アイアンは前に乗ってダウン
+- [[golf-downblow-spin-loft-face-compresses-ball-not-scoop]] — なぜダウンに打つと上がる/スピンが増えるかの物理（スピンロフト・すくわない）

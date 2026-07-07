@@ -24,3 +24,4 @@ tags: [sports/golf]
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — アッパーに構える側（前傾なし）。ここは維持
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 圧は前・上体は後ろでアッパー。これも維持しつつ"増やしすぎない"
 - [[golf-my-driver-distance-roadmap-smash-first-then-speed]] — 全体の飛距離ロードマップ（縦の打点＝最優先とも一致）
+- [[golf-downblow-spin-loft-face-compresses-ball-not-scoop]] — スピンロフトの一般原理。アイアン（ダウン）側の対比
