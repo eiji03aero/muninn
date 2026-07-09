@@ -38,6 +38,7 @@ tags: [moc]
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — 診断。フィニッシュのそり返りは後ろ足残りのサインで飛距離・ミート・腰にマイナス
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 矯正方針。切り返しで先に圧を前足へ→前脚を支柱に立ち上がる
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — 振り抜きのイメージ。インパクト後の通過点でクラブ位置を確認して振り抜く
+- [[golf-driver-draw-lower-body-opens-upper-stays-closed-right-shoulder-down]] — ドローの体の使い方。下半身は開く/上半身は閉じて我慢/右肩は下へ/リード股関節を抜く
 
 ## スイングの原動力（体と手の役割）
 

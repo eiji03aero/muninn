@@ -20,3 +20,4 @@ srs:
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — 同じアッパーの狙いを構え側で作る（前傾なし）。こちらは体重移動側
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — 対比。「上体を残す」と混同しがちな"後ろ足残り（ハングバック）"はNGという話
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 圧を前足へ移してポストアップする具体動作
+- [[golf-driver-draw-lower-body-opens-upper-stays-closed-right-shoulder-down]] — 右肩を下へ・上体を残す動きはドロー（インから）とも一致
