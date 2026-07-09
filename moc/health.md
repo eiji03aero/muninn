@@ -14,6 +14,16 @@ tags: [moc]
 - [[hair-supplements-without-deficiency-not-recommended]] — 欠乏なしのサプリは非推奨。ビタミンA・セレンは過剰で逆効果
 - [[cost-effective-foods-for-hair-nutrients]] — 卵・納豆・サバ缶・レバー＋日光でコスパよく揃える
 
+## スキンケア（毛穴・保湿）
+
+- [[enlarged-pores-three-causes-sebum-laxity-follicle-size]] — 毛穴の開きの3主因（皮脂・弾力低下・毛包サイズ）。消せず目立たなくするもの
+- [[sunscreen-protects-dermal-collagen-the-base-of-pore-and-aging-care]] — 日焼け止めは土台。UVが真皮コラーゲンを壊す
+- [[niacinamide-reduces-sebum-and-improves-pore-appearance]] — ナイアシンアミドは皮脂を抑え毛穴の見た目を改善
+- [[topical-retinoids-are-gold-standard-for-pores-and-texture]] — レチノイドは毛穴・キメ改善のゴールドスタンダード
+- [[morning-facial-plumpness-is-edema-not-hydration]] — 寝起きのハリはむくみで、健康な潤いとは別物
+- [[skin-water-retention-internal-levers-omega3-uv-sleep-bloodflow]] — 内側から水分保持を上げるレバー（オメガ3・紫外線・睡眠・血流）
+- [[my-skincare-pore-plan-keep-sunscreen-niacinamide-add-retinol]] — 私の毛穴ケア方針（現行の評価と次の一手）
+
 ## 入浴とストレス
 
 - [[warm-bath-immersion-reduces-stress-and-negative-mood]] — 40℃前後の湯船はシャワーより怒り・緊張・抑うつを下げる（RCT）
