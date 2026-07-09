@@ -25,6 +25,7 @@ srs:
 - [[protein-deficiency-causes-hair-shedding]] — なぜタンパク質が最優先なのかの根拠
 - [[iron-vitamin-d-zinc-deficiency-linked-to-hair-loss]] — ここで揃えている栄養素のエビデンス
 - [[hair-supplements-without-deficiency-not-recommended]] — サプリではなく食事で摂るべき理由とレバーの注意点
+- [[skin-water-retention-internal-levers-omega3-uv-sleep-bloodflow]] — サバ缶のオメガ3は肌の水分保持にも効く（同じ食材が別目的にも）
 
 ## Sources
 - https://fooddb.mext.go.jp/ (文部科学省 食品成分データベース)
