@@ -22,3 +22,4 @@ srs:
 ## Links
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — 積んだ圧をダウンでどう放出するか（切り返しの順序）
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 積んだ圧を前足へ移す体重移動の全体像
+- [[golf-backswing-keep-good-tilt-kill-sway-and-dip-rotate-onto-inside-trail-hip]] — 軸/上体の側。良い傾きは残しスウェー/ディップを消す（圧の話とセット）
