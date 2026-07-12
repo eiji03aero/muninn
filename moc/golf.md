@@ -25,10 +25,12 @@ tags: [moc]
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアン（対比）。軽いハンドファーストでダウンブロー
 - [[golf-driver-address-connection-without-tension-relax-into-low-trail-shoulder]] — ドライバーの腕/肩の力加減。連結は残しテンションだけ抜く、緩めは右肩を下へ
 
-## ダウンブロー（アイアン・すくい打ち矯正）
+## ダウンブロー・番手別の打ち分け（入射角）
 
 - [[golf-iron-downblow-preset-impact-then-swing-drill]] — インパクトの形を先に作ってから振るプリセット・ドリル（＋ポンプ）。前に乗って覆ってダウンに打つ
 - [[golf-downblow-spin-loft-face-compresses-ball-not-scoop]] — 原理。すくわず、スピンロフトで面を擦り上げてバックスピン。ロフトより低く斜め上へ
+- [[golf-club-length-gradient-longer-shallower-flatter-ball-forward]] — 番手のグラデーション。長い番手ほど浅く/広く/ボール前（払う）。地面からは全番手ボールファースト
+- [[golf-my-3-iron-swing-like-driver-body-led-shallow-but-ball-first]] — 3番はドライバー寄りのイメージ（体主導・広く浅く）でミートしやすい
 
 ## 体重移動・スイングシーケンス・フィニッシュ
 

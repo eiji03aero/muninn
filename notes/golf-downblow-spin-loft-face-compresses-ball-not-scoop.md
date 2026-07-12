@@ -26,3 +26,4 @@ srs:
 - [[golf-iron-downblow-preset-impact-then-swing-drill]] — この物理を体で作るドリル（前に乗ってダウンに打つ）
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — ハンドファースト＝デロフトの構え。ダイナミックロフトを立てる側
 - [[golf-my-swing-low-spin-loft-optimize-with-loft-and-vertical-strike]] — ドライバー側のスピンロフト（低スピンロフト体質）。同じ枠の対比
+- [[golf-club-length-gradient-longer-shallower-flatter-ball-forward]] — この入射角が番手ごとにどう変わるか（クラブ長のグラデーション）
