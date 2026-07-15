@@ -26,3 +26,4 @@ srs:
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — 出力の中身（地面から順のシーケンス）
 - [[golf-my-driver-speed-training-plan]] — これを鍛える具体メニュー
 - [[golf-driver-distance-is-ballspeed-smash-is-free-but-capped-300-needs-speed]] — なぜHSを上げるのか（大幅な飛距離増はHS向上が必須）
+- [[golf-let-the-head-run-first-with-smooth-tempo-then-add-raw-speed]] — 実感版。まずヘッドを走らせる（スムーズなテンポ）→速度は後乗せ

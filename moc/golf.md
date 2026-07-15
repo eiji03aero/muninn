@@ -57,6 +57,7 @@ tags: [moc]
 - [[golf-my-driver-distance-roadmap-smash-first-then-speed]] — 自分の方針。現状値と優先順位（まず芯で~280、300はスピードトレ、クラブは補助）
 - [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — 原則。HSは腕速度でなくチェーンの出力。上げる鍵はブレーキを外す効率化
 - [[golf-my-driver-speed-training-plan]] — 自分のスピードトレ計画（オーバースピード＋パワー＋可動域）
+- [[golf-let-the-head-run-first-with-smooth-tempo-then-add-raw-speed]] — まずヘッドを走らせる（スムーズなテンポ）→生の速度は後乗せ。ゆっくり=テンポ、リリースはフル
 - [[golf-my-swing-low-spin-loft-optimize-with-loft-and-vertical-strike]] — 弾道の癖。低スピンロフト体質、最適化はロフト＋縦の打点（もっとアッパーではない）
 
 ## パッティング（マレット型）
