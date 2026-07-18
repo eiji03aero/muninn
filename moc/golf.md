@@ -50,6 +50,7 @@ tags: [moc]
 - [[golf-pros-share-body-led-sequence-individual-differences-are-feel-and-release-style]] — プロは体主導とシーケンスが共通、個人差はFeelとリリーススタイルだけ
 - [[golf-driver-grip-secure-but-relaxed-stable-lead-wrist-no-flip]] — 実用。グリップは確実だが力まない・一定／親指側コックは許し掌屈背屈は安定させフリップさせない
 - [[golf-body-led-delivery-is-right-but-chest-opening-ahead-plus-flip-causes-pull-hook]] — 体主導は正しいが「胸が先に開く＋手で返す」は引っかけ。両立の条件
+- [[golf-driver-stop-forcing-extreme-inside-out-deliver-neutral-through-ball]] — 極端インからをやめ中立軌道でボールに通す（詰まり→開き→スライス解消／ドローはミルドに）
 
 ## 飛距離アップ（ドライバー）
 

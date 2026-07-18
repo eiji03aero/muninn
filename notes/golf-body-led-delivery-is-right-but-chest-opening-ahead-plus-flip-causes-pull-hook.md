@@ -26,3 +26,4 @@ tags: [sports/golf]
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — 体主導が再現性の根拠
 - [[golf-driver-grip-secure-but-relaxed-stable-lead-wrist-no-flip]] — 「手で返さない（フェース軸を安定）」の具体
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — 開く順番（下半身先行）の土台
+- [[golf-driver-stop-forcing-extreme-inside-out-deliver-neutral-through-ball]] — ブロック/スライス側（極端インから→詰まり→開く）を軌道の観点で埋める
