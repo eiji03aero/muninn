@@ -25,3 +25,4 @@ tags: [sports/golf]
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 右肩を下へ・上体を残す＝ドローとアッパーが同時に成立
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — リード股関節を抜いてポストアップする具体動作
 - [[golf-body-led-delivery-is-right-but-chest-opening-ahead-plus-flip-causes-pull-hook]] — 「胸が先に開いてクラブ置き去り＋手で返す＝引っかけ」の切り分け
+- [[golf-dont-open-chest-early-is-good-but-dont-over-hold-sync-and-keep-rotating]] — 「閉じて我慢」の運用注意。詰まり側は同期・腰主導・回転を止めないで効かせる
