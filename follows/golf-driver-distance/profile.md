@@ -1,7 +1,8 @@
 ---
 title: ゴルフ ドライバー飛距離 — 定点観測トラック
 created: 2026-07-06
-kind: track
+kind: follow           # 追う対象（旧track）。クイズ対象外（srsは付けない）
+follow_type: goal      # goal=上達目標がある / interest=興味で追う
 tags: [sports/golf]
 goal: ドライバー飛距離アップ（現状 総263y → まず芯で ~280y、本丸 300y）
 status: active
