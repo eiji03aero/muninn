@@ -1,0 +1,36 @@
+---
+follow: argentina-nt
+kind: collect
+cadence: weekly
+updated: 2026-07-24
+watchlist:
+  - lionel-messi
+  - emiliano-martinez
+  - cristian-romero
+  - lisandro-martinez
+  - nicolas-otamendi
+  - rodrigo-de-paul
+  - enzo-fernandez
+  - alexis-mac-allister
+  - julian-alvarez
+  - lautaro-martinez
+deep_dive:
+  - enzo-fernandez
+  - julian-alvarez
+collect:
+  recent_form: true
+  videos: true
+  next_matches: true
+  rivals: false
+sources:
+  schedule: "https://www.afa.com.ar/es/pages/seleccion-mayor-masculina"
+  notes: "英語一次ソース優先。未確定の日程・数字・移籍は書かない"
+---
+
+## 収集メモ / 調整履歴
+
+現主力10人を watchlist に。中盤の核 **エンソ** と、次代の得点源 **フリアン** を深掘り（成長を追う）。
+2026 W杯後は世代交代局面なので、若手の台頭が出てきたら watchlist / deep_dive を入れ替える。
+
+- 2026-07-24: 起票。deep_dive = エンソ・フェルナンデス / フリアン・アルバレス。日程は AFA 公式を当てにするが、W杯直後で次戦未確定の見込み。
+- 2026-07-24: 初回収集を実行。deep_dive 2名のフォーム/clips更新、日程は未確定で見送り。詳細は `sessions/2026-07-24-collect.md`。
