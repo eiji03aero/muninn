@@ -4,38 +4,25 @@ created: 2026-07-23
 kind: entity
 follow: argentina-nt
 tags: [sports/football]
+group: FW
+role: センターフォワード
+club: Inter Milan
 status: active
+deep_dive: false
+strengths: [鋭い決定力, 賢い動き, キープ, 空中戦, 決勝での冷静さ]
+developing: [大会で沈黙することがある（2022W杯は不発）]
+clips:
+  - { title: "インテルでのゴール集", query: Lautaro Martinez Inter goals }
+changelog:
+  - { date: "2026-07", note: "2026準決勝イングランド戦90+2分に決勝ヘッド" }
 updated: 2026-07-23
 ---
 
 鋭い決定力と賢い動きを持つセンターフォワード。決勝や終盤で冷静に仕事をする "牡牛(El Toro)"。
 
-## 基本情報
+## メモ
 
-- 役割 / ポジション: センターフォワード
-- 所属（現在, 2025–26）: Inter Milan（クラブ主将）
-
-## 強み
-
-- 鋭い決定力
-- 賢い動き
-- キープ
-- 空中戦
-- 決勝での冷静さ
-
-## 強化中 / 弱み
-
-- 大会で沈黙することがある（2022W杯は不発）
-
-## 直近フォーム・変化（changelog）
-
-| 日付 | 変化・所見 |
-|------|-----------|
-| 2026-07 | 2026準決勝イングランド戦90+2分に決勝ヘッド。あだ名 "牡牛(El Toro)"、2024コパ決勝の決勝弾も決めた |
-
-## 参考クリップ
-
-- YouTube検索: `Lautaro Martinez Inter goals`
+鋭い決定力と賢い動きを持つセンターフォワードで、あだ名は「牡牛（El Toro）」。2026準決勝イングランド戦では90+2分に決勝ヘッドを決めた。2024年のコパ・アメリカ決勝でも決勝弾を挙げており、大舞台での勝負強さが光る。
 
 ## Links
 
