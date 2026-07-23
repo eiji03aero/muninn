@@ -1,0 +1,27 @@
+{
+  "name": "muninn-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "muninn のブラウザ用ビューア（follows / notes / moc を閲覧する派生サイト）。正本は ../ のmarkdown。",
+  "scripts": {
+    "build:data": "node scripts/build-data.mjs",
+    "dev": "npm run build:data && vite",
+    "build": "npm run build:data && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^3",
+    "@emotion/react": "^11",
+    "react": "^19",
+    "react-dom": "^19",
+    "react-markdown": "^10",
+    "react-router-dom": "^7"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6",
+    "gray-matter": "^4",
+    "vite": "^8",
+    "vite-plugin-pwa": "^1"
+  }
+}

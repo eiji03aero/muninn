@@ -1,0 +1,7 @@
+node_modules/
+dist/
+# 生成物（build-data.mjs が markdown から吐く派生JSON）
+public/site.json
+public/site.enc.json
+# playwright-cli の作業ファイル
+.playwright-cli/
