@@ -8,6 +8,7 @@ muninn は3つのconcernでできている —— **① 客観知識の蓄積（
 - **直接ルート（`/mn-research`）**: 調べた客観知識をinboxを経由せず**その場で**原子化して `notes/` / `moc/` に記録し push する。明示的に記録を頼まれたときだけ（「notesにして」「保存して」等）。単なる「調べて」では記録しない。調査セッションが一番リッチな文脈を持つため、2段圧縮（inbox書き出し→後日再要約）による意味の歪みを避ける。
 - **inboxルート（`/mn-process-inbox`）**: その場で原子化できないもの（スマホの雑メモ、claude.aiチャットの貼り付け、思いつき）は `inbox.md` に雑に追記し、後日バッチ処理する。
 - **フォロー（定点観測）ルート（`/mn-follow`）**: 上達したいスキルや**興味のある対象**を定点観測する。写真・計測値・観戦所見をアップロード → 分析 → 記録（goal型はアドバイス / interest型は見どころ・深掘り）→ `follows/` に書き出し → push。`notes/` とは別concernの時系列ジャーナル。詳細は「フォロー（follows）」の節を参照。
+- **収集ルート（`/mn-collect`）**: フォローごとの収集スペック `collect.md`（watchlist・深掘り選手・日程・ライバル・頻度）に沿って、現主力の直近フォーム・動画・次戦日程を集めて entity/profile/notes に反映し、収集ダイジェストを残す。設定の逐次調整（「〜を深掘りに追加」等）もこのルート。
 - **想起ルート（`/mn-brief`）**: 蓄積（notes/entities/follows/sessions）を横断合成して対象の「予習ブリーフィング」を作る（試合前の見どころ、現状＋関連知識＋想起クイズ）。既定は読むだけ。蓄積を"楽しむ"に変換する回収装置。
 - **クイズルート（`/mn-review`）**: `kind: knowledge` の復習期限ノートから1問出題し、間隔反復で定着させる。
 
@@ -17,7 +18,7 @@ muninn は3つのconcernでできている —— **① 客観知識の蓄積（
 inbox.md          # 捕捉用。雑な追記場所。処理済み項目は削除する
 notes/            # 原子ノート置き場（1ノート1アイデア）。kind: knowledge / insight
 moc/              # Map of Content。テーマごとの索引。home.md が全体の入口
-follows/          # フォロー（定点観測）。1対象1ディレクトリ。profile.md / entities/ / sessions/
+follows/          # フォロー（定点観測）。1対象1ディレクトリ。profile.md / entities/ / sessions/ / collect.md
 review-log.jsonl  # クイズ解答履歴の追記ログ（1行1解答、append-only）
 templates/        # note.md / follow-profile.md / follow-session.md / follow-entity.md
 scripts/          # 補助ツール。mn-status.mjs = 復習期限・フォロー一覧のダッシュボード（依存ゼロ / node で実行）
@@ -83,7 +84,8 @@ srs:
 - `kind: insight` — 自分で言語化した**独自の知見・身体知・メタ原則**（例: ゴルフのスイング感覚、このKBの運用原則）。**クイズ対象外**。`srs` は付けない。
 - `kind: follow` — `follows/*/profile.md`（追う対象のプロファイル）。**クイズ対象外**。`srs` は付けない（＋ `follow_type: goal|interest`）。→「フォロー（follows）」の節。
 - `kind: entity` — `follows/*/entities/*.md`（人物・構成要素のドシエ。時系列で変化）。**クイズ対象外**。`srs` は付けない。ドシエから覚える価値のある客観知識は `knowledge` ノートに切り出す。
-- `knowledge` / `insight` は `notes/` に、`follow` / `entity` は `follows/` に置く。クイズ（`mn-review`）が回すのは `knowledge` だけ。
+- `kind: collect` — `follows/*/collect.md`（フォローの収集スペック＝設定）。**クイズ対象外**。`srs` なし。サイトには出さない。→「フォロー（follows）」の節。
+- `knowledge` / `insight` は `notes/` に、`follow` / `entity` / `collect` は `follows/` に置く。クイズ（`mn-review`）が回すのは `knowledge` だけ。
 - 仕分けに迷うものは「外部の事実を調べて得たか（knowledge）／自分の経験・解釈から来るか（insight）」で判断する。
 
 ### srs フィールド（SM-2簡易版）
@@ -111,6 +113,7 @@ srs:
 - `/mn-regen-moc` — MOCを再生成し、壊れリンクを検出する
 - `/mn-review` — `kind: knowledge` かつ復習日が来たノートから1問出題し、採点・理解度記録・SRS更新 → commit → push する
 - `/mn-follow` — スキルや対象を定点観測（フォロー）する。写真・計測値・観戦所見をアップロード → 分析・記録（goal型=アドバイス / interest型=見どころ）→ `follows/` に記録 → commit → push（「定点観測」「試合を記録して」「トラック/フォロー作って」等）
+- `/mn-collect` — フォローの収集スペック `collect.md` に沿って近況（直近フォーム・動画・日程）を集めて entity/profile/notes に反映し、収集ダイジェストを残す。設定の逐次調整も（「収集して」「最新化して」「〜を深掘りに追加」等）
 - `/mn-brief` — 蓄積を横断合成して対象の予習ブリーフィングを作る（試合前の見どころ、想起クイズ）。既定は読むだけ（commitしない）
 
 このCLAUDE.mdは規約（命名・原子化・リンク・タグ・コミット運用）の正本であり、skillはこの規約に従った手順を定義する。規約と手順が矛盾する場合はこのファイルを優先し、矛盾を報告する。
@@ -125,7 +128,8 @@ srs:
 - **1対象1ディレクトリ**: `follows/<follow-name>/`（kebab-case。例: `golf-driver-distance`, `argentina-nt`）。
   - `profile.md` — 目的・前提・現状（基準値/スナップショット）・重点/見どころ・**変遷タイムライン**。frontmatter は `kind: follow` ＋ `follow_type`（`srs` は付けない＝クイズ対象外）。`templates/follow-profile.md` に従う。
   - `entities/<name>.md` — 任意。人物・構成要素の**ドシエ**（`kind: entity`、時系列で変化）。役割・強み・強化中の点・changelog・参考クリップ。`templates/follow-entity.md` に従う。
-  - `sessions/YYYY-MM-DD.md` — 各回の観測（データ＋所見＋前回からの変化＋アドバイス/深掘り＋次回チェック）。`templates/follow-session.md` に従う。
+  - `sessions/YYYY-MM-DD.md` — 各回の観測（データ＋所見＋前回からの変化＋アドバイス/深掘り＋次回チェック）。`templates/follow-session.md` に従う。収集ダイジェストは `sessions/YYYY-MM-DD-collect.md`。
+  - `collect.md` — 収集スペック（`kind: collect`）。何を・誰を（watchlist / deep_dive）・どれくらい追うか。`/mn-collect` が読む。`templates/collect.md` に従う（任意）。
   - **写真・動画はリポジトリに保存・コミットしない**。vision で内容を読み取るだけにとどめ、読み取った計測値・所見を `sessions/`（や entity の changelog）にテキストで書き出す。
 - **定点観測の核は「同条件で観て前回と比べる」こと**。固定パラメータは profile に書き、条件が変わったらセッションに明記する。
 - フォローは `notes/` の知識を**参照・消費する側**。所見・アドバイスは既存ノートに `[[リンク]]` して根拠を示す。フォローで新しい**客観知識**が判明したら `/mn-research`（または `/mn`）で `notes/` に原子ノート化する（フォローに埋め込んで終わりにしない）。人物の時系列属性は entity に書く。
