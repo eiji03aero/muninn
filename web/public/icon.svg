@@ -1,4 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="muninn raven">
   <rect width="512" height="512" rx="104" fill="#0f172a"/>
-  <text x="256" y="366" font-size="330" font-family="Helvetica, Arial, sans-serif" font-weight="700" fill="#38bdf8" text-anchor="middle">m</text>
+  <g fill="#6ec1ff">
+    <path d="M48 248 L150 220 C160 198 178 188 198 194 C210 198 214 198 222 198 C232 198 240 206 244 222 C280 228 320 248 360 284 L462 298 C466 299 467 305 462 307 L376 330 C348 348 306 350 288 346 C270 354 244 354 228 344 C198 328 190 306 196 298 C166 288 150 272 150 254 Z"/>
+    <rect x="252" y="346" width="10" height="68" rx="5"/>
+    <rect x="286" y="346" width="10" height="68" rx="5"/>
+    <rect x="156" y="412" width="220" height="13" rx="6"/>
+  </g>
+  <circle cx="162" cy="222" r="9" fill="#0f172a"/>
 </svg>
