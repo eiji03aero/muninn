@@ -1,7 +1,11 @@
 :root { color-scheme: dark; }
 html, body, #root { height: 100%; }
+/* PWA をネイティブアプリのように: ダブルタップ/ピンチ/文字自動拡大でのズームを抑止 */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
 body {
   margin: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   color: #f2f5ff;
   background:
     radial-gradient(120% 55% at 12% -6%, rgba(110,193,255,.20), transparent 60%),
