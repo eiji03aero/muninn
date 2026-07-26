@@ -131,7 +131,7 @@ const atlases = (existsSync(atlasDir) ? readdirSync(atlasDir, { withFileTypes: t
       const e = data.edges || {};
       return {
         slug: cslug, title: data.title || cslug, gist: data.gist || '',
-        status: data.status || 'written',
+        status: data.status || 'written', created: D(data.created) || null,
         edges: {
           requires: arrOf(e.requires), contrasts: arrOf(e.contrasts),
           leadsTo: arrOf(e['leads-to']), elaborates: arrOf(e.elaborates),

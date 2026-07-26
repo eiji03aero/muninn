@@ -45,65 +45,115 @@ const Star = () => <span style={{ color: C.violet, textShadow: '0 0 10px rgba(18
 const ftColor = (t) => (t === 'interest' ? C.violet : C.sky);
 const statusColor = (s) => (s === 'injured' ? C.pink : s === 'inactive' ? C.faint : C.green);
 const clipHref = (c) => (c.url ? c.url : `https://www.youtube.com/results?search_query=${encodeURIComponent(c.query || c.title || '')}`);
+const clean = (t) => (t || '').replace(/\s*—.*$/, '');
+function relDay(date, today) {
+  if (!date) return '';
+  const d = Math.round((new Date(today) - new Date(date)) / 86400000);
+  if (d <= 0) return '今日';
+  if (d === 1) return '昨日';
+  if (d < 7) return `${d}日前`;
+  if (d < 28) return `${Math.floor(d / 7)}週間前`;
+  return String(date);
+}
 
 // ---------------- Home ----------------
 export function Home() {
   const { site } = useData();
   const navigate = useNavigate();
+  const today = site.generatedAt;
   const dueCount = site.notes.filter((n) => n.due).length;
   const kCount = site.notes.filter((n) => n.kind === 'knowledge').length;
   const iCount = site.notes.filter((n) => n.kind === 'insight').length;
+  const totalConcepts = (site.atlases || []).reduce((s, a) => s + a.concepts.length, 0);
+  const writtenConcepts = (site.atlases || []).reduce((s, a) => s + a.concepts.filter((c) => c.status !== 'stub').length, 0);
   const upcoming = site.follows
     .flatMap((f) => (f.nextMatches || []).map((m) => ({ ...m, follow: f })))
     .filter((m) => m.date)
     .sort((a, b) => (a.date < b.date ? -1 : 1))[0];
-  const upDays = upcoming ? Math.ceil((new Date(upcoming.date) - new Date(site.generatedAt)) / 86400000) : null;
+  const upDays = upcoming ? Math.ceil((new Date(upcoming.date) - new Date(today)) / 86400000) : null;
+  const kpis = [
+    { label: '復習期限', value: String(dueCount), alert: dueCount > 0 },
+    { label: 'ノート', value: String(site.notes.length) },
+    { label: 'アトラス概念', value: totalConcepts ? `${writtenConcepts}/${totalConcepts}` : '—' },
+    { label: 'フォロー', value: String(site.follows.length) },
+  ];
+  const actMeta = {
+    note: { label: 'ノート', color: C.sky },
+    follow: { label: 'フォロー', color: C.green },
+    atlas: { label: 'アトラス', color: C.violet },
+  };
+  const activity = [
+    ...site.notes.map((n) => ({ kind: 'note', title: n.title, date: n.created, to: `/note/${n.slug}` })),
+    ...site.follows.flatMap((f) => f.sessions.map((s) => ({ kind: 'follow', title: `${clean(f.title)}：${s.date} の観測`, date: s.date, to: `/follow/${f.name}` }))),
+    ...(site.atlases || []).flatMap((a) => a.concepts.filter((c) => c.status !== 'stub' && c.created).map((c) => ({ kind: 'atlas', title: `${clean(a.title)}：${clean(c.title)}`, date: c.created, to: `/atlas/${a.slug}/concept/${c.slug}` }))),
+  ].filter((x) => x.date).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 7);
   return (
     <>
-      <AppBar title="muninn" subtitle={`個人ナレッジベース · ${site.generatedAt} 時点`} back={false} />
+      <AppBar title="muninn" subtitle={`個人ナレッジベース · ${today} 時点`} back={false} />
       <Page>
-        <Box className="glass" p="4" borderRadius="20px" mb="6">
-          <Text fontSize="xs" color={C.faint} mb="2.5" letterSpacing="0.03em">{site.generatedAt} · 今日の一手</Text>
-          <VStack align="stretch" gap="2">
+        <SimpleGrid columns={2} gap="2.5" mb="3">
+          {kpis.map((k) => <StatTile key={k.label} {...k} />)}
+        </SimpleGrid>
+
+        {(dueCount > 0 || upcoming) && (
+          <VStack align="stretch" gap="2" mb="6">
             {dueCount > 0 && (
               <Flex as="button" onClick={() => navigate('/notes')} align="center" justify="space-between"
-                className="glass-soft press" px="3.5" py="3" borderRadius="14px" w="100%" textAlign="left">
+                className="glass press" px="4" py="3" borderRadius="16px" w="100%" textAlign="left">
                 <HStack gap="3"><DueBadge /><Text fontSize="sm" color={C.ink} fontWeight="600">復習期限のノートがある</Text></HStack>
                 <Text fontSize="sm" color={C.muted} flexShrink="0">{dueCount}件 ›</Text>
               </Flex>
             )}
             {upcoming && (
               <Flex as="button" onClick={() => navigate(`/follow/${upcoming.follow.name}`)} align="center" justify="space-between"
-                className="glass-soft press" px="3.5" py="3" borderRadius="14px" w="100%" textAlign="left">
+                className="glass press" px="4" py="3" borderRadius="16px" w="100%" textAlign="left">
                 <Box>
-                  <Text fontSize="xs" color={C.faint}>次戦 · {upcoming.follow.title.replace(/\s*—.*$/, '')}</Text>
+                  <Text fontSize="xs" color={C.faint}>次戦 · {clean(upcoming.follow.title)}</Text>
                   <Text fontSize="sm" color={C.ink} fontWeight="600" mt="0.5">vs {upcoming.opponent}</Text>
                 </Box>
                 <Text fontSize="sm" color={C.violet} fontWeight="700" flexShrink="0">{upDays != null ? `あと${upDays}日` : upcoming.date} ›</Text>
               </Flex>
             )}
-            {dueCount === 0 && !upcoming && (
-              <Text fontSize="sm" color={C.muted}>今日は静かだ。下から読みたいものを選ぼう。</Text>
-            )}
           </VStack>
-        </Box>
+        )}
+
+        <Section title="直近の更新">
+          <Box className="glass" borderRadius="18px" px="2" py="0.5">
+            {activity.map((it, i) => (
+              <Flex as="button" key={i} onClick={() => navigate(it.to)} align="center" gap="3" w="100%" textAlign="left"
+                className="press" px="2.5" py="2.5" borderTop={i ? `1px solid ${C.line}` : 'none'}>
+                <Box w="8px" h="8px" borderRadius="full" flexShrink="0" bg={actMeta[it.kind].color}
+                  style={{ boxShadow: `0 0 8px ${actMeta[it.kind].color}` }} />
+                <Box flex="1" minW="0">
+                  <Text fontSize="sm" color={C.ink} truncate>{it.title}</Text>
+                  <Text fontSize="11px" color={C.faint} mt="0.5">{actMeta[it.kind].label} · {relDay(it.date, today)}</Text>
+                </Box>
+                <Text fontSize="sm" color={C.faint} flexShrink="0">›</Text>
+              </Flex>
+            ))}
+          </Box>
+        </Section>
 
         {(site.atlases || []).length > 0 && (
           <Section title="学習アトラス">
             <VStack align="stretch" gap="3">
               {site.atlases.map((a) => {
                 const written = a.concepts.filter((c) => c.status !== 'stub').length;
+                const pct = a.concepts.length ? Math.round((written / a.concepts.length) * 100) : 0;
                 return (
                   <Card key={a.slug} onClick={() => navigate(`/atlas/${a.slug}`)}>
-                    <Flex justify="space-between" align="start" gap="3">
-                      <Box>
-                        <Heading size="sm" mb="1" color={C.ink}>{a.title.replace(/\s*—.*$/, '')}</Heading>
-                        <Text fontSize="sm" color={C.muted}>{a.routes?.[0]?.desc || '知識グラフを順路でたどる'}</Text>
+                    <Flex justify="space-between" align="start" gap="3" mb="3">
+                      <Box flex="1" minW="0">
+                        <Heading size="sm" color={C.ink}>{clean(a.title)}</Heading>
+                        <Text fontSize="xs" color={C.muted} mt="1" truncate>{a.routes?.[0]?.desc || '知識グラフを順路でたどる'}</Text>
                       </Box>
-                      <VStack align="end" gap="1.5" flexShrink="0">
-                        <Chip color={C.violet}>atlas</Chip>
-                        <Text fontSize="xs" color={C.faint}>概念 {written}/{a.concepts.length}</Text>
-                      </VStack>
+                      <Chip color={C.violet}>atlas</Chip>
+                    </Flex>
+                    <Flex align="center" gap="2.5">
+                      <Box flex="1" h="6px" borderRadius="full" bg="rgba(255,255,255,.08)" overflow="hidden">
+                        <Box h="100%" borderRadius="full" bg={ACCENT_GRADIENT} style={{ width: `${pct}%` }} />
+                      </Box>
+                      <Text fontSize="xs" color={C.faint} flexShrink="0">概念 {written}/{a.concepts.length}</Text>
                     </Flex>
                   </Card>
                 );
@@ -114,20 +164,23 @@ export function Home() {
 
         <Section title="フォロー">
           <VStack align="stretch" gap="3">
-            {site.follows.map((f) => (
-              <Card key={f.name} onClick={() => navigate(`/follow/${f.name}`)}>
-                <Flex justify="space-between" align="start" gap="3">
-                  <Box>
-                    <Heading size="sm" mb="1" color={C.ink}>{f.title.replace(/\s*—.*$/, '')}</Heading>
-                    <Text fontSize="sm" color={C.muted}>{f.coach ? `監督: ${f.coach}` : f.goal}</Text>
-                  </Box>
-                  <VStack align="end" gap="1.5" flexShrink="0">
-                    <Chip color={ftColor(f.followType)}>{f.followType}</Chip>
-                    <Text fontSize="xs" color={C.faint}>{f.entities.length ? `選手 ${f.entities.length}` : `観測 ${f.sessions.length}`}</Text>
-                  </VStack>
-                </Flex>
-              </Card>
-            ))}
+            {site.follows.map((f) => {
+              const sub = f.snapshot?.[0] || (f.coach ? `監督: ${f.coach}` : f.goal);
+              return (
+                <Card key={f.name} onClick={() => navigate(`/follow/${f.name}`)}>
+                  <Flex justify="space-between" align="start" gap="3">
+                    <Box flex="1" minW="0">
+                      <Heading size="sm" mb="1" color={C.ink}>{clean(f.title)}</Heading>
+                      <Text fontSize="sm" color={C.muted} truncate>{sub}</Text>
+                    </Box>
+                    <VStack align="end" gap="1.5" flexShrink="0">
+                      <Chip color={ftColor(f.followType)}>{f.followType}</Chip>
+                      <Text fontSize="xs" color={C.faint}>{f.entities.length ? `選手 ${f.entities.length}` : `観測 ${f.sessions.length}`}</Text>
+                    </VStack>
+                  </Flex>
+                </Card>
+              );
+            })}
           </VStack>
         </Section>
 
