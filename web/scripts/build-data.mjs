@@ -104,6 +104,7 @@ const follows = (existsSync(followsDir) ? readdirSync(followsDir, { withFileType
       status: pf.status || 'active', goal: pf.goal || '', tags: pf.tags || [],
       coach: pf.coach || null, formation: pf.formation || null,
       snapshot: pf.snapshot || [], rivals: pf.rivals || [],
+      baseline: pf.baseline || [], focus: pf.focus || [],
       nextMatches: (pf.next_matches || []).map((m) => ({ ...m, date: D(m.date) })),
       body: pbody, links: wikiTargets(pbody), entities, sessions,
     };
