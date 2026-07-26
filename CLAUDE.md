@@ -2,13 +2,14 @@
 
 このリポジトリは、Claudeで調べて学んだ知識をツェッテルカステン的に蓄積・リンク・見直しする個人ナレッジベース。**正本（source of truth）はこのGitリポジトリのmarkdown群**であり、Obsidianは閲覧専用ビューア（任意）。
 
-muninn は3つのconcernでできている —— **① 客観知識の蓄積（`notes/`）／ ② スキル・対象のフォロー（`follows/`）／ ③ 想起と定着（`/mn-brief`・`/mn-review`）**。この3つを相互リンクで有機的に繋ぐのが狙いで、**「今どの機能を使っているか」を意識しなくて済むよう、統一入口 `/mn` にすべてのキャプチャを集約できる**。
+muninn は4つのconcernでできている —— **① 客観知識の蓄積（`notes/`）／ ② スキル・対象のフォロー（`follows/`）／ ③ 想起と定着（`/mn-brief`・`/mn-review`）／ ④ 体系的な学習（`atlas/`・`/mn-learn`）**。この4つを相互リンクで有機的に繋ぐのが狙いで、**「今どの機能を使っているか」を意識しなくて済むよう、統一入口 `/mn` にすべてのキャプチャを集約できる**。①がバラバラの原子（単語カード）なら、④はそれを**読み物として体系立てて学ぶ順路（教科書）**——④で読んで理解し、④が①に知識を蒸留し、③がそれを定着させる。
 
 - **統一入口（`/mn`）**: 何を投げても内容を判定し、**客観知識ノート / insight / フォロー観測 / フォロー新設 / 人物ドシエ / inbox退避**に自動で仕分け・相互リンクして記録・push する。種別を意識させないフロントドア（mn-capture）。仕分け結果は必ず提示し、ユーザーが訂正できる。単なる「調べて」（記録の意思なし）では発火しない。
 - **直接ルート（`/mn-research`）**: 調べた客観知識をinboxを経由せず**その場で**原子化して `notes/` / `moc/` に記録し push する。明示的に記録を頼まれたときだけ（「notesにして」「保存して」等）。単なる「調べて」では記録しない。調査セッションが一番リッチな文脈を持つため、2段圧縮（inbox書き出し→後日再要約）による意味の歪みを避ける。
 - **inboxルート（`/mn-process-inbox`）**: その場で原子化できないもの（スマホの雑メモ、claude.aiチャットの貼り付け、思いつき）は `inbox.md` に雑に追記し、後日バッチ処理する。
 - **フォロー（定点観測）ルート（`/mn-follow`）**: 上達したいスキルや**興味のある対象**を定点観測する。写真・計測値・観戦所見をアップロード → 分析 → 記録（goal型はアドバイス / interest型は見どころ・深掘り）→ `follows/` に書き出し → push。`notes/` とは別concernの時系列ジャーナル。詳細は「フォロー（follows）」の節を参照。
 - **収集ルート（`/mn-collect`）**: フォローごとの収集スペック `collect.md`（watchlist・深掘り選手・日程・ライバル・頻度）に沿って、現主力の直近フォーム・動画・次戦日程を集めて entity/profile/notes に反映し、収集ダイジェストを残す。設定の逐次調整（「〜を深掘りに追加」等）もこのルート。
+- **学習アトラスルート（`/mn-learn`）**: あるトピックを **知識グラフ（概念ノード＋型付きエッジ）＋読む順路（ルート）** として体系的に学ぶ。トピックを渡すとグラフを設計し、理解しやすいルートを引き、各概念を**読み物（散文）**として執筆、覚える価値のある知識を `notes/` に蒸留して push する。読者は GitHub Pages で「マップ（俯瞰）／ルート（順路）」を読み進める。`notes/` の断片とは別concernの**学習レイヤー（教科書）**。詳細は「学習アトラス（atlas）」の節を参照。
 - **想起ルート（`/mn-brief`）**: 蓄積（notes/entities/follows/sessions）を横断合成して対象の「予習ブリーフィング」を作る（試合前の見どころ、現状＋関連知識＋想起クイズ）。既定は読むだけ。蓄積を"楽しむ"に変換する回収装置。
 - **クイズルート（`/mn-review`）**: `kind: knowledge` の復習期限ノートから1問出題し、間隔反復で定着させる。
 
@@ -19,10 +20,11 @@ inbox.md          # 捕捉用。雑な追記場所。処理済み項目は削除
 notes/            # 原子ノート置き場（1ノート1アイデア）。kind: knowledge / insight
 moc/              # Map of Content。テーマごとの索引。home.md が全体の入口
 follows/          # フォロー（定点観測）。1対象1ディレクトリ。profile.md / entities/ / sessions/ / collect.md
+atlas/            # 学習アトラス。1トピック1ディレクトリ。atlas.md（ハブ＋ルート）/ concepts/（概念ノード）
 review-log.jsonl  # クイズ解答履歴の追記ログ（1行1解答、append-only）
-templates/        # note.md / follow-profile.md / follow-session.md / follow-entity.md
+templates/        # note.md / follow-profile.md / follow-session.md / follow-entity.md / collect.md / atlas.md / concept.md
 scripts/          # 補助ツール。mn-status.mjs = 復習期限・フォロー一覧のダッシュボード（依存ゼロ / node で実行）
-.claude/skills/   # 作業手順（mn-capture / mn-research / mn-process-inbox / mn-regen-moc / mn-review / mn-follow / mn-brief）
+.claude/skills/   # 作業手順（mn-capture / mn-research / mn-process-inbox / mn-regen-moc / mn-review / mn-follow / mn-collect / mn-brief / mn-learn）
 ```
 
 ## 命名規則
@@ -85,7 +87,9 @@ srs:
 - `kind: follow` — `follows/*/profile.md`（追う対象のプロファイル）。**クイズ対象外**。`srs` は付けない（＋ `follow_type: goal|interest`）。→「フォロー（follows）」の節。
 - `kind: entity` — `follows/*/entities/*.md`（人物・構成要素のドシエ。時系列で変化）。**クイズ対象外**。`srs` は付けない。ドシエから覚える価値のある客観知識は `knowledge` ノートに切り出す。
 - `kind: collect` — `follows/*/collect.md`（フォローの収集スペック＝設定）。**クイズ対象外**。`srs` なし。サイトには出さない。→「フォロー（follows）」の節。
-- `knowledge` / `insight` は `notes/` に、`follow` / `entity` / `collect` は `follows/` に置く。クイズ（`mn-review`）が回すのは `knowledge` だけ。
+- `kind: atlas` — `atlas/*/atlas.md`（学習アトラスのハブ＝概要・ルート）。**クイズ対象外**。`srs` は付けない。→「学習アトラス（atlas）」の節。
+- `kind: concept` — `atlas/*/concepts/*.md`（概念ノード＝型付きエッジ＋読み物）。**クイズ対象外**。`srs` は付けない。概念から覚える価値のある客観知識は `knowledge` ノートに蒸留する。
+- `knowledge` / `insight` は `notes/` に、`follow` / `entity` / `collect` は `follows/` に、`atlas` / `concept` は `atlas/` に置く。クイズ（`mn-review`）が回すのは `knowledge` だけ。
 - 仕分けに迷うものは「外部の事実を調べて得たか（knowledge）／自分の経験・解釈から来るか（insight）」で判断する。
 
 ### srs フィールド（SM-2簡易版）
@@ -115,6 +119,7 @@ srs:
 - `/mn-follow` — スキルや対象を定点観測（フォロー）する。写真・計測値・観戦所見をアップロード → 分析・記録（goal型=アドバイス / interest型=見どころ）→ `follows/` に記録 → commit → push（「定点観測」「試合を記録して」「トラック/フォロー作って」等）
 - `/mn-collect` — フォローの収集スペック `collect.md` に沿って近況（直近フォーム・動画・日程）を集めて entity/profile/notes に反映し、収集ダイジェストを残す。設定の逐次調整も（「収集して」「最新化して」「〜を深掘りに追加」等）
 - `/mn-brief` — 蓄積を横断合成して対象の予習ブリーフィングを作る（試合前の見どころ、想起クイズ）。既定は読むだけ（commitしない）
+- `/mn-learn` — トピックを知識グラフ＋ルートで体系的に学ぶ学習アトラスを運用。グラフ設計・ルート設計・概念の読み物執筆・`notes/` への蒸留 → commit → push（「〜を学びたい」「〜のアトラス作って」「次の章を書いて」「この概念を深掘り」「ルート引き直して」等）
 
 このCLAUDE.mdは規約（命名・原子化・リンク・タグ・コミット運用）の正本であり、skillはこの規約に従った手順を定義する。規約と手順が矛盾する場合はこのファイルを優先し、矛盾を報告する。
 
@@ -134,6 +139,21 @@ srs:
 - **定点観測の核は「同条件で観て前回と比べる」こと**。固定パラメータは profile に書き、条件が変わったらセッションに明記する。
 - フォローは `notes/` の知識を**参照・消費する側**。所見・アドバイスは既存ノートに `[[リンク]]` して根拠を示す。フォローで新しい**客観知識**が判明したら `/mn-research`（または `/mn`）で `notes/` に原子ノート化する（フォローに埋め込んで終わりにしない）。人物の時系列属性は entity に書く。
 - タグ・命名・コミット運用は本ファイルの規約に従う。基準値・現状を書き換える場合は理由をコミットメッセージに明記（サイレント上書き禁止）。
+
+## 学習アトラス（atlas）
+
+あるトピックを **知識グラフ＋読む順路（ルート）** として体系的に学ぶ仕組み。`notes/`（バラバラの原子ノート）が「すでに分野を知る人」の断片捕捉・定着に強いのに対し、atlas は **新しい分野に入門する順路（読み物・教科書）** を与える別concernの**学習レイヤー**。手順は `/mn-learn` skill。
+
+- **2層モデル**:
+  - **知識グラフ（durableな構造）** — ノード＝概念（`kind: concept`）、エッジ＝型付きの関係（`requires` 前提 / `contrasts` 対比 / `leads-to` 発展 / `elaborates` 深掘り）。分野の知識は一本道でなくグラフ、という前提に立つ。
+  - **ルート＝シラバス** — グラフを「理解しやすい順」にたどる経路。`requires` で順序を決め、`contrasts` は隣接させる。**同じグラフに複数ルートを引ける**（例: 歴史でたどる／分野でたどる）。ルートは `atlas.md` の `routes` に持つ。
+- **1トピック1ディレクトリ**: `atlas/<topic-slug>/`（kebab-case。例: `philosophy`）。
+  - `atlas.md` — 概要・読み方・`routes`（順路）。frontmatter は `kind: atlas`（`srs` なし＝クイズ対象外）。`templates/atlas.md` に従う。そのトピックの**ハブ（MOC相当）**を兼ねる。
+  - `concepts/<concept>.md` — 概念ノード。frontmatter に型付きエッジ・`gist`・`status`(written/stub)・蒸留先 `notes`。body は**読ませる散文**。`kind: concept`（`srs` なし）。`templates/concept.md` に従う。
+- **読み物の書き方**: 各概念は、入ってくるエッジ（前提・対比・発展）を**物語に織り込みながら**書く（「つながりを説明しながら」）。箇条書きの羅列にしない。良質な入門書のトーンで、具体例・比喩・「なぜ重要か」を入れて読ませる。ただし**正確さは絶対に犠牲にしない**（解釈が割れる論点は「諸説ある」と明示）。エッジ・キーポイントの**構造は frontmatter に持ち、本文には重複させない**（サイト側がUIで描く）。
+- **一度に全部書かない**。新設時も先頭数ノードだけ執筆し、残りは `status: stub` でグラフに置く。読む速度に合わせて増やす。
+- atlas は `notes/` へ**知識を蒸留する側**。概念執筆時に、覚える価値のある客観知識を `notes/`（`kind: knowledge`、`srs` 初期化）へ切り出し、概念⇄ノートを相互リンクする。クイズ（`/mn-review`）が回すのは蒸留された `knowledge` だけで、concept/atlas は回さない（**読んで理解＝atlas／覚えて定着＝notes** の役割分担）。
+- **画像・動画等のバイナリはコミットしない**（follows と同じ）。`moc/home.md` から各アトラスに到達できるようにする。タグ・命名・コミット運用は本ファイルの規約に従う。
 
 ## コミット運用（安全装置・最重要）
 
