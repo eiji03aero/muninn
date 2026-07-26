@@ -26,7 +26,7 @@ function NotFound({ what }) {
 }
 function TabRow({ tabs, tab, setTab }) {
   return (
-    <Flex wrap="wrap" gap="2" my="4">
+    <Flex wrap="wrap" gap="2" mt="3">
       {tabs.map((t) => {
         const on = tab === t.id;
         return (
@@ -53,28 +53,40 @@ export function Home() {
   const dueCount = site.notes.filter((n) => n.due).length;
   const kCount = site.notes.filter((n) => n.kind === 'knowledge').length;
   const iCount = site.notes.filter((n) => n.kind === 'insight').length;
+  const upcoming = site.follows
+    .flatMap((f) => (f.nextMatches || []).map((m) => ({ ...m, follow: f })))
+    .filter((m) => m.date)
+    .sort((a, b) => (a.date < b.date ? -1 : 1))[0];
+  const upDays = upcoming ? Math.ceil((new Date(upcoming.date) - new Date(site.generatedAt)) / 86400000) : null;
   return (
     <>
       <AppBar title="muninn" subtitle={`個人ナレッジベース · ${site.generatedAt} 時点`} back={false} />
       <Page>
-        <Section title="フォロー">
-          <VStack align="stretch" gap="3">
-            {site.follows.map((f) => (
-              <Card key={f.name} onClick={() => navigate(`/follow/${f.name}`)}>
-                <Flex justify="space-between" align="start" gap="3">
-                  <Box>
-                    <Heading size="sm" mb="1" color={C.ink}>{f.title}</Heading>
-                    <Text fontSize="sm" color={C.muted}>{f.coach ? `監督: ${f.coach}` : f.goal}</Text>
-                  </Box>
-                  <VStack align="end" gap="1.5" flexShrink="0">
-                    <Chip color={ftColor(f.followType)}>{f.followType}</Chip>
-                    <Text fontSize="xs" color={C.faint}>{f.entities.length ? `選手 ${f.entities.length}` : `観測 ${f.sessions.length}`}</Text>
-                  </VStack>
-                </Flex>
-              </Card>
-            ))}
+        <Box className="glass" p="4" borderRadius="20px" mb="6">
+          <Text fontSize="xs" color={C.faint} mb="2.5" letterSpacing="0.03em">{site.generatedAt} · 今日の一手</Text>
+          <VStack align="stretch" gap="2">
+            {dueCount > 0 && (
+              <Flex as="button" onClick={() => navigate('/notes')} align="center" justify="space-between"
+                className="glass-soft press" px="3.5" py="3" borderRadius="14px" w="100%" textAlign="left">
+                <HStack gap="3"><DueBadge /><Text fontSize="sm" color={C.ink} fontWeight="600">復習期限のノートがある</Text></HStack>
+                <Text fontSize="sm" color={C.muted} flexShrink="0">{dueCount}件 ›</Text>
+              </Flex>
+            )}
+            {upcoming && (
+              <Flex as="button" onClick={() => navigate(`/follow/${upcoming.follow.name}`)} align="center" justify="space-between"
+                className="glass-soft press" px="3.5" py="3" borderRadius="14px" w="100%" textAlign="left">
+                <Box>
+                  <Text fontSize="xs" color={C.faint}>次戦 · {upcoming.follow.title.replace(/\s*—.*$/, '')}</Text>
+                  <Text fontSize="sm" color={C.ink} fontWeight="600" mt="0.5">vs {upcoming.opponent}</Text>
+                </Box>
+                <Text fontSize="sm" color={C.violet} fontWeight="700" flexShrink="0">{upDays != null ? `あと${upDays}日` : upcoming.date} ›</Text>
+              </Flex>
+            )}
+            {dueCount === 0 && !upcoming && (
+              <Text fontSize="sm" color={C.muted}>今日は静かだ。下から読みたいものを選ぼう。</Text>
+            )}
           </VStack>
-        </Section>
+        </Box>
 
         {(site.atlases || []).length > 0 && (
           <Section title="学習アトラス">
@@ -100,6 +112,25 @@ export function Home() {
           </Section>
         )}
 
+        <Section title="フォロー">
+          <VStack align="stretch" gap="3">
+            {site.follows.map((f) => (
+              <Card key={f.name} onClick={() => navigate(`/follow/${f.name}`)}>
+                <Flex justify="space-between" align="start" gap="3">
+                  <Box>
+                    <Heading size="sm" mb="1" color={C.ink}>{f.title.replace(/\s*—.*$/, '')}</Heading>
+                    <Text fontSize="sm" color={C.muted}>{f.coach ? `監督: ${f.coach}` : f.goal}</Text>
+                  </Box>
+                  <VStack align="end" gap="1.5" flexShrink="0">
+                    <Chip color={ftColor(f.followType)}>{f.followType}</Chip>
+                    <Text fontSize="xs" color={C.faint}>{f.entities.length ? `選手 ${f.entities.length}` : `観測 ${f.sessions.length}`}</Text>
+                  </VStack>
+                </Flex>
+              </Card>
+            ))}
+          </VStack>
+        </Section>
+
         <Section title="ノート / 蘊蓄">
           <Card onClick={() => navigate('/notes')}>
             <Flex justify="space-between" align="center">
@@ -110,7 +141,8 @@ export function Home() {
               {dueCount > 0 && <DueBadge />}
             </Flex>
           </Card>
-          <Flex wrap="wrap" gap="2" mt="3">
+          <Text fontSize="xs" color={C.faint} mt="4" mb="2">テーマ別に見る</Text>
+          <Flex wrap="wrap" gap="2">
             {site.mocs.map((m) => (
               <Button key={m.slug} size="xs" variant="outline" borderRadius="full" color={C.muted}
                 borderColor={C.line} _hover={{ color: C.ink, bg: 'rgba(255,255,255,.05)' }}
@@ -125,27 +157,84 @@ export function Home() {
   );
 }
 
+// goal型フォローのダッシュボード部品
+function StatTile({ label, value, note, alert }) {
+  return (
+    <Box className="glass-soft" p="3" borderRadius="14px">
+      <Text fontSize="11px" color={C.faint} lineHeight="1.3">{label}</Text>
+      <Text fontSize="lg" fontWeight="800" lineHeight="1.15" mt="1" color={alert ? C.pink : C.ink}>{value}</Text>
+      {note && <Text fontSize="10px" color={alert ? C.pink : C.faint} mt="1" lineHeight="1.35">{note}</Text>}
+    </Box>
+  );
+}
+
+function GoalDashboard({ follow }) {
+  return (
+    <VStack align="stretch" gap="6">
+      {follow.goal && (
+        <Section title="目標">
+          <Card><Text fontSize="sm" color={C.ink} lineHeight="1.7">{follow.goal}</Text></Card>
+        </Section>
+      )}
+      {follow.baseline?.length > 0 && (
+        <Section title="基準値（ベースライン）">
+          <SimpleGrid columns={2} gap="3">
+            {follow.baseline.map((b, i) => <StatTile key={i} {...b} />)}
+          </SimpleGrid>
+        </Section>
+      )}
+      {follow.focus?.length > 0 && (
+        <Section title="重点課題">
+          <VStack align="stretch" gap="2.5">
+            {follow.focus.map((f, i) => (
+              <Card key={i}>
+                <HStack justify="space-between" align="start" gap="2" mb={f.note ? '1.5' : '0'}>
+                  <HStack gap="2" align="center">
+                    <Flex w="20px" h="20px" borderRadius="full" align="center" justify="center" flexShrink="0"
+                      fontSize="11px" fontWeight="800" color="#08111f" bg={ACCENT_GRADIENT}>{i + 1}</Flex>
+                    <Text fontWeight="700" fontSize="sm" color={C.ink}>{f.title}</Text>
+                  </HStack>
+                  {f.priority && <Chip color={C.pink}>最優先</Chip>}
+                </HStack>
+                {f.note && <Text fontSize="xs" color={C.muted} lineHeight="1.6" pl="7">{f.note}</Text>}
+              </Card>
+            ))}
+          </VStack>
+        </Section>
+      )}
+    </VStack>
+  );
+}
+
 // ---------------- Follow ----------------
 export function Follow() {
   const { site, idx } = useData();
   const navigate = useNavigate();
   const { name } = useParams();
   const follow = idx.follows.get(name);
-  const [tab, setTab] = useState('squad');
+  const [tab, setTab] = useState(null);
   if (!follow) return <NotFound what="フォロー" />;
 
   const isInterest = follow.followType === 'interest' && follow.entities.length > 0;
   const relatedNotes = site.notes.filter((n) => n.tags?.some((t) => follow.tags?.includes(t)));
   const nm = follow.nextMatches?.[0];
   const days = nm ? Math.ceil((new Date(nm.date) - new Date(site.generatedAt)) / 86400000) : null;
-  const tabs = [
-    { id: 'squad', label: 'スカッド' }, { id: 'schedule', label: '日程' },
-    { id: 'trivia', label: '蘊蓄' }, { id: 'timeline', label: 'タイムライン' }, { id: 'overview', label: '概要' },
-  ];
+  const tabs = isInterest
+    ? [
+        { id: 'squad', label: 'スカッド' }, { id: 'schedule', label: '日程' },
+        { id: 'trivia', label: '蘊蓄' }, { id: 'timeline', label: 'タイムライン' }, { id: 'overview', label: '概要' },
+      ]
+    : [
+        { id: 'dashboard', label: 'ダッシュボード' }, { id: 'timeline', label: 'タイムライン' },
+        { id: 'trivia', label: '蘊蓄' }, { id: 'overview', label: '概要' },
+      ];
+  const activeTab = tabs.some((t) => t.id === tab) ? tab : tabs[0].id;
 
   return (
     <>
-      <AppBar title={follow.title} subtitle={follow.coach ? `監督: ${follow.coach} · ${follow.formation || ''}` : follow.goal} />
+      <AppBar title={follow.title} subtitle={follow.coach ? `監督: ${follow.coach} · ${follow.formation || ''}` : follow.goal}>
+        <TabRow tabs={tabs} tab={activeTab} setTab={setTab} />
+      </AppBar>
       <Page>
         {follow.snapshot?.length > 0 && (
           <Card>
@@ -165,11 +254,10 @@ export function Follow() {
           </Card>
         )}
 
+        <Box mt={follow.snapshot?.length ? '5' : '0'}>
         {isInterest ? (
           <>
-            <TabRow tabs={tabs} tab={tab} setTab={setTab} />
-
-            {tab === 'squad' && (
+            {activeTab === 'squad' && (
               <VStack align="stretch" gap="5">
                 {GROUP_ORDER.map((g) => {
                   const members = follow.entities.filter((e) => e.group === g);
@@ -199,7 +287,7 @@ export function Follow() {
               </VStack>
             )}
 
-            {tab === 'schedule' && (
+            {activeTab === 'schedule' && (
               <VStack align="stretch" gap="4">
                 <Section title="次の試合">
                   {follow.nextMatches?.length ? (
@@ -223,7 +311,7 @@ export function Follow() {
               </VStack>
             )}
 
-            {tab === 'trivia' && (
+            {activeTab === 'trivia' && (
               <VStack align="stretch" gap="3">
                 {relatedNotes.map((n) => (
                   <Card key={n.slug} onClick={() => navigate(`/note/${n.slug}`)}>
@@ -237,15 +325,30 @@ export function Follow() {
               </VStack>
             )}
 
-            {tab === 'timeline' && <Timeline follow={follow} />}
-            {tab === 'overview' && <Md text={follow.body} />}
+            {activeTab === 'timeline' && <Timeline follow={follow} />}
+            {activeTab === 'overview' && <Md text={follow.body} />}
           </>
         ) : (
           <>
-            <Section title="概要"><Md text={follow.body} /></Section>
-            <Section title="タイムライン"><Timeline follow={follow} /></Section>
+            {activeTab === 'dashboard' && <GoalDashboard follow={follow} />}
+            {activeTab === 'timeline' && <Timeline follow={follow} />}
+            {activeTab === 'trivia' && (
+              <VStack align="stretch" gap="3">
+                {relatedNotes.length > 0 ? relatedNotes.map((n) => (
+                  <Card key={n.slug} onClick={() => navigate(`/note/${n.slug}`)}>
+                    <HStack justify="space-between" align="start" mb="2">
+                      <Text fontWeight="600" fontSize="sm" color={C.ink}>{n.title}</Text>
+                      {n.due && <DueBadge />}
+                    </HStack>
+                    <Chip color={n.kind === 'knowledge' ? C.sky : C.muted}>{n.kind}</Chip>
+                  </Card>
+                )) : <Text fontSize="sm" color={C.muted}>関連ノートはまだ無いのだ</Text>}
+              </VStack>
+            )}
+            {activeTab === 'overview' && <Md text={follow.body} />}
           </>
         )}
+        </Box>
       </Page>
     </>
   );
@@ -350,20 +453,23 @@ export function NotesIndex() {
     .sort((a, b) => (a.due === b.due ? a.title.localeCompare(b.title) : a.due ? -1 : 1));
   return (
     <>
-      <AppBar title="ノート / 蘊蓄" subtitle={`${site.notes.length}件 · 復習期限 ${dueCount}`} />
+      <AppBar title="ノート / 蘊蓄" subtitle={`${site.notes.length}件 · 復習期限 ${dueCount}`}>
+        <Box mt="3">
+          <Input placeholder="タイトル・タグで検索" value={q} onChange={(e) => setQ(e.target.value)}
+            color={C.ink} bg="rgba(255,255,255,.05)" border="1px solid" borderColor={C.line} borderRadius="14px"
+            _placeholder={{ color: C.faint }} _focus={{ borderColor: C.sky, outline: 'none' }} />
+          <Flex wrap="wrap" gap="2" mt="2.5">
+            {site.mocs.map((m) => (
+              <Button key={m.slug} size="xs" variant="outline" borderRadius="full" color={C.muted}
+                borderColor={C.line} _hover={{ color: C.ink, bg: 'rgba(255,255,255,.05)' }}
+                onClick={() => navigate(`/moc/${m.slug}`)}>
+                {m.title.replace(/\s*—.*$/, '').replace(/（.*?）/, '')}
+              </Button>
+            ))}
+          </Flex>
+        </Box>
+      </AppBar>
       <Page>
-        <Input placeholder="タイトル・タグで検索" value={q} onChange={(e) => setQ(e.target.value)}
-          color={C.ink} bg="rgba(255,255,255,.05)" border="1px solid" borderColor={C.line} borderRadius="14px"
-          _placeholder={{ color: C.faint }} _focus={{ borderColor: C.sky, outline: 'none' }} mb="3" />
-        <Flex wrap="wrap" gap="2" mb="4">
-          {site.mocs.map((m) => (
-            <Button key={m.slug} size="xs" variant="outline" borderRadius="full" color={C.muted}
-              borderColor={C.line} _hover={{ color: C.ink, bg: 'rgba(255,255,255,.05)' }}
-              onClick={() => navigate(`/moc/${m.slug}`)}>
-              {m.title.replace(/\s*—.*$/, '').replace(/（.*?）/, '')}
-            </Button>
-          ))}
-        </Flex>
         <VStack align="stretch" gap="2">
           {list.map((n) => (
             <Card key={n.slug} onClick={() => navigate(`/note/${n.slug}`)}>
