@@ -1,18 +1,28 @@
 :root { color-scheme: dark; }
-html, body, #root { height: 100%; }
-/* PWA をネイティブアプリのように: ダブルタップ/ピンチ/文字自動拡大でのズームを抑止 */
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
+/* height:100% で固定するとページがビューポート高に閉じ込められ、position:sticky が
+   1画面分で剥がれてしまう。min-height にしてコンテンツで伸ばす（sticky が最後まで粘る）。 */
+html { height: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
+body, #root { min-height: 100%; }
 body {
   margin: 0;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   color: #f2f5ff;
+  background: #090a14;
+  -webkit-font-smoothing: antialiased;
+}
+/* アンビエント背景は固定レイヤーにする。body に background-attachment:fixed を敷くと
+   iOS Safari が無視して1画面分しか出ずスクロールで流れるため、fixed の擬似要素で全面固定。 */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
     radial-gradient(120% 55% at 12% -6%, rgba(110,193,255,.20), transparent 60%),
     radial-gradient(120% 55% at 100% 2%, rgba(183,155,255,.18), transparent 55%),
     #090a14;
-  background-attachment: fixed;
-  -webkit-font-smoothing: antialiased;
 }
 
 /* ===== グラス素材 ===== */

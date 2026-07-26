@@ -7,7 +7,7 @@ import { C, ACCENT_GRADIENT, tint } from './theme.js';
 
 export { GROUP, GROUP_ORDER } from './theme.js';
 
-export function AppBar({ title, subtitle, back = true }) {
+export function AppBar({ title, subtitle, back = true, children }) {
   const navigate = useNavigate();
   return (
     <Box
@@ -20,13 +20,20 @@ export function AppBar({ title, subtitle, back = true }) {
       style={{ paddingTop: 'max(0.7rem, env(safe-area-inset-top))' }}
     >
       {back && (
-        <Button size="xs" variant="ghost" color={C.muted} mb="1" px="1" onClick={() => navigate(-1)}
-          _hover={{ color: C.ink, bg: 'transparent' }}>
-          ‹ 戻る
-        </Button>
+        <Flex align="center" justify="space-between" mb="1">
+          <Button size="xs" variant="ghost" color={C.muted} px="1" onClick={() => navigate(-1)}
+            _hover={{ color: C.ink, bg: 'transparent' }}>
+            ‹ 戻る
+          </Button>
+          <Button size="xs" variant="ghost" color={C.muted} px="1" onClick={() => navigate('/')}
+            _hover={{ color: C.ink, bg: 'transparent' }}>
+            ⌂ ホーム
+          </Button>
+        </Flex>
       )}
       <Heading size="md" color={C.ink} lineHeight="1.25" letterSpacing="-0.01em">{title}</Heading>
       {subtitle && <Text fontSize="sm" color={C.muted} mt="1">{subtitle}</Text>}
+      {children}
     </Box>
   );
 }

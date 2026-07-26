@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { HashRouter, Routes, Route, Navigate, useLocation, useNavigationType } from 'react-router-dom';
 import { Heading, Text, Input, Button, VStack } from '@chakra-ui/react';
 import { DataCtx } from './lib/ctx.js';
 import { loadSite } from './lib/data.js';
@@ -51,6 +51,36 @@ function PasswordGate({ onSubmit, error }) {
   );
 }
 
+// 新ページ遷移(PUSH/REPLACE)は先頭へ、戻る(POP)は直前のスクロール位置を復元する。
+function ScrollManager() {
+  const location = useLocation();
+  const navType = useNavigationType();
+  const positions = useRef(new Map());
+  const currentKey = useRef(location.key);
+
+  // 永続リスナーで「現在ページのキー」に位置を保存し続ける（キーは layout effect で更新）。
+  // ブラウザ既定のスクロール復元は手動運用と競合するため無効化する。
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+    const onScroll = () => positions.current.set(currentKey.current, window.scrollY);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useLayoutEffect(() => {
+    currentKey.current = location.key; // 先にキーを更新（以後のスクロール保存は遷移先へ向く）
+    if (navType === 'POP') {
+      const y = positions.current.get(location.key) ?? 0;
+      const restore = () => window.scrollTo(0, y);
+      requestAnimationFrame(() => { restore(); requestAnimationFrame(restore); });
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location.key, navType]);
+
+  return null;
+}
+
 export default function App() {
   const [state, setState] = useState({ status: 'loading', site: null, idx: null, error: '' });
 
@@ -79,6 +109,7 @@ export default function App() {
   return (
     <DataCtx.Provider value={{ site: state.site, idx: state.idx }}>
       <HashRouter>
+        <ScrollManager />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/follow/:name" element={<Follow />} />
