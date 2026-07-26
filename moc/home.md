@@ -31,3 +31,4 @@ muninn の入口。テーマごとのMOCはここから辿る。
 
 - [[golf-driver-distance/profile|ゴルフ ドライバー飛距離]] `[goal]` — スイングを定点観測して飛距離アップを追う（`follows/golf-driver-distance/`）
 - [[argentina-nt/profile|アルゼンチン代表]] `[interest]` — 代表チームを追って試合を最大限楽しむ（`follows/argentina-nt/`）
+- [[skincare-pores/profile|スキンケア（毛穴を目立たなくする）]] `[goal]` — 毛穴ケアを定点観測して「たるみ毛穴」を目立たなくする（`follows/skincare-pores/`）

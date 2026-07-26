@@ -22,7 +22,10 @@ tags: [moc]
 - [[topical-retinoids-are-gold-standard-for-pores-and-texture]] — レチノイドは毛穴・キメ改善のゴールドスタンダード
 - [[morning-facial-plumpness-is-edema-not-hydration]] — 寝起きのハリはむくみで、健康な潤いとは別物
 - [[skin-water-retention-internal-levers-omega3-uv-sleep-bloodflow]] — 内側から水分保持を上げるレバー（オメガ3・紫外線・睡眠・血流）
+- [[sagging-pores-improve-when-skin-stretched-are-laxity-type]] — 横に引くと消える毛穴は「たるみ毛穴」（弾力低下型）の判別サイン
+- [[skincare-layer-water-based-before-oil-based]] — スキンケアは水性→油性の順（例: ナイアシンアミド→レチノール）
 - [[my-skincare-pore-plan-keep-sunscreen-niacinamide-add-retinol]] — 私の毛穴ケア方針（現行の評価と次の一手）
+- [[skincare-pores/profile|スキンケア（毛穴を目立たなくする）]] `[follow/goal]` — 毛穴ケアを定点観測するフォロー（`follows/skincare-pores/`）
 
 ## 入浴とストレス
 
