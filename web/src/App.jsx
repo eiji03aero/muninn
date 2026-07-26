@@ -5,6 +5,7 @@ import { DataCtx } from './lib/ctx.js';
 import { loadSite } from './lib/data.js';
 import { buildIndex } from './lib/wiki.js';
 import { Home, Follow, Player, Note, NotesIndex, Moc } from './pages.jsx';
+import { Atlas, Concept } from './atlas.jsx';
 import { Center, Loading } from './ui.jsx';
 import { C, ACCENT_GRADIENT } from './theme.js';
 
@@ -85,6 +86,8 @@ export default function App() {
           <Route path="/notes" element={<NotesIndex />} />
           <Route path="/note/:slug" element={<Note />} />
           <Route path="/moc/:slug" element={<Moc />} />
+          <Route path="/atlas/:slug" element={<Atlas />} />
+          <Route path="/atlas/:slug/concept/:cslug" element={<Concept />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </HashRouter>

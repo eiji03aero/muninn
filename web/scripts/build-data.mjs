@@ -23,6 +23,8 @@ const errors = [];
 const fail = (file, msg) => errors.push(`${file}: ${msg}`);
 // js-yaml は無引用の YYYY-MM-DD を Date に変換するため YYYY-MM-DD 文字列へ正規化する
 const D = (v) => (v instanceof Date ? v.toISOString().slice(0, 10) : v);
+// スカラ/配列/未定義を配列に正規化する
+const arrOf = (v) => (Array.isArray(v) ? v : v ? [v] : []);
 
 function mdFiles(dir) {
   if (!existsSync(dir)) return [];
@@ -108,13 +110,64 @@ const follows = (existsSync(followsDir) ? readdirSync(followsDir, { withFileType
   })
   .filter(Boolean);
 
+// ---------- atlases（学習アトラス） ----------
+const atlasDir = join(ROOT, 'atlas');
+const atlases = (existsSync(atlasDir) ? readdirSync(atlasDir, { withFileTypes: true }) : [])
+  .filter((d) => d.isDirectory())
+  .map((d) => {
+    const dir = join(atlasDir, d.name);
+    const atlasPath = join(dir, 'atlas.md');
+    if (!existsSync(atlasPath)) { fail(d.name, 'atlas.md がない'); return null; }
+    const { data: af, body: abody } = read(atlasPath);
+    if (af.kind !== 'atlas') fail(`${d.name}/atlas`, `kind は atlas であるべき（実際: ${af.kind}）`);
+    const slug = af.slug || d.name;
+
+    const concepts = mdFiles(join(dir, 'concepts')).map((cp) => {
+      const { data, body } = read(cp);
+      const cslug = slugOf(cp);
+      if (data.kind !== 'concept') fail(`${d.name}/concepts/${cslug}`, `kind は concept であるべき`);
+      if (!data.title) fail(`${d.name}/concepts/${cslug}`, 'title 欠落');
+      const e = data.edges || {};
+      return {
+        slug: cslug, title: data.title || cslug, gist: data.gist || '',
+        status: data.status || 'written',
+        edges: {
+          requires: arrOf(e.requires), contrasts: arrOf(e.contrasts),
+          leadsTo: arrOf(e['leads-to']), elaborates: arrOf(e.elaborates),
+        },
+        notes: arrOf(data.notes), tags: data.tags || [],
+        body, links: wikiTargets(body),
+      };
+    });
+
+    const routes = arrOf(af.routes).map((r) => ({
+      id: r.id, label: r.label || r.id, desc: r.desc || '', order: arrOf(r.order),
+    }));
+
+    // 参照整合性の検証
+    const cset = new Set(concepts.map((c) => c.slug));
+    for (const c of concepts)
+      for (const [k, targets] of Object.entries(c.edges))
+        for (const t of targets)
+          if (!cset.has(t)) fail(`${d.name}/concepts/${c.slug}`, `edge ${k} の参照先がない: ${t}`);
+    for (const r of routes)
+      for (const s of r.order)
+        if (!cset.has(s)) fail(`${d.name}/atlas`, `route ${r.id} の order にない概念: ${s}`);
+
+    return {
+      slug, title: af.title || slug, tags: af.tags || [],
+      routes, body: abody, links: wikiTargets(abody), concepts,
+    };
+  })
+  .filter(Boolean);
+
 // ---------- 検証結果 ----------
 if (errors.length) {
   console.error('❌ build-data: スキーマ検証エラー\n' + errors.map((e) => '  - ' + e).join('\n'));
   process.exit(1);
 }
 
-const site = { generatedAt: today, follows, notes, mocs };
+const site = { generatedAt: today, follows, notes, mocs, atlases };
 const json = JSON.stringify(site);
 
 mkdirSync(OUT, { recursive: true });
@@ -134,8 +187,8 @@ if (password) {
     ct: Buffer.concat([ct, cipher.getAuthTag()]).toString('base64'), // ct||tag（WebCrypto互換）
   };
   writeFileSync(join(OUT, 'site.enc.json'), JSON.stringify(payload));
-  console.log(`🔒 site.enc.json を出力（暗号化）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length}`);
+  console.log(`🔒 site.enc.json を出力（暗号化）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length}`);
 } else {
   writeFileSync(join(OUT, 'site.json'), json);
-  console.log(`📄 site.json を出力（平文/dev）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length}`);
+  console.log(`📄 site.json を出力（平文/dev）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length}`);
 }

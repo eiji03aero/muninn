@@ -76,6 +76,30 @@ export function Home() {
           </VStack>
         </Section>
 
+        {(site.atlases || []).length > 0 && (
+          <Section title="学習アトラス">
+            <VStack align="stretch" gap="3">
+              {site.atlases.map((a) => {
+                const written = a.concepts.filter((c) => c.status !== 'stub').length;
+                return (
+                  <Card key={a.slug} onClick={() => navigate(`/atlas/${a.slug}`)}>
+                    <Flex justify="space-between" align="start" gap="3">
+                      <Box>
+                        <Heading size="sm" mb="1" color={C.ink}>{a.title.replace(/\s*—.*$/, '')}</Heading>
+                        <Text fontSize="sm" color={C.muted}>{a.routes?.[0]?.desc || '知識グラフを順路でたどる'}</Text>
+                      </Box>
+                      <VStack align="end" gap="1.5" flexShrink="0">
+                        <Chip color={C.violet}>atlas</Chip>
+                        <Text fontSize="xs" color={C.faint}>概念 {written}/{a.concepts.length}</Text>
+                      </VStack>
+                    </Flex>
+                  </Card>
+                );
+              })}
+            </VStack>
+          </Section>
+        )}
+
         <Section title="ノート / 蘊蓄">
           <Card onClick={() => navigate('/notes')}>
             <Flex justify="space-between" align="center">

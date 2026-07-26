@@ -6,7 +6,10 @@ export function buildIndex(site) {
   const follows = new Map(site.follows.map((f) => [f.name, f]));
   const entities = new Map();
   for (const f of site.follows) for (const e of f.entities) entities.set(e.slug, { entity: e, follow: f.name });
-  return { notes, mocs, follows, entities };
+  const atlases = new Map((site.atlases || []).map((a) => [a.slug, a]));
+  const concepts = new Map();
+  for (const a of site.atlases || []) for (const c of a.concepts) concepts.set(c.slug, { concept: c, atlas: a.slug });
+  return { notes, mocs, follows, entities, atlases, concepts };
 }
 
 // target（[[ ]] の中身）→ { route, label } or null
@@ -22,6 +25,11 @@ export function resolveTarget(target, idx) {
   }
   if (idx.notes.has(t)) return { route: `/note/${t}`, label: idx.notes.get(t).title };
   if (idx.mocs.has(t)) return { route: `/moc/${t}`, label: idx.mocs.get(t).title };
+  if (idx.atlases?.has(t)) return { route: `/atlas/${t}`, label: idx.atlases.get(t).title };
+  if (idx.concepts?.has(t)) {
+    const { concept, atlas } = idx.concepts.get(t);
+    return { route: `/atlas/${atlas}/concept/${t}`, label: concept.title };
+  }
   return null;
 }
 
