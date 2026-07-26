@@ -1,0 +1,20 @@
+---
+title: 横に引くと目立たなくなる毛穴は「たるみ毛穴」（弾力低下型）の判別サイン
+created: 2026-07-26
+kind: knowledge
+tags: [health/skincare]
+srs:
+  last: null
+  interval: 0
+  ease: 2.5
+  next: 2026-07-26
+---
+
+毛穴を指で横に引っ張って（皮膚を伸ばして）**目立たなくなるなら、その毛穴は皮脂・詰まり型ではなく「たるみ毛穴（弾力低下型）」**。真皮のコラーゲン・エラスチンが減って毛穴まわりの皮膚が重力方向に垂れると、毛穴が丸から涙型・楕円に伸び、縁の凹凸に影ができて目立つ。皮膚を伸ばすとその垂れが一時的に補正されて毛穴が丸く縮むので、目立たなくなる。これがそのまま判別テストになる。
+
+逆に、引っ張っても見た目が変わらない毛穴は開き（皮脂）型・詰まり型で、効く対策が違う（皮脂抑制・角栓ケア vs コラーゲンを守り増やす）。たるみ毛穴は加齢型で30代以降に増えやすく、若年層は皮脂型が多いので、「毛穴が目立つ人はみんな同じ仕組み」ではない。
+
+## Links
+- [[enlarged-pores-three-causes-sebum-laxity-follicle-size]] — この判別は「弾力低下型」の切り分けにあたる（原因分類の一部）
+- [[sunscreen-protects-dermal-collagen-the-base-of-pore-and-aging-care]] — たるみ毛穴の予防＝UVでコラーゲンを壊さないこと
+- [[topical-retinoids-are-gold-standard-for-pores-and-texture]] — たるみ毛穴に効く本命（コラーゲン産生）
