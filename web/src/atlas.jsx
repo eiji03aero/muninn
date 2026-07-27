@@ -24,15 +24,24 @@ const PAD_Y = 34;
 
 function layoutGraph(concepts) {
   const bySlug = new Map(concepts.map((c) => [c.slug, c]));
+  // 「上位（土台）」方向のエッジを集める。requires と elaborates は自分の親（先に立つ概念）を指す。
+  // leads-to は「発展先」なので、発展先から見れば発展元が親。inbound で拾って深さに反映する
+  // （こうすると elaborates / leads-to だけで繋がる深掘りノードも浮かず、親の下に配置される）。
+  const parents = new Map(concepts.map((c) => [c.slug, new Set()]));
+  for (const c of concepts) {
+    for (const r of c.edges.requires) if (bySlug.has(r)) parents.get(c.slug).add(r);
+    for (const e of c.edges.elaborates) if (bySlug.has(e)) parents.get(c.slug).add(e);
+    for (const l of c.edges.leadsTo) if (bySlug.has(l)) parents.get(l)?.add(c.slug);
+  }
   const cache = new Map();
   const depth = (slug, stack = new Set()) => {
     if (cache.has(slug)) return cache.get(slug);
     if (stack.has(slug)) return 0; // 循環ガード
-    const reqs = (bySlug.get(slug)?.edges.requires || []).filter((r) => bySlug.has(r));
+    const ps = [...(parents.get(slug) || [])];
     let d = 0;
-    if (reqs.length) {
+    if (ps.length) {
       stack.add(slug);
-      d = 1 + Math.max(...reqs.map((r) => depth(r, stack)));
+      d = 1 + Math.max(...ps.map((p) => depth(p, stack)));
       stack.delete(slug);
     }
     cache.set(slug, d);
@@ -66,6 +75,8 @@ function MapView({ atlas, read, onOpen }) {
 
   const reqEdges = [];
   const conEdges = [];
+  const leadEdges = [];
+  const elabEdges = [];
   const seen = new Set();
   for (const c of atlas.concepts) {
     for (const r of c.edges.requires) if (has(r)) reqEdges.push({ from: pos.get(r), to: pos.get(c.slug), key: `r-${r}-${c.slug}` });
@@ -76,6 +87,9 @@ function MapView({ atlas, read, onOpen }) {
       seen.add(k);
       conEdges.push({ from: pos.get(c.slug), to: pos.get(o), key: `c-${k}` });
     }
+    // 発展（leads-to）: c → l（l が下）。深掘り（elaborates）: c は e の細部（e が上）
+    for (const l of c.edges.leadsTo) if (has(l)) leadEdges.push({ from: pos.get(c.slug), to: pos.get(l), key: `l-${c.slug}-${l}` });
+    for (const e of c.edges.elaborates) if (has(e)) elabEdges.push({ from: pos.get(e), to: pos.get(c.slug), key: `e-${e}-${c.slug}` });
   }
 
   return (
@@ -88,6 +102,12 @@ function MapView({ atlas, read, onOpen }) {
             ))}
             {conEdges.map((e) => (
               <path key={e.key} d={edgePath(e.from, e.to)} fill="none" stroke={C.violet} strokeOpacity="0.3" strokeWidth="1.5" strokeDasharray="4 4" />
+            ))}
+            {leadEdges.map((e) => (
+              <path key={e.key} d={edgePath(e.from, e.to)} fill="none" stroke={C.green} strokeOpacity="0.3" strokeWidth="1.5" strokeDasharray="1 5" strokeLinecap="round" />
+            ))}
+            {elabEdges.map((e) => (
+              <path key={e.key} d={edgePath(e.from, e.to)} fill="none" stroke={C.amber} strokeOpacity="0.34" strokeWidth="1.5" />
             ))}
           </svg>
           {atlas.concepts.map((c) => {
@@ -117,6 +137,8 @@ function MapView({ atlas, read, onOpen }) {
       <HStack gap="4" mt="1" fontSize="11px" color={C.faint} wrap="wrap">
         <HStack gap="1.5"><Box w="14px" h="0" borderTop="1.5px solid" borderColor={C.sky} opacity="0.6" />前提</HStack>
         <HStack gap="1.5"><Box w="14px" h="0" borderTop="1.5px dashed" borderColor={C.violet} opacity="0.7" />対比</HStack>
+        <HStack gap="1.5"><Box w="14px" h="0" borderTop="1.5px dotted" borderColor={C.green} opacity="0.7" />発展</HStack>
+        <HStack gap="1.5"><Box w="14px" h="0" borderTop="1.5px solid" borderColor={C.amber} opacity="0.7" />深掘り</HStack>
         <Text>上が土台 / 下ほど発展 · 横スクロールで全体を見る</Text>
       </HStack>
     </>
@@ -242,12 +264,32 @@ export function Atlas() {
 }
 
 // ---- 概念（章）リーダー ----
-const EDGE_META = [
-  { key: 'requires', label: '前提', color: C.sky },
-  { key: 'contrasts', label: '対比', color: C.violet },
-  { key: 'leadsTo', label: '発展', color: C.green },
-  { key: 'elaborates', label: '深掘り', color: C.amber },
+// つながりは outbound（この概念が張ったエッジ）と inbound（他概念からこの概念に張られたエッジ）の
+// 両方を出す。これで「深掘りで作った子（子が elaborates:[この概念]）」が親ページから辿れる。
+const REL_META = [
+  { key: 'requires', dir: 'out', label: '前提', color: C.sky },        // 先に読むべき概念
+  { key: 'requires', dir: 'in', label: '前提にする概念', color: C.sky }, // これを土台にする概念
+  { key: 'contrasts', dir: 'both', label: '対比', color: C.violet },
+  { key: 'leadsTo', dir: 'out', label: '発展', color: C.green },        // この先へ
+  { key: 'leadsTo', dir: 'in', label: '由来', color: C.green },          // ここに至る前段
+  { key: 'elaborates', dir: 'out', label: '深掘り元', color: C.amber },  // この概念が細部を成す親
+  { key: 'elaborates', dir: 'in', label: '深掘り', color: C.amber },     // この概念を深掘りした子
 ];
+
+const EDGE_KEYS = ['requires', 'contrasts', 'leadsTo', 'elaborates'];
+
+// 深掘り依頼プロンプト（作業手順は mn-learn skill 側に集約。ここは起動＋文脈アンカーだけ渡す）
+function deepDivePrompt(atlas, concept) {
+  const parent = concept.slug;
+  const title = shortTitle(concept.title);
+  return [
+    `/mn-learn 学習アトラス「${atlas.title}」(${atlas.slug}) の概念ページ「${title}」(${parent}) を読んでいて、ここから深掘りしたいことがある。`,
+    '',
+    '深掘りしたいトピック: （ここに書く）',
+    '',
+    `mn-learn の「ページからの深掘り」（モードE）の手順で対応して。この概念(${parent})に elaborates で繋いだ新しい概念ノードを atlas/${atlas.slug}/concepts/ に作り、調査→読み物として執筆→（覚える価値があれば notes/ に蒸留して相互リンク）→ commit/push まで。親ページ(${parent})から深掘り先を辿れるようにすること。`,
+  ].join('\n');
+}
 
 export function Concept() {
   const { idx } = useData();
@@ -256,6 +298,16 @@ export function Concept() {
   const navigate = useNavigate();
   const atlas = idx.atlases?.get(slug);
   const concept = atlas?.concepts.find((c) => c.slug === cslug);
+  const [copied, setCopied] = useState(false);
+
+  // 逆引き（inbound）エッジ: 他概念からこの概念に張られた関係を集める
+  const inbound = useMemo(() => {
+    const m = {};
+    for (const c of atlas?.concepts || [])
+      for (const k of EDGE_KEYS)
+        for (const t of c.edges[k] || []) ((m[t] ||= { requires: [], contrasts: [], leadsTo: [], elaborates: [] })[k]).push(c.slug);
+    return m;
+  }, [atlas]);
 
   useEffect(() => {
     if (atlas && concept && concept.status !== 'stub') {
@@ -278,7 +330,32 @@ export function Concept() {
   const go = (c) => navigate(`/atlas/${slug}/concept/${c.slug}${route ? `?route=${route.id}` : ''}`);
 
   const distilled = concept.notes.map((n) => idx.notes.get(n)).filter(Boolean);
-  const hasEdges = EDGE_META.some((m) => (concept.edges[m.key] || []).length);
+
+  // 表示する関係（双方向）。contrasts は out/in を統合。同一 slug は重複排除
+  const inb = inbound[cslug] || {};
+  const relations = REL_META.map((m) => {
+    let slugs;
+    if (m.dir === 'both') slugs = [...(concept.edges[m.key] || []), ...(inb[m.key] || [])];
+    else slugs = m.dir === 'in' ? inb[m.key] || [] : concept.edges[m.key] || [];
+    const items = [...new Set(slugs)].filter((s) => s !== cslug).map((s) => byId.get(s)).filter(Boolean);
+    return { ...m, items };
+  }).filter((m) => m.items.length);
+  const hasEdges = relations.length > 0;
+
+  const copyDeepDive = async () => {
+    const text = deepDivePrompt(atlas, concept);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch { /* noop */ }
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
 
   return (
     <>
@@ -300,26 +377,40 @@ export function Concept() {
           <Box className="glass-soft" p="4" borderRadius="14px" mt="6">
             <Heading size="xs" color={C.muted} mb="3" letterSpacing="0.02em">つながり</Heading>
             <VStack align="stretch" gap="2.5">
-              {EDGE_META.map((m) => {
-                const items = (concept.edges[m.key] || []).map((s) => byId.get(s)).filter(Boolean);
-                if (!items.length) return null;
-                return (
-                  <Flex key={m.key} align="start" gap="2.5" wrap="wrap">
-                    <Chip color={m.color}>{m.label}</Chip>
-                    <Flex wrap="wrap" gap="2" flex="1">
-                      {items.map((c) => (
-                        <Text key={c.slug} as="button" onClick={() => go(c)} fontSize="sm" color={C.sky}
-                          textAlign="left" style={{ borderBottom: `1px solid ${C.sky}55` }}>
-                          {shortTitle(c.title)}
-                        </Text>
-                      ))}
-                    </Flex>
+              {relations.map((m) => (
+                <Flex key={`${m.key}-${m.dir}`} align="start" gap="2.5" wrap="wrap">
+                  <Chip color={m.color}>{m.label}</Chip>
+                  <Flex wrap="wrap" gap="2" flex="1">
+                    {m.items.map((c) => (
+                      <Text key={c.slug} as="button" onClick={() => go(c)} fontSize="sm" color={C.sky}
+                        textAlign="left" style={{ borderBottom: `1px solid ${C.sky}55` }}>
+                        {shortTitle(c.title)}
+                      </Text>
+                    ))}
                   </Flex>
-                );
-              })}
+                </Flex>
+              ))}
             </VStack>
           </Box>
         )}
+
+        <Box className="glass-soft" p="4" borderRadius="14px" mt="4">
+          <Flex align="center" justify="space-between" gap="3" wrap="wrap">
+            <Box flex="1" minW="180px">
+              <Text fontSize="sm" fontWeight="700" color={C.ink}>ここから深掘りする</Text>
+              <Text fontSize="xs" color={C.faint} mt="1" lineHeight="1.5">
+                依頼文をコピー → Claude に貼って送ると、調べて新しい概念をグラフに足し、このページから辿れるようにするのだ。
+              </Text>
+            </Box>
+            <Button size="sm" borderRadius="12px" flexShrink="0" fontWeight="700"
+              color={copied ? C.ink : '#08111f'}
+              bg={copied ? 'transparent' : 'linear-gradient(120deg,#ffd479,#ffb054)'}
+              border="1px solid" borderColor={copied ? C.line : 'transparent'}
+              onClick={copyDeepDive} _hover={{ opacity: 0.92 }}>
+              {copied ? '✓ コピーした' : '深掘りを依頼（コピー）'}
+            </Button>
+          </Flex>
+        </Box>
 
         {distilled.length > 0 && (
           <Box mt="6">
