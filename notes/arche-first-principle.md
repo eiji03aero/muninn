@@ -14,4 +14,5 @@ srs:
 
 ## Links
 - [[birth-of-philosophy]] — この知識の出所（哲学アトラス）
+- [[anaximander-apeiron-indefinite-arche]] — 一答（アナクシマンドロス）の深掘り：なぜ根源は無限定でなければならないか
 - [[socratic-method-elenchus]] — 視線を自然から人間へ転じたソクラテスへ続く
