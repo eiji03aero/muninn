@@ -278,16 +278,15 @@ const REL_META = [
 
 const EDGE_KEYS = ['requires', 'contrasts', 'leadsTo', 'elaborates'];
 
-// 深掘り依頼プロンプト（作業手順は mn-learn skill 側に集約。ここは起動＋文脈アンカーだけ渡す）
+// 深掘り依頼プロンプト（作業手順は mn-learn skill 側に集約。ここは起動＋文脈アンカーだけ渡す）。
+// 末尾を入力欄にしておき、ペースト後ユーザーがそのまま深掘りトピックを書き始められるようにする。
 function deepDivePrompt(atlas, concept) {
   const parent = concept.slug;
   const title = shortTitle(concept.title);
   return [
-    `/mn-learn 学習アトラス「${atlas.title}」(${atlas.slug}) の概念ページ「${title}」(${parent}) を読んでいて、ここから深掘りしたいことがある。`,
+    `/mn-learn 学習アトラス「${atlas.title}」(${atlas.slug}) の概念ページ「${title}」(${parent}) を読んでいて、ここから深掘りしたいことがある。mn-learn の「ページからの深掘り」（モードE）の手順で対応して。この概念(${parent})に elaborates で繋いだ新しい概念ノードを atlas/${atlas.slug}/concepts/ に作り、調査→読み物として執筆→（覚える価値があれば notes/ に蒸留して相互リンク）→ commit/push まで。親ページ(${parent})から深掘り先を辿れるようにすること。`,
     '',
-    '深掘りしたいトピック: （ここに書く）',
-    '',
-    `mn-learn の「ページからの深掘り」（モードE）の手順で対応して。この概念(${parent})に elaborates で繋いだ新しい概念ノードを atlas/${atlas.slug}/concepts/ に作り、調査→読み物として執筆→（覚える価値があれば notes/ に蒸留して相互リンク）→ commit/push まで。親ページ(${parent})から深掘り先を辿れるようにすること。`,
+    '深掘りしたいトピック: ',
   ].join('\n');
 }
 
