@@ -52,6 +52,7 @@ tags: [moc]
 - [[golf-body-led-delivery-is-right-but-chest-opening-ahead-plus-flip-causes-pull-hook]] — 体主導は正しいが「胸が先に開く＋手で返す」は引っかけ。両立の条件
 - [[golf-driver-stop-forcing-extreme-inside-out-deliver-neutral-through-ball]] — 極端インからをやめ中立軌道でボールに通す（詰まり→開き→スライス解消／ドローはミルドに）
 - [[golf-dont-open-chest-early-is-good-but-dont-over-hold-sync-and-keep-rotating]] — 「胸を早く開かない」は有効だが、詰まり側は"閉じて我慢"にせず同期・腰主導・回転を止めない
+- [[golf-hands-release-is-a-real-speed-source-but-not-manipulation]] — 手で「振り抜く（リリース）」は速度源で必須／「こねる操作」は別物でNG。体だけでは頭打ち
 
 ## 飛距離アップ（ドライバー）
 
