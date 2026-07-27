@@ -1,12 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="muninn raven">
-  <rect width="512" height="512" fill="#0f172a"/>
-  <g transform="translate(256 256) scale(0.78) translate(-255 -307)">
-    <g fill="#6ec1ff">
-      <path d="M48 248 L150 220 C160 198 178 188 198 194 C210 198 214 198 222 198 C232 198 240 206 244 222 C280 228 320 248 360 284 L462 298 C466 299 467 305 462 307 L376 330 C348 348 306 350 288 346 C270 354 244 354 228 344 C198 328 190 306 196 298 C166 288 150 272 150 254 Z"/>
-      <rect x="252" y="346" width="10" height="68" rx="5"/>
-      <rect x="286" y="346" width="10" height="68" rx="5"/>
-      <rect x="156" y="412" width="220" height="13" rx="6"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="muninn knowledge graph">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17223c"/><stop offset="1" stop-color="#0a0f1e"/></linearGradient>
+    <linearGradient id="sv" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6ec1ff"/><stop offset="1" stop-color="#b79bff"/></linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g transform="translate(256 256) scale(1.30) translate(-258.5 -252.5)">
+    <g stroke="#6ec1ff" stroke-opacity="0.42" stroke-width="7" stroke-linecap="round">
+      <path d="M262 240 L188 172"/><path d="M262 240 L346 156"/><path d="M262 240 L360 300"/>
+      <path d="M262 240 L212 344"/><path d="M262 240 L150 278"/><path d="M188 172 L150 278"/><path d="M346 156 L360 300"/>
     </g>
-    <circle cx="162" cy="222" r="9" fill="#0f172a"/>
+    <circle cx="188" cy="172" r="17" fill="#6ec1ff"/><circle cx="346" cy="156" r="15" fill="#b79bff"/>
+    <circle cx="360" cy="300" r="20" fill="#6ec1ff"/><circle cx="212" cy="344" r="15" fill="#b79bff"/>
+    <circle cx="150" cy="278" r="13" fill="#6ec1ff"/><circle cx="262" cy="240" r="27" fill="url(#sv)"/>
   </g>
 </svg>
