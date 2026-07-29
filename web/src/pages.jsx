@@ -3,6 +3,7 @@ import { Box, Flex, HStack, VStack, SimpleGrid, Heading, Text, Button, Input } f
 import { useNavigate, useParams } from 'react-router-dom';
 import { useData } from './lib/ctx.js';
 import { AppBar, Chip, Chips, DueBadge, Card, Center, Md } from './ui.jsx';
+import { TopicCard } from './logs.jsx';
 import { C, ACCENT_GRADIENT, GROUP, GROUP_ORDER } from './theme.js';
 
 function Page({ children }) {
@@ -81,11 +82,13 @@ export function Home() {
     note: { label: 'ノート', color: C.sky },
     follow: { label: 'フォロー', color: C.green },
     atlas: { label: 'アトラス', color: C.violet },
+    log: { label: 'ログ', color: C.orange },
   };
   const activity = [
     ...site.notes.map((n) => ({ kind: 'note', title: n.title, date: n.created, to: `/note/${n.slug}` })),
     ...site.follows.flatMap((f) => f.sessions.map((s) => ({ kind: 'follow', title: `${clean(f.title)}：${s.date} の観測`, date: s.date, to: `/follow/${f.name}` }))),
     ...(site.atlases || []).flatMap((a) => a.concepts.filter((c) => c.status !== 'stub' && c.created).map((c) => ({ kind: 'atlas', title: `${clean(a.title)}：${clean(c.title)}`, date: c.created, to: `/atlas/${a.slug}/concept/${c.slug}` }))),
+    ...(site.logtopics || []).flatMap((t) => t.entries.map((e) => ({ kind: 'log', title: `${clean(t.title)}：${e.title}`, date: e.created, to: `/log/${t.slug}/entry/${e.slug}` }))),
   ].filter((x) => x.date).sort((a, b) => (a.date < b.date ? 1 : -1)).slice(0, 7);
   return (
     <>
@@ -183,6 +186,16 @@ export function Home() {
             })}
           </VStack>
         </Section>
+
+        {(site.logtopics || []).length > 0 && (
+          <Section title="ログ">
+            <VStack align="stretch" gap="3">
+              {site.logtopics.map((t) => (
+                <TopicCard key={t.slug} topic={t} onClick={() => navigate(`/log/${t.slug}`)} />
+              ))}
+            </VStack>
+          </Section>
+        )}
 
         <Section title="ノート / 蘊蓄">
           <Card onClick={() => navigate('/notes')}>

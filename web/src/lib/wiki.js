@@ -9,15 +9,21 @@ export function buildIndex(site) {
   const atlases = new Map((site.atlases || []).map((a) => [a.slug, a]));
   const concepts = new Map();
   for (const a of site.atlases || []) for (const c of a.concepts) concepts.set(c.slug, { concept: c, atlas: a.slug });
-  return { notes, mocs, follows, entities, atlases, concepts };
+  const logtopics = new Map((site.logtopics || []).map((t) => [t.slug, t]));
+  return { notes, mocs, follows, entities, atlases, concepts, logtopics };
 }
 
 // target（[[ ]] の中身）→ { route, label } or null
 export function resolveTarget(target, idx) {
   const t = target.trim();
   if (t.includes('/')) {
-    const [name] = t.split('/');
+    const [name, sub] = t.split('/');
     if (idx.follows.has(name)) return { route: `/follow/${name}`, label: idx.follows.get(name).title };
+    if (idx.logtopics?.has(name)) {
+      const topic = idx.logtopics.get(name);
+      const e = topic.entries.find((x) => x.slug === sub);
+      return e ? { route: `/log/${name}/entry/${sub}`, label: e.title } : { route: `/log/${name}`, label: topic.title };
+    }
   }
   if (idx.entities.has(t)) {
     const { entity, follow } = idx.entities.get(t);
@@ -26,6 +32,7 @@ export function resolveTarget(target, idx) {
   if (idx.notes.has(t)) return { route: `/note/${t}`, label: idx.notes.get(t).title };
   if (idx.mocs.has(t)) return { route: `/moc/${t}`, label: idx.mocs.get(t).title };
   if (idx.atlases?.has(t)) return { route: `/atlas/${t}`, label: idx.atlases.get(t).title };
+  if (idx.logtopics?.has(t)) return { route: `/log/${t}`, label: idx.logtopics.get(t).title };
   if (idx.concepts?.has(t)) {
     const { concept, atlas } = idx.concepts.get(t);
     return { route: `/atlas/${atlas}/concept/${t}`, label: concept.title };

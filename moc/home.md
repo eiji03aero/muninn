@@ -32,3 +32,9 @@ muninn の入口。テーマごとのMOCはここから辿る。
 - [[golf-driver-distance/profile|ゴルフ ドライバー飛距離]] `[goal]` — スイングを定点観測して飛距離アップを追う（`follows/golf-driver-distance/`）
 - [[argentina-nt/profile|アルゼンチン代表]] `[interest]` — 代表チームを追って試合を最大限楽しむ（`follows/argentina-nt/`）
 - [[skincare-pores/profile|スキンケア（毛穴を目立たなくする）]] `[goal]` — 毛穴ケアを定点観測して「たるみ毛穴」を目立たなくする（`follows/skincare-pores/`）
+
+## ログ（logs/）
+
+トピック別に、多数の項目を一貫したスキーマ（記録項目）で貯める記録帖（台帳）。`/mn-log` で運用（notes/ とは別concern）。サイトでは一覧・絞り込みで比較できる。
+
+- [[coffee-beans|コーヒー豆の記録]] — 買った豆を産地・精製・焙煎度・評価で記録して次の豆選びに使う（`logs/coffee-beans/`）

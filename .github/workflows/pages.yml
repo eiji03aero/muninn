@@ -8,6 +8,7 @@ on:
       - 'notes/**'
       - 'moc/**'
       - 'atlas/**'
+      - 'logs/**'
       - 'web/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:

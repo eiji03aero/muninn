@@ -12,7 +12,7 @@ export default defineConfig({
       manifest: {
         name: 'muninn',
         short_name: 'muninn',
-        description: '個人ナレッジベースのビューア（follows / notes / moc）',
+        description: '個人ナレッジベースのビューア（follows / notes / moc / atlas / logs）',
         start_url: '/muninn/',
         scope: '/muninn/',
         display: 'standalone',

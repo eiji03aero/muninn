@@ -3,5 +3,7 @@ dist/
 # 生成物（build-data.mjs が markdown から吐く派生JSON）
 public/site.json
 public/site.enc.json
+# 生成物（build-data.mjs が logs/*/images から公開用にコピーする画像。正本は logs/ 側）
+public/log-media/
 # playwright-cli の作業ファイル
 .playwright-cli/

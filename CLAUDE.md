@@ -2,13 +2,14 @@
 
 このリポジトリは、Claudeで調べて学んだ知識をツェッテルカステン的に蓄積・リンク・見直しする個人ナレッジベース。**正本（source of truth）はこのGitリポジトリのmarkdown群**であり、Obsidianは閲覧専用ビューア（任意）。
 
-muninn は4つのconcernでできている —— **① 客観知識の蓄積（`notes/`）／ ② スキル・対象のフォロー（`follows/`）／ ③ 想起と定着（`/mn-brief`・`/mn-review`）／ ④ 体系的な学習（`atlas/`・`/mn-learn`）**。この4つを相互リンクで有機的に繋ぐのが狙いで、**「今どの機能を使っているか」を意識しなくて済むよう、統一入口 `/mn` にすべてのキャプチャを集約できる**。①がバラバラの原子（単語カード）なら、④はそれを**読み物として体系立てて学ぶ順路（教科書）**——④で読んで理解し、④が①に知識を蒸留し、③がそれを定着させる。
+muninn は5つのconcernでできている —— **① 客観知識の蓄積（`notes/`）／ ② スキル・対象のフォロー（`follows/`）／ ③ 想起と定着（`/mn-brief`・`/mn-review`）／ ④ 体系的な学習（`atlas/`・`/mn-learn`）／ ⑤ トピック別の記録（`logs/`・`/mn-log`）**。この5つを相互リンクで有機的に繋ぐのが狙いで、**「今どの機能を使っているか」を意識しなくて済むよう、統一入口 `/mn` にすべてのキャプチャを集約できる**。①がバラバラの原子（単語カード）なら、④はそれを**読み物として体系立てて学ぶ順路（教科書）**——④で読んで理解し、④が①に知識を蒸留し、③がそれを定着させる。⑤は「コーヒー豆」「訪れた店」のようなトピックを、最初に決めた記録項目（スキーマ）で一貫して貯める**記録帖（台帳）**——比較・想起の楽しみを生み、そこで湧いた客観知識は①に蒸留する。
 
 - **統一入口（`/mn`）**: 何を投げても内容を判定し、**客観知識ノート / insight / フォロー観測 / フォロー新設 / 人物ドシエ / inbox退避**に自動で仕分け・相互リンクして記録・push する。種別を意識させないフロントドア（mn-capture）。仕分け結果は必ず提示し、ユーザーが訂正できる。単なる「調べて」（記録の意思なし）では発火しない。
 - **直接ルート（`/mn-research`）**: 調べた客観知識をinboxを経由せず**その場で**原子化して `notes/` / `moc/` に記録し push する。明示的に記録を頼まれたときだけ（「notesにして」「保存して」等）。単なる「調べて」では記録しない。調査セッションが一番リッチな文脈を持つため、2段圧縮（inbox書き出し→後日再要約）による意味の歪みを避ける。
 - **inboxルート（`/mn-process-inbox`）**: その場で原子化できないもの（スマホの雑メモ、claude.aiチャットの貼り付け、思いつき）は `inbox.md` に雑に追記し、後日バッチ処理する。
 - **フォロー（定点観測）ルート（`/mn-follow`）**: 上達したいスキルや**興味のある対象**を定点観測する。写真・計測値・観戦所見をアップロード → 分析 → 記録（goal型はアドバイス / interest型は見どころ・深掘り）→ `follows/` に書き出し → push。`notes/` とは別concernの時系列ジャーナル。詳細は「フォロー（follows）」の節を参照。
 - **収集ルート（`/mn-collect`）**: フォローごとの収集スペック `collect.md`（watchlist・深掘り選手・日程・ライバル・頻度）に沿って、現主力の直近フォーム・動画・次戦日程を集めて entity/profile/notes に反映し、収集ダイジェストを残す。設定の逐次調整（「〜を深掘りに追加」等）もこのルート。
+- **ログ（記録帖）ルート（`/mn-log`）**: 「コーヒー豆」「ハンドドライヤー」等のトピックを、最初に設計した記録項目（スキーマ）で一貫して貯める。写真＋ひと言のラフ入力を毎回スキーマに整形して1記録ずつ蓄積し（画像は圧縮してコミット）、GitHub Pages で一覧・比較する。フォロー（1対象の定点観測）とは別で、**多数の項目をカタログ的に並べる**のが軸。詳細は「ログ（logs）」の節を参照。
 - **学習アトラスルート（`/mn-learn`）**: あるトピックを **知識グラフ（概念ノード＋型付きエッジ）＋読む順路（ルート）** として体系的に学ぶ。トピックを渡すとグラフを設計し、理解しやすいルートを引き、各概念を**読み物（散文）**として執筆、覚える価値のある知識を `notes/` に蒸留して push する。読者は GitHub Pages で「マップ（俯瞰）／ルート（順路）」を読み進める。`notes/` の断片とは別concernの**学習レイヤー（教科書）**。詳細は「学習アトラス（atlas）」の節を参照。
 - **想起ルート（`/mn-brief`）**: 蓄積（notes/entities/follows/sessions）を横断合成して対象の「予習ブリーフィング」を作る（試合前の見どころ、現状＋関連知識＋想起クイズ）。既定は読むだけ。蓄積を"楽しむ"に変換する回収装置。
 - **クイズルート（`/mn-review`）**: `kind: knowledge` の復習期限ノートから1問出題し、間隔反復で定着させる。
@@ -21,10 +22,11 @@ notes/            # 原子ノート置き場（1ノート1アイデア）。kind
 moc/              # Map of Content。テーマごとの索引。home.md が全体の入口
 follows/          # フォロー（定点観測）。1対象1ディレクトリ。profile.md / entities/ / sessions/ / collect.md
 atlas/            # 学習アトラス。1トピック1ディレクトリ。atlas.md（ハブ＋ルート）/ concepts/（概念ノード）
+logs/             # ログ（記録帖）。1トピック1ディレクトリ。topic.md（スキーマ）/ entries/（記録）/ images/（圧縮画像）
 review-log.jsonl  # クイズ解答履歴の追記ログ（1行1解答、append-only）
-templates/        # note.md / follow-profile.md / follow-session.md / follow-entity.md / collect.md / atlas.md / concept.md
+templates/        # note.md / follow-profile.md / follow-session.md / follow-entity.md / collect.md / atlas.md / concept.md / log-topic.md / log-entry.md
 scripts/          # 補助ツール。mn-status.mjs = 復習期限・フォロー一覧のダッシュボード（依存ゼロ / node で実行）
-.claude/skills/   # 作業手順（mn-capture / mn-research / mn-process-inbox / mn-regen-moc / mn-review / mn-follow / mn-collect / mn-brief / mn-learn）
+.claude/skills/   # 作業手順（mn-capture / mn-research / mn-process-inbox / mn-regen-moc / mn-review / mn-follow / mn-collect / mn-brief / mn-learn / mn-log）
 ```
 
 ## 命名規則
@@ -89,7 +91,9 @@ srs:
 - `kind: collect` — `follows/*/collect.md`（フォローの収集スペック＝設定）。**クイズ対象外**。`srs` なし。サイトには出さない。→「フォロー（follows）」の節。
 - `kind: atlas` — `atlas/*/atlas.md`（学習アトラスのハブ＝概要・ルート）。**クイズ対象外**。`srs` は付けない。→「学習アトラス（atlas）」の節。
 - `kind: concept` — `atlas/*/concepts/*.md`（概念ノード＝型付きエッジ＋読み物）。**クイズ対象外**。`srs` は付けない。概念から覚える価値のある客観知識は `knowledge` ノートに蒸留する。
-- `knowledge` / `insight` は `notes/` に、`follow` / `entity` / `collect` は `follows/` に、`atlas` / `concept` は `atlas/` に置く。クイズ（`mn-review`）が回すのは `knowledge` だけ。
+- `kind: logtopic` — `logs/*/topic.md`（記録帖のスキーマ定義＝ハブ）。**クイズ対象外**。`srs` は付けない。→「ログ（logs）」の節。
+- `kind: logentry` — `logs/*/entries/*.md`（スキーマに沿った1記録。主観記録が主）。**クイズ対象外**。`srs` は付けない。記録から覚える価値のある客観知識は `knowledge` ノートに切り出す。
+- `knowledge` / `insight` は `notes/` に、`follow` / `entity` / `collect` は `follows/` に、`atlas` / `concept` は `atlas/` に、`logtopic` / `logentry` は `logs/` に置く。クイズ（`mn-review`）が回すのは `knowledge` だけ。
 - 仕分けに迷うものは「外部の事実を調べて得たか（knowledge）／自分の経験・解釈から来るか（insight）」で判断する。
 
 ### srs フィールド（SM-2簡易版）
@@ -120,6 +124,7 @@ srs:
 - `/mn-collect` — フォローの収集スペック `collect.md` に沿って近況（直近フォーム・動画・日程）を集めて entity/profile/notes に反映し、収集ダイジェストを残す。設定の逐次調整も（「収集して」「最新化して」「〜を深掘りに追加」等）
 - `/mn-brief` — 蓄積を横断合成して対象の予習ブリーフィングを作る（試合前の見どころ、想起クイズ）。既定は読むだけ（commitしない）
 - `/mn-learn` — トピックを知識グラフ＋ルートで体系的に学ぶ学習アトラスを運用。グラフ設計・ルート設計・概念の読み物執筆・`notes/` への蒸留 → commit → push（「〜を学びたい」「〜のアトラス作って」「次の章を書いて」「この概念を深掘り」「このページから〜を深掘り」「ルート引き直して」等）
+- `/mn-log` — トピック別の記録帖（ログ）を運用。トピック新設時に記録項目（スキーマ）を設計し、以後は写真＋ひと言のラフ入力を毎回スキーマに整形して1記録ずつ蓄積 → 画像は圧縮してコミット → commit → push（「コーヒー豆を記録」「〜のログ作って」「これ記録して」「ハンドドライヤー評価しといて」等）
 
 このCLAUDE.mdは規約（命名・原子化・リンク・タグ・コミット運用）の正本であり、skillはこの規約に従った手順を定義する。規約と手順が矛盾する場合はこのファイルを優先し、矛盾を報告する。
 
@@ -154,6 +159,21 @@ srs:
 - **一度に全部書かない**。新設時も先頭数ノードだけ執筆し、残りは `status: stub` でグラフに置く。読む速度に合わせて増やす。
 - atlas は `notes/` へ**知識を蒸留する側**。概念執筆時に、覚える価値のある客観知識を `notes/`（`kind: knowledge`、`srs` 初期化）へ切り出し、概念⇄ノートを相互リンクする。クイズ（`/mn-review`）が回すのは蒸留された `knowledge` だけで、concept/atlas は回さない（**読んで理解＝atlas／覚えて定着＝notes** の役割分担）。
 - **画像・動画等のバイナリはコミットしない**（follows と同じ）。`moc/home.md` から各アトラスに到達できるようにする。タグ・命名・コミット運用は本ファイルの規約に従う。
+
+## ログ（logs）
+
+トピックごとに、**多数の項目を一貫したスキーマで貯める記録帖（台帳）**。コーヒー豆・訪れた店・使ったガジェット・ハンドドライヤー…「買うたび・出会うたびに1件足す」用途。`notes/`（客観知識）や `follows/`（1対象の定点観測）とは別concernの**コレクション／カタログ**。手順は `/mn-log` skill。
+
+- **follows との違い（間違えないこと）**: follows は**1つの対象**を時系列で定点観測（同じ対象を何度も観る）。logs は**多数の別々の項目**を同じ項目で並べて比較する（各記録は主に1回きり）。「推移を追う」なら follows、「並べて比べる」なら logs。
+- **スキーマ先付け・入力はラフに**: トピック新設時に記録項目（`fields`）を設計し、以後その項目で一貫させる。ただし**入力体験はラフに保つ**——ユーザーは写真＋ひと言を放るだけ、スキーマへの整形はこちらがやる。これが「続けられる」の肝。
+- **1トピック1ディレクトリ**: `logs/<topic-slug>/`（kebab-case。例: `coffee-beans`）。
+  - `topic.md` — スキーマ定義（`fields`＝記録項目、`display`＝サイトの見せ方）。frontmatter は `kind: logtopic`（`srs` なし＝クイズ対象外）。`templates/log-topic.md` に従う。そのトピックのハブ（MOC相当）を兼ねる。
+  - `entries/<entry-slug>.md` — スキーマに沿った1記録（`kind: logentry`、`srs` なし）。主観記録・評価が主。`templates/log-entry.md` に従う。
+  - `images/<entry-slug>.webp` — 任意。**長辺1280px以下に圧縮した画像のみ**を置く（原本はコミットしない）。正本はここで、build が `web/public/log-media/`（gitignore）へコピーして Pages に載せる。
+- **フィールド型**: `text / longtext / number / rating / enum / tags / date / bool / url`。`enum` の選択肢固定と必須項目で一貫性を担保する。**スキーマ検証は `web/scripts/build-data.mjs` が行い、必須欠落・enum外・rating範囲外はビルドを落とす**（＝一貫性の砦）。
+- **画像の公開範囲に注意**: サイトのテキストはパスワードで暗号化されるが、画像ファイルは Pages 上で公開になる（直URLで見える）。機微な写真は載せない。機微なトピックは `image_visibility: none`。
+- logs は `notes/` へ**知識を蒸留する側**。記録から覚える価値のある客観知識が出たら `/mn`（または `/mn-research`）で `notes/`（`kind: knowledge`）に原子ノート化し、相互リンクする。クイズ（`/mn-review`）が回すのは蒸留された `knowledge` だけ（**記録＝logs／覚えて定着＝notes** の役割分担）。
+- `moc/home.md` から各ログトピックに到達できるようにする。タグ・命名・コミット運用は本ファイルの規約に従う。
 
 ## コミット運用（安全装置・最重要）
 

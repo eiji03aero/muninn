@@ -8,7 +8,7 @@
 //        web/public/site.enc.json（AES-256-GCM 暗号化, 本番）のみを出力する。
 //
 // 依存: gray-matter（frontmatterのYAML解析）。Node標準の crypto で暗号化。
-import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pbkdf2Sync, randomBytes, createCipheriv } from 'node:crypto';
@@ -162,13 +162,128 @@ const atlases = (existsSync(atlasDir) ? readdirSync(atlasDir, { withFileTypes: t
   })
   .filter(Boolean);
 
+// ---------- logs（トピック別・記録帖） ----------
+// topic.md（kind: logtopic）が記録項目のスキーマ(fields)を定義し、entries/*.md（kind: logentry）が
+// そのスキーマに沿った1記録。必須欠落・enum外・rating範囲外はビルドを落とす（＝一貫性の砦）。
+const FIELD_TYPES = ['text', 'longtext', 'number', 'rating', 'enum', 'tags', 'date', 'bool', 'url'];
+const MEDIA_DIR = join(OUT, 'log-media'); // 公開画像のコピー先（gitignore・vite が dist へ同梱）
+if (existsSync(MEDIA_DIR)) rmSync(MEDIA_DIR, { recursive: true, force: true });
+
+const logsDir = join(ROOT, 'logs');
+const logtopics = (existsSync(logsDir) ? readdirSync(logsDir, { withFileTypes: true }) : [])
+  .filter((d) => d.isDirectory())
+  .map((d) => {
+    const dir = join(logsDir, d.name);
+    const topicPath = join(dir, 'topic.md');
+    if (!existsSync(topicPath)) { fail(d.name, 'topic.md がない'); return null; }
+    const { data: tf, body: tbody } = read(topicPath);
+    if (tf.kind !== 'logtopic') fail(`${d.name}/topic`, `kind は logtopic であるべき（実際: ${tf.kind}）`);
+    if (!tf.title) fail(`${d.name}/topic`, 'title 欠落');
+    const slug = tf.slug || d.name;
+
+    // スキーマ（fields）を正規化・検証する
+    const fields = arrOf(tf.fields).map((f) => ({
+      key: f.key, label: f.label || f.key, type: f.type || 'text',
+      options: arrOf(f.options), unit: f.unit || null,
+      required: !!f.required, max: f.max || 5,
+    }));
+    for (const f of fields) {
+      if (!f.key) fail(`${d.name}/topic`, 'field に key がない');
+      else if (!FIELD_TYPES.includes(f.type)) fail(`${d.name}/topic`, `field ${f.key} の type が不正: ${f.type}`);
+      else if (f.type === 'enum' && !f.options.length) fail(`${d.name}/topic`, `enum field ${f.key} に options がない`);
+    }
+
+    const dp = tf.display || {};
+    const display = {
+      subtitle: dp.subtitle || null, badge: dp.badge || null,
+      cardFields: arrOf(dp.card_fields), filters: arrOf(dp.filters),
+      sort: { by: dp.sort?.by || null, order: dp.sort?.order || 'desc' },
+    };
+
+    // 各記録（entry）をスキーマに照らして検証し、画像を公開先へコピーする
+    const entries = mdFiles(join(dir, 'entries')).map((ep) => {
+      const { data: ef, body } = read(ep);
+      const eslug = slugOf(ep);
+      if (ef.kind !== 'logentry') fail(`${d.name}/entries/${eslug}`, 'kind は logentry であるべき');
+      if (!ef.title) fail(`${d.name}/entries/${eslug}`, 'title 欠落');
+      if (ef.topic && ef.topic !== slug) fail(`${d.name}/entries/${eslug}`, `topic 不一致: ${ef.topic}（期待: ${slug}）`);
+
+      const raw = ef.fields || {};
+      const out = {};
+      for (const f of fields) {
+        let v = raw[f.key];
+        const empty = v == null || v === '' || (Array.isArray(v) && v.length === 0);
+        if (empty) {
+          if (f.required) fail(`${d.name}/entries/${eslug}`, `必須 field ${f.key} が空`);
+          continue;
+        }
+        switch (f.type) {
+          case 'number':
+          case 'rating':
+            if (typeof v !== 'number') fail(`${d.name}/entries/${eslug}`, `field ${f.key} は数値であるべき: ${v}`);
+            else if (f.type === 'rating' && (v < 1 || v > f.max)) fail(`${d.name}/entries/${eslug}`, `rating ${f.key} は 1〜${f.max}: ${v}`);
+            break;
+          case 'enum':
+            if (!f.options.includes(v)) fail(`${d.name}/entries/${eslug}`, `field ${f.key} は options 外: ${v}`);
+            break;
+          case 'tags': v = arrOf(v); break;
+          case 'date': v = D(v); break;
+          case 'bool': v = !!v; break;
+          default: break;
+        }
+        out[f.key] = v;
+      }
+
+      // 画像: 参照があれば実在確認 → public/log-media/<topic>/ へコピー（相対URLを持たせる）
+      let imageUrl = null;
+      if (ef.image) {
+        const src = join(dir, ef.image);
+        if (!existsSync(src)) {
+          fail(`${d.name}/entries/${eslug}`, `image が存在しない: ${ef.image}`);
+        } else {
+          const fname = basename(src);
+          const destDir = join(MEDIA_DIR, slug);
+          mkdirSync(destDir, { recursive: true });
+          copyFileSync(src, join(destDir, fname));
+          imageUrl = `log-media/${slug}/${fname}`;
+        }
+      }
+
+      return {
+        slug: eslug, title: ef.title || eslug, topic: slug,
+        created: D(ef.created) || null, image: imageUrl,
+        fields: out, body, links: wikiTargets(body),
+      };
+    });
+
+    // 既定の並び順（display.sort）で entries を整列する
+    const sb = display.sort.by, asc = display.sort.order === 'asc';
+    if (sb) {
+      const kv = (e) => (sb === 'created' ? e.created : e.fields[sb]);
+      entries.sort((a, b) => {
+        const av = kv(a), bv = kv(b);
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        return (av < bv ? -1 : av > bv ? 1 : 0) * (asc ? 1 : -1);
+      });
+    }
+
+    return {
+      slug, title: tf.title || slug, tags: tf.tags || [],
+      created: D(tf.created) || null, imageVisibility: tf.image_visibility || 'public',
+      fields, display, intro: tbody, links: wikiTargets(tbody), entries,
+    };
+  })
+  .filter(Boolean);
+
 // ---------- 検証結果 ----------
 if (errors.length) {
   console.error('❌ build-data: スキーマ検証エラー\n' + errors.map((e) => '  - ' + e).join('\n'));
   process.exit(1);
 }
 
-const site = { generatedAt: today, follows, notes, mocs, atlases };
+const site = { generatedAt: today, follows, notes, mocs, atlases, logtopics };
 const json = JSON.stringify(site);
 
 mkdirSync(OUT, { recursive: true });
@@ -188,8 +303,8 @@ if (password) {
     ct: Buffer.concat([ct, cipher.getAuthTag()]).toString('base64'), // ct||tag（WebCrypto互換）
   };
   writeFileSync(join(OUT, 'site.enc.json'), JSON.stringify(payload));
-  console.log(`🔒 site.enc.json を出力（暗号化）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length}`);
+  console.log(`🔒 site.enc.json を出力（暗号化）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length}`);
 } else {
   writeFileSync(join(OUT, 'site.json'), json);
-  console.log(`📄 site.json を出力（平文/dev）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length}`);
+  console.log(`📄 site.json を出力（平文/dev）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length}`);
 }
