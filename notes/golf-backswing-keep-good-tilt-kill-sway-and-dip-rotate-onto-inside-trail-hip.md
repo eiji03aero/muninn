@@ -32,3 +32,4 @@ tags: [sports/golf]
 - [[golf-backswing-load-pressure-into-inside-of-trail-foot-not-sway]] — 直接の対。圧の側（内側に積む）とこちら（軸/上体）はセット
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 良い右傾き＝上体を残す＝アッパーの土台
 - [[golf-shallow-backswing-hand-and-shaft-in-line-reduces-fat]] — テークバックを深く引かず一直線/オンプレーンに上げる側
+- [[golf-takeaway-by-feel-hands-in-and-lever-sets-good-return-reference-not-path-preview]] — ハンズイン＋てこの自然な始動（ただしやり過ぎ＝深く引きすぎ→軸倒れ、はこのノートの警告）
