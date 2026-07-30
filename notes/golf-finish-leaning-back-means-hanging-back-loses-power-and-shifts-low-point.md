@@ -25,3 +25,4 @@ srs:
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — これを直すための具体的な動作・心持ち（矯正方針）
 - [[golf-fat-shots-from-losing-address-reference-geometry]] — ハングバックは最下点の参照を「後方へ」失う一例。ダフりの統一仮説とつながる
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 対比。ドライバーの「上体を残す」はハングバック（後ろ足残り）とは別物
+- [[golf-reverse-c-is-lower-body-not-arm-rotation-flat-3oclock-shaft-is-too-little-release]] — 逆Cの主因は下半身でアームローテーションではない（＋3時シャフト平行＝リリース控えめ）
