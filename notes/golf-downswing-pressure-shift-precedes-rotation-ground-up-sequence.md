@@ -24,3 +24,4 @@ srs:
 - [[golf-backswing-load-pressure-into-inside-of-trail-foot-not-sway]] — 順序の前提になる、積んだ圧の作り方
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — このシーケンスが「体主導＝再現性の基盤」である理由
 - [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — このシーケンス効率がヘッドスピードの源になる（飛距離側の応用）
+- [[golf-drill-step-l-to-l-groove-weight-shift-post-up-and-club-standing-up]] — この「踏む→回す」を L to L で刷り込む具体ドリル
