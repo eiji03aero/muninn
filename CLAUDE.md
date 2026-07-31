@@ -29,7 +29,10 @@ review-log.jsonl  # クイズ解答履歴の追記ログ（1行1解答、append-
 templates/        # note.md / follow-profile.md / follow-session.md / follow-entity.md / collect.md / atlas.md / concept.md / log-topic.md / log-entry.md
 scripts/          # 補助ツール。mn-status.mjs = 復習期限・フォロー一覧のダッシュボード（依存ゼロ / node で実行）
 web/              # 閲覧サイト（GitHub Pages）。正本の markdown を派生ビルドして読む面。DESIGN.md が設計思想の正本
-docs/             # 設計資料。web-renewal/ = 刷新の経緯（現状分析・3案コンペ・両審査・ワイヤーフレーム）
+docs/             # 設計資料と作業項目
+                  #   web-renewal/        = 現行実装の経緯（現状分析・3案コンペ・両審査・ワイヤーフレーム）
+                  #   web-uiux-experiment/= 定石を壊す3案の実験（8分野リサーチ・触れるモック・審査）
+                  #   pbi/                = これから作るもの。着手前にここを見る
 .claude/skills/   # 作業手順（mn-capture / mn-research / mn-process-inbox / mn-regen-moc / mn-review / mn-follow / mn-collect / mn-brief / mn-learn / mn-log）
 ```
 
