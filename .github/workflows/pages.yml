@@ -29,7 +29,11 @@ jobs:
       run:
         working-directory: web
     steps:
+      # build-data.mjs が git log から各ファイルの最終更新日を引く（「復刻」「久しく読んでいない」の材料）。
+      # 既定の浅いクローンだと履歴が足りないため全履歴を取る。
       - uses: actions/checkout@v7.0.0
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6.4.0
         with:
           node-version: 22

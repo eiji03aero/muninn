@@ -9,15 +9,40 @@
 //
 // 依存: gray-matter（frontmatterのYAML解析）。Node標準の crypto で暗号化。
 import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs';
-import { join, dirname, basename } from 'node:path';
+import { join, dirname, basename, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pbkdf2Sync, randomBytes, createCipheriv } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import matter from 'gray-matter';
 
 const WEB = join(dirname(fileURLToPath(import.meta.url)), '..');
 const ROOT = join(WEB, '..');
 const OUT = join(WEB, 'public');
 const today = new Date().toISOString().slice(0, 10);
+
+// ---------- git 最終更新日 ----------
+// 「復刻（最終更新が最も古い記事）」「久しく読んでいない」の材料。1回の git log で全ファイル分を引く。
+// CI では actions/checkout の fetch-depth: 0 が必要（浅いクローンだと履歴が足りない）。
+const gitUpdated = (() => {
+  const map = new Map();
+  try {
+    const out = execFileSync('git', ['log', '--pretty=format:%cs', '--name-only'], {
+      cwd: ROOT, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024,
+    });
+    let cur = null;
+    for (const line of out.split('\n')) {
+      const s = line.trim();
+      if (!s) continue;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) { cur = s; continue; }
+      if (cur && !map.has(s)) map.set(s, cur); // log は新しい順なので初出＝最終更新
+    }
+  } catch {
+    console.warn('⚠️  git 履歴を読めなかった（updated は created で代替する）');
+  }
+  return map;
+})();
+const updatedOf = (absPath, fallback) =>
+  gitUpdated.get(relative(ROOT, absPath).split('\\').join('/')) || fallback || null;
 
 const errors = [];
 const fail = (file, msg) => errors.push(`${file}: ${msg}`);
@@ -49,21 +74,51 @@ const notes = mdFiles(join(ROOT, 'notes')).map((p) => {
   const kind = data.kind || 'knowledge';
   if (!['knowledge', 'insight'].includes(kind)) fail(slug, `notes の kind が不正: ${kind}`);
   if (!data.title) fail(slug, 'title 欠落');
+  // due（復習期限フラグ）はビルド日で固定されてしまうため廃止。srs をそのまま渡し、
+  // 「今日どれを出すか」はクライアントが閲覧日（new Date()）とローカル影SRSで決める。
   const srs = data.srs || null;
   const next = srs ? D(srs.next) : null;
-  const due = kind === 'knowledge' && next && String(next) !== 'null' && String(next) <= today;
   return {
     slug, title: data.title || slug, kind,
     tags: data.tags || [], created: D(data.created) || null,
-    srs: srs ? { next: next ?? null, interval: srs.interval ?? 0 } : null,
-    due: !!due, body, links: wikiTargets(body),
+    updated: updatedOf(p, D(data.created)),
+    srs: srs
+      ? { last: D(srs.last) ?? null, interval: srs.interval ?? 0, ease: srs.ease ?? 2.5, next: next ?? null }
+      : null,
+    recall: data.recall || null, // 伏せ記事の「問い」。無ければ degrade 表示にフォールバックする
+    body, links: wikiTargets(body),
   };
 });
 
 // ---------- mocs ----------
+// MOC は生 markdown を描画するのをやめ、`##` セクションを「束（人間が編集した索引の単位）」として
+// 構造化する。束は棚板の上段と、面の「特集」カードの材料になる。
+function mocSections(body) {
+  const out = [];
+  let cur = null;
+  for (const raw of body.split('\n')) {
+    const h = raw.match(/^##\s+(.+?)\s*$/);
+    if (h) { cur = { title: h[1], items: [], lead: '' }; out.push(cur); continue; }
+    if (!cur) continue;
+    const li = raw.match(/^\s*[-*]\s+(.*)$/);
+    if (li) {
+      const m = li[1].match(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]\s*(?:—|--|―)?\s*(.*)$/);
+      if (m) cur.items.push({ target: m[1].trim(), alias: (m[2] || '').trim() || null, reason: (m[3] || '').trim() });
+    } else if (raw.trim() && !cur.items.length) {
+      cur.lead = (cur.lead ? cur.lead + ' ' : '') + raw.trim();
+    }
+  }
+  return out.filter((s) => s.items.length > 0);
+}
+
 const mocs = mdFiles(join(ROOT, 'moc')).map((p) => {
   const { data, body } = read(p);
-  return { slug: slugOf(p), title: data.title || slugOf(p), tags: data.tags || [], body, links: wikiTargets(body) };
+  return {
+    slug: slugOf(p), title: data.title || slugOf(p), tags: data.tags || [],
+    updated: updatedOf(p, null),
+    sections: mocSections(body),
+    body, links: wikiTargets(body),
+  };
 });
 
 // ---------- follows ----------
@@ -95,9 +150,39 @@ const follows = (existsSync(followsDir) ? readdirSync(followsDir, { withFileType
       };
     });
 
+    // sessions だけ links の抽出が漏れており、観測記録がノートへ張ったリンクがビルド時に
+    // 捨てられていた（実測24本）。他の型と同様に wikiTargets を通す。
+    // metrics は「推移グラフ」の材料。本文の表をパースすると書式の揺れで欠けるため frontmatter で受ける。
     const sessions = mdFiles(join(dir, 'sessions'))
-      .map((sp) => { const { data, body } = read(sp); const d = D(data.date) || slugOf(sp); return { date: d, title: d, body }; })
+      .map((sp) => {
+        const { data, body } = read(sp);
+        const d = D(data.date) || slugOf(sp);
+        return {
+          date: d, title: d, body,
+          summary: data.summary || null,
+          metrics: data.metrics || null,
+          links: wikiTargets(body),
+        };
+      })
       .sort((a, b) => (a.date < b.date ? 1 : -1));
+
+    // 観測値の時系列（グラフ用）。metrics を持つ session を古い順に畳む。
+    // { 総距離: [{date, value}, ...], ... } の形にして、キー順は最新 session の定義順を尊重する。
+    const series = (() => {
+      const withM = [...sessions].filter((s) => s.metrics && typeof s.metrics === 'object').reverse();
+      if (!withM.length) return [];
+      const keys = [...new Set(withM.flatMap((s) => Object.keys(s.metrics)))];
+      const goals = pf.metric_goals || {};
+      return keys.map((key) => ({
+        key,
+        // up=大きいほど良い / down=小さいほど良い / null=中立（良し悪しを判定しない）。
+        // 宣言のない指標を勝手に「大きいほうが良い」と扱うと、悪化を自己ベストと表示してしまう。
+        goal: goals[key] === 'up' || goals[key] === 'down' ? goals[key] : null,
+        points: withM
+          .map((s) => ({ date: s.date, value: s.metrics[key] }))
+          .filter((p) => typeof p.value === 'number'),
+      })).filter((s) => s.points.length > 0);
+    })();
 
     return {
       name: d.name, title: pf.title || d.name, followType,
@@ -106,7 +191,8 @@ const follows = (existsSync(followsDir) ? readdirSync(followsDir, { withFileType
       snapshot: pf.snapshot || [], rivals: pf.rivals || [],
       baseline: pf.baseline || [], focus: pf.focus || [],
       nextMatches: (pf.next_matches || []).map((m) => ({ ...m, date: D(m.date) })),
-      body: pbody, links: wikiTargets(pbody), entities, sessions,
+      updated: updatedOf(profPath, null),
+      body: pbody, links: wikiTargets(pbody), entities, sessions, series,
     };
   })
   .filter(Boolean);
@@ -132,6 +218,7 @@ const atlases = (existsSync(atlasDir) ? readdirSync(atlasDir, { withFileTypes: t
       return {
         slug: cslug, title: data.title || cslug, gist: data.gist || '',
         status: data.status || 'written', created: D(data.created) || null,
+        updated: updatedOf(cp, D(data.created)),
         edges: {
           requires: arrOf(e.requires), contrasts: arrOf(e.contrasts),
           leadsTo: arrOf(e['leads-to']), elaborates: arrOf(e.elaborates),
@@ -251,7 +338,8 @@ const logtopics = (existsSync(logsDir) ? readdirSync(logsDir, { withFileTypes: t
 
       return {
         slug: eslug, title: ef.title || eslug, topic: slug,
-        created: D(ef.created) || null, image: imageUrl,
+        created: D(ef.created) || null, updated: updatedOf(ep, D(ef.created)),
+        image: imageUrl,
         fields: out, body, links: wikiTargets(body),
       };
     });
