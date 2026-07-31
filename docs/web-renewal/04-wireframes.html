@@ -1,0 +1,1580 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>muninn 日報 — 割付用紙</title>
+
+<style>
+/* ─────────────────────────────────────────────
+   muninn Web 刷新 / C案「日報」ワイヤーフレーム
+   意匠: 新聞の割付用紙（レイアウト・ダミー）
+   罫は非再現青、指示は赤字、内容は鉛筆
+   ───────────────────────────────────────────── */
+
+:root{
+  --paper:#EAECEF;
+  --sheet:#FFFFFF;
+  --graphite:#1B1E25;
+  --pencil:#565C67;
+  --faint:#949BA6;
+  --rule:#C6CBD2;
+  --hair:#DDE0E5;
+  --blue:#4E90B4;
+  --blue-soft:#DCEAF1;
+  --blue-line:#B4D3E2;
+  --red:#A0322A;
+  --red-soft:#F2DCD9;
+  --on-red:#FFFFFF;
+  --fill:#DFE2E7;
+  --fill-2:#EDEFF2;
+  --shadow:0 1px 2px rgba(27,30,37,.06), 0 8px 24px -16px rgba(27,30,37,.3);
+
+  --mincho:"Hiragino Mincho ProN","Yu Mincho",YuMincho,"Songti SC",serif;
+  --gothic:"Hiragino Sans","Yu Gothic",YuGothic,"Noto Sans JP",system-ui,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,monospace;
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#131519;
+    --sheet:#1C1F25;
+    --graphite:#E7EAEF;
+    --pencil:#A2A9B4;
+    --faint:#6B727E;
+    --rule:#333944;
+    --hair:#282D36;
+    --blue:#7FB9D6;
+    --blue-soft:#1E2E38;
+    --blue-line:#2E4653;
+    --red:#E0776A;
+    --red-soft:#38221F;
+    --on-red:#1B1E25;
+    --fill:#2A2F38;
+    --fill-2:#23272E;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131519;
+  --sheet:#1C1F25;
+  --graphite:#E7EAEF;
+  --pencil:#A2A9B4;
+  --faint:#6B727E;
+  --rule:#333944;
+  --hair:#282D36;
+  --blue:#7FB9D6;
+  --blue-soft:#1E2E38;
+  --blue-line:#2E4653;
+  --red:#E0776A;
+  --red-soft:#38221F;
+  --on-red:#1B1E25;
+  --fill:#2A2F38;
+  --fill-2:#23272E;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+}
+:root[data-theme="light"]{
+  --paper:#EAECEF;
+  --sheet:#FFFFFF;
+  --graphite:#1B1E25;
+  --pencil:#565C67;
+  --faint:#949BA6;
+  --rule:#C6CBD2;
+  --hair:#DDE0E5;
+  --blue:#4E90B4;
+  --blue-soft:#DCEAF1;
+  --blue-line:#B4D3E2;
+  --red:#A0322A;
+  --red-soft:#F2DCD9;
+  --on-red:#FFFFFF;
+  --fill:#DFE2E7;
+  --fill-2:#EDEFF2;
+  --shadow:0 1px 2px rgba(27,30,37,.06), 0 8px 24px -16px rgba(27,30,37,.3);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--graphite);
+  font-family:var(--gothic);
+  font-size:15px;
+  line-height:1.75;
+  -webkit-text-size-adjust:100%;
+}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px 120px}
+
+/* ── 表紙 ────────────────────────────────── */
+.cover{
+  padding:64px 0 40px;
+  border-bottom:3px double var(--rule);
+  margin-bottom:8px;
+}
+.cover .eyebrow{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.16em;
+  color:var(--blue);
+  text-transform:uppercase;
+  margin:0 0 18px;
+}
+.cover h1{
+  font-family:var(--mincho);
+  font-size:clamp(34px,6vw,58px);
+  line-height:1.15;
+  letter-spacing:.02em;
+  font-weight:600;
+  margin:0 0 4px;
+  text-wrap:balance;
+}
+.cover .sub{
+  font-family:var(--mincho);
+  font-size:clamp(15px,2vw,19px);
+  color:var(--pencil);
+  margin:0 0 28px;
+}
+.meta{
+  display:flex;flex-wrap:wrap;gap:0 28px;
+  font-family:var(--mono);font-size:11.5px;color:var(--faint);
+  border-top:1px solid var(--hair);padding-top:14px;
+}
+.meta b{color:var(--pencil);font-weight:600}
+
+/* ── 見出し ──────────────────────────────── */
+h2{
+  font-family:var(--mincho);
+  font-size:26px;font-weight:600;letter-spacing:.03em;
+  margin:72px 0 6px;padding-bottom:10px;
+  border-bottom:1px solid var(--rule);
+  display:flex;align-items:baseline;gap:14px;
+  text-wrap:balance;
+}
+h2 .num{
+  font-family:var(--mono);font-size:12px;color:var(--blue);
+  letter-spacing:.1em;flex-shrink:0;
+}
+h2 .route{
+  font-family:var(--mono);font-size:12px;color:var(--faint);
+  margin-left:auto;flex-shrink:0;
+}
+h3{
+  font-family:var(--gothic);
+  font-size:14px;font-weight:700;letter-spacing:.04em;
+  color:var(--pencil);
+  margin:38px 0 12px;
+  display:flex;align-items:center;gap:10px;
+}
+h3::after{content:"";flex:1;height:1px;background:var(--hair)}
+
+.lede{
+  font-family:var(--mincho);
+  font-size:16.5px;line-height:1.9;color:var(--pencil);
+  margin:14px 0 4px;max-width:64ch;
+}
+
+/* ── 凡例 ────────────────────────────────── */
+.legend{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:1px;background:var(--hair);
+  border:1px solid var(--hair);margin:28px 0 0;
+}
+.legend > div{background:var(--paper);padding:14px 16px}
+.legend dt{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  color:var(--blue);margin:0 0 6px;text-transform:uppercase;
+}
+.legend dd{margin:0;font-size:12.5px;line-height:1.65;color:var(--pencil)}
+
+/* ── 画面ブロック ────────────────────────── */
+.block{
+  display:grid;
+  grid-template-columns:minmax(280px,300px) 1fr;
+  gap:34px;
+  align-items:start;
+  margin:26px 0 0;
+  padding:26px 0 0;
+  border-top:1px solid var(--hair);
+}
+.block:first-of-type{border-top:none;padding-top:6px}
+.block.wide{grid-template-columns:1fr}
+@media (max-width:820px){
+  .block{grid-template-columns:1fr;gap:22px}
+}
+
+.caption{
+  font-family:var(--mono);font-size:11px;color:var(--blue);
+  letter-spacing:.08em;margin:0 0 10px;
+}
+
+/* ── 端末フレーム ────────────────────────── */
+.screen{
+  width:300px;max-width:100%;
+  background:var(--sheet);
+  border:1px solid var(--rule);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:var(--shadow);
+  font-size:10.5px;line-height:1.5;
+  display:flex;flex-direction:column;
+}
+.screen.tall{min-height:600px}
+
+.sbar{
+  padding:12px 12px 10px;
+  border-bottom:1px solid var(--hair);
+  background:var(--fill-2);
+}
+.sbar .t{font-weight:700;font-size:12.5px;letter-spacing:.02em}
+.sbar .s{color:var(--faint);font-size:9.5px;margin-top:2px}
+.sbar .nav{
+  display:flex;justify-content:space-between;
+  color:var(--faint);font-size:9px;margin-bottom:6px;
+}
+
+/* 題字（面のみ・明朝） */
+.masthead{
+  padding:14px 12px 10px;border-bottom:2px solid var(--graphite);
+  background:var(--sheet);
+}
+.masthead .mt{
+  font-family:var(--mincho);font-size:19px;font-weight:600;
+  letter-spacing:.34em;line-height:1;
+}
+.masthead .mr{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-top:6px;font-family:var(--mono);font-size:8.5px;color:var(--faint);
+}
+
+.sbody{padding:12px;display:flex;flex-direction:column;gap:12px;flex:1}
+
+.stabs{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:1px solid var(--rule);
+  background:var(--fill-2);
+  font-size:9px;text-align:center;color:var(--faint);
+  margin-top:auto;
+}
+.stabs div{padding:9px 2px 12px}
+.stabs .on{color:var(--graphite);font-weight:700;box-shadow:inset 0 2px 0 var(--graphite)}
+
+/* ── 段（スロット）ラベル ────────────────── */
+.slot{
+  display:flex;align-items:center;gap:7px;
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;
+  color:var(--blue);
+}
+.slot::after{content:"";flex:1;height:1px;background:var(--blue-line)}
+.slot .cnt{color:var(--faint);letter-spacing:0}
+
+/* ── ワイヤー部品 ────────────────────────── */
+.card{
+  border:1px solid var(--rule);border-radius:9px;
+  padding:9px 10px;background:var(--sheet);
+}
+.card.lead{border:2px solid var(--graphite);border-radius:4px;padding:11px 11px 12px}
+.card.dash{border-style:dashed;color:var(--faint)}
+.card.tint{background:var(--fill-2)}
+
+.kick{
+  font-family:var(--mono);font-size:8px;letter-spacing:.1em;
+  color:var(--red);margin-bottom:5px;
+}
+.kick.b{color:var(--blue)}
+.hl{font-family:var(--mincho);font-size:13px;line-height:1.45;font-weight:600}
+.tx{color:var(--pencil);font-size:9.5px;line-height:1.6}
+.mini{color:var(--faint);font-size:8.5px}
+
+.ph{height:6px;border-radius:3px;background:var(--fill);display:block}
+.ph + .ph{margin-top:5px}
+.w95{width:95%}.w85{width:85%}.w70{width:70%}.w55{width:55%}.w40{width:40%}
+
+.row{display:flex;align-items:center;gap:7px}
+.row.sb{justify-content:space-between}
+.stack{display:flex;flex-direction:column;gap:7px}
+
+.chip{
+  display:inline-block;border:1px solid var(--rule);border-radius:99px;
+  padding:1px 7px;font-size:8px;color:var(--pencil);white-space:nowrap;
+}
+.chip.on{background:var(--graphite);color:var(--sheet);border-color:var(--graphite)}
+.chip.b{border-color:var(--blue-line);color:var(--blue);background:var(--blue-soft)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+
+.btn{
+  display:block;text-align:center;border:1px solid var(--graphite);
+  border-radius:7px;padding:6px;font-size:9.5px;font-weight:700;
+}
+.btn.solid{background:var(--graphite);color:var(--sheet)}
+.btn.ghost{border-color:var(--rule);color:var(--pencil);font-weight:500}
+.btn.copy{border-color:var(--blue-line);color:var(--blue);background:var(--blue-soft)}
+
+.bar{height:5px;border-radius:3px;background:var(--fill);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--graphite)}
+
+/* 注番（画面内） */
+.n{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:14px;height:14px;border-radius:50%;flex-shrink:0;
+  background:var(--red);color:var(--on-red);font-family:var(--mono);
+  font-size:8.5px;font-weight:700;line-height:1;
+}
+
+/* ── 赤字（注釈） ────────────────────────── */
+.notes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:13px}
+.notes li{display:grid;grid-template-columns:16px 1fr;gap:11px;align-items:start}
+.notes .n{margin-top:4px}
+.notes p{margin:0;font-size:13.5px;line-height:1.72;color:var(--graphite)}
+.notes p b{color:var(--red);font-weight:700}
+.notes p code{
+  font-family:var(--mono);font-size:11.5px;
+  background:var(--fill-2);border:1px solid var(--hair);
+  border-radius:3px;padding:1px 4px;color:var(--pencil);
+}
+.notes .why{
+  display:block;margin-top:3px;font-size:12px;color:var(--faint);line-height:1.65;
+}
+
+/* 判定・出典タグ */
+.src{
+  display:inline-block;font-family:var(--mono);font-size:9.5px;
+  letter-spacing:.06em;padding:1px 6px;border-radius:3px;
+  background:var(--red-soft);color:var(--red);margin-left:6px;
+  vertical-align:1px;white-space:nowrap;
+}
+
+/* ── 状態バリアントの並び ────────────────── */
+.variants{
+  display:grid;gap:16px;
+  grid-template-columns:repeat(auto-fill,minmax(215px,1fr));
+  margin-top:14px;
+}
+.variant{
+  border:1px solid var(--rule);border-radius:10px;
+  background:var(--sheet);overflow:hidden;display:flex;flex-direction:column;
+}
+.variant > .vh{
+  font-family:var(--mono);font-size:9px;letter-spacing:.08em;
+  padding:7px 10px;background:var(--fill-2);
+  border-bottom:1px solid var(--hair);color:var(--blue);
+  display:flex;justify-content:space-between;gap:8px;
+}
+.variant > .vh em{font-style:normal;color:var(--faint)}
+.variant > .vb{padding:10px;font-size:10px;line-height:1.5;flex:1;display:flex;flex-direction:column;gap:8px}
+.variant > .vn{
+  padding:8px 10px 10px;border-top:1px dashed var(--hair);
+  font-size:11.5px;line-height:1.6;color:var(--pencil);
+}
+
+/* ── 表 ──────────────────────────────────── */
+.tablewrap{overflow-x:auto;margin:16px 0 0;border:1px solid var(--hair)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:13px}
+th,td{padding:9px 13px;text-align:left;border-bottom:1px solid var(--hair);vertical-align:top}
+th{
+  background:var(--fill-2);font-family:var(--mono);font-size:10.5px;
+  letter-spacing:.08em;color:var(--blue);font-weight:600;white-space:nowrap;
+}
+td code{font-family:var(--mono);font-size:11.5px;color:var(--pencil)}
+tbody tr:last-child td{border-bottom:none}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ── 面積マップ ──────────────────────────── */
+.treemap{
+  display:grid;gap:3px;
+  grid-template-columns:repeat(6,1fr);
+  grid-auto-rows:26px;
+}
+.tile{
+  background:var(--fill);border:1px solid var(--rule);border-radius:3px;
+  padding:5px 6px;font-size:8.5px;line-height:1.25;color:var(--pencil);
+  display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;
+}
+.tile b{color:var(--graphite);font-size:9.5px;font-weight:700}
+.tile .c{font-family:var(--mono);font-size:8px;color:var(--faint)}
+.t-golf{grid-column:span 4;grid-row:span 4;background:var(--fill-2)}
+.t-3x2{grid-column:span 2;grid-row:span 2}
+.t-2x1{grid-column:span 2}
+.t-1x1{grid-column:span 1;font-size:7.5px}
+
+/* ── スパークライン ──────────────────────── */
+.spark{display:block;width:100%;height:30px}
+.spark path{fill:none;stroke:var(--graphite);stroke-width:1.5}
+.spark .area{fill:var(--fill);stroke:none}
+.spark circle{fill:var(--graphite)}
+
+/* ── 注意書き ────────────────────────────── */
+.callout{
+  border-left:3px solid var(--red);
+  background:var(--red-soft);
+  padding:14px 18px;margin:26px 0 0;
+  font-size:13.5px;line-height:1.75;
+}
+.callout b{color:var(--red)}
+.callout.blue{border-left-color:var(--blue);background:var(--blue-soft)}
+.callout.blue b{color:var(--blue)}
+
+/* ── 目次 ────────────────────────────────── */
+.toc{
+  columns:2;column-gap:34px;margin:26px 0 0;padding:20px 22px;
+  border:1px solid var(--hair);background:var(--fill-2);
+}
+@media (max-width:640px){.toc{columns:1}}
+.toc a{
+  display:block;break-inside:avoid;text-decoration:none;color:var(--pencil);
+  font-size:13px;padding:3px 0;border-bottom:1px dotted transparent;
+}
+.toc a:hover,.toc a:focus-visible{color:var(--graphite);border-bottom-color:var(--rule)}
+.toc a span{font-family:var(--mono);font-size:10.5px;color:var(--blue);margin-right:9px}
+
+a:focus-visible,.btn:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+
+@media (prefers-reduced-motion:no-preference){
+  .screen{transition:box-shadow .2s ease}
+}
+
+footer{
+  margin-top:80px;padding-top:22px;border-top:3px double var(--rule);
+  font-family:var(--mono);font-size:11px;color:var(--faint);line-height:1.9;
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="cover">
+  <p class="eyebrow">muninn web renewal / wireframe layout sheet</p>
+  <h1>muninn 日報</h1>
+  <p class="sub">C案「探させない、編集して差し出す」— 全12ルート＋状態バリアントの割付</p>
+  <div class="meta">
+    <span><b>対象コミット</b> 6cc727f</span>
+    <span><b>作成</b> 2026-07-31</span>
+    <span><b>判定</b> デザイン統括 87 / PO 77（1-1で割れ、オーナー裁定によりC案採択）</span>
+    <span><b>前提</b> 01-current-state.md / 02-proposal-c.md / 03-review-*.md</span>
+  </div>
+</header>
+
+<p class="lede">
+これは<b>ワイヤーフレーム＝割付用紙</b>であって、完成画面のビジュアルではない。既存のダークなグラス質感（<code style="font-family:var(--mono);font-size:13px">theme.js</code> の11トークン）はそのまま維持する前提で、ここでは<b>「どの段に、何が、どの優先で入るか」</b>だけを確定させる。塗りのグレーは実装時にコンテンツが入る箱、青い罫は段の境界、<b style="color:var(--red)">赤字</b>は実装者への指示。
+</p>
+
+<nav class="toc" aria-label="目次">
+  <a href="#read"><span>00</span>この資料の読み方</a>
+  <a href="#ia"><span>01</span>IA と4タブ</a>
+  <a href="#men"><span>02</span>面 — 今日の紙面</a>
+  <a href="#lead"><span>03</span>リード枠 6状態</a>
+  <a href="#recall"><span>04</span>再読カード 3状態</a>
+  <a href="#shelf"><span>05</span>棚 — 在庫マップ</a>
+  <a href="#shelfboard"><span>06</span>棚板 — タグ横断</a>
+  <a href="#search"><span>07</span>探す 3状態</a>
+  <a href="#desk"><span>08</span>デスク＋伝票 4状態</a>
+  <a href="#note"><span>09</span>記事 2状態</a>
+  <a href="#follow"><span>10</span>定点 3型</a>
+  <a href="#entity"><span>11</span>人物ドシエ</a>
+  <a href="#atlas"><span>12</span>連載・概念</a>
+  <a href="#log"><span>13</span>記録帖 3状態</a>
+  <a href="#legacy"><span>14</span>旧ルート着地</a>
+  <a href="#rules"><span>15</span>全画面共通の規約</a>
+</nav>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="read"><span class="num">00</span>この資料の読み方</h2>
+<p class="lede">
+描いてある文言・数値は<b>すべて実データ</b>（notes 90件・うち <code style="font-family:var(--mono);font-size:13px">sports/golf</code> 42件／follows 3／atlas philosophy 概念11・執筆7／logs coffee-beans 記録1件）。スカスカの面が出るかどうかを、この段階で確かめるため。
+</p>
+
+<div class="legend">
+  <div><dt>灰の箱</dt><dd>コンテンツが入る枠。塗り＝可変長テキスト、線＝カード境界</dd></div>
+  <div><dt>青い罫・青ラベル</dt><dd>段（スロット）の名前と境界。編成ルール §7.1 に対応</dd></div>
+  <div><dt>赤丸の番号</dt><dd>実装指示。画面の右（狭い画面では下）に赤字で対応</dd></div>
+  <div><dt>破線の箱</dt><dd>空状態・在庫切れ時に落ちてくる代替</dd></div>
+</div>
+
+<div class="callout">
+<b>審査で名指しされた指示を、すべて画面に落としてある。</b>
+デザイン統括の申し送り8項目（リード6状態／再読3状態／一言入力欄の余白／面積比例タイル／つながり全型必須／伝票3状態＋校正チェックポイント／旧ルート着地／観測1点のみの扱い）は、この資料の該当節で必ず1バリアント以上を描いた。<span class="src">申し送り①〜⑧</span>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="ia"><span class="num">01</span>IA と4タブ</h2>
+<p class="lede">
+ページを concern（notes／follows／atlas／logs）で割るのをやめ、<b>読む姿勢</b>で割る。タブ名がそのまま「muninn でできること」の要約になっている。
+</p>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>タブ</th><th>ルート</th><th>役目（姿勢）</th><th>殺す訴え</th><th>現状からの変化</th></tr></thead>
+<tbody>
+<tr><td><b>▣ 面</b></td><td><code>/</code></td><td>めくる</td><td>辿り着けない／回遊</td><td>7セクション縦積みのホームを廃し、編集された紙面に</td></tr>
+<tr><td><b>▤ 棚</b></td><td><code>/shelf</code> <code>/shelf/:tag</code></td><td>俯瞰する</td><td><b>何があるのかわからない</b></td><td>新設。<code>/notes</code> 90件フラットと <code>/moc/:slug</code> 生markdownを吸収</td></tr>
+<tr><td><b>⌕ 探す</b></td><td><code>/search</code></td><td>当てる</td><td>あれ何だっけ</td><td>新設。本文込み・全concern横断（現状はタイトル+タグのみ・notes限定）</td></tr>
+<tr><td><b>✎ デスク</b></td><td><code>/desk</code></td><td>頼む</td><td><b>何ができるんだっけ</b></td><td>新設。説明ページと発射台を同一化</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>詳細ページ（葉）</th><th>ルート</th><th>本資料</th></tr></thead>
+<tbody>
+<tr><td>記事</td><td><code>/note/:slug</code></td><td>§09（通常／バックリンク0件）</td></tr>
+<tr><td>定点</td><td><code>/follow/:name</code></td><td>§10（goal 2点以上／goal 1点のみ／interest）</td></tr>
+<tr><td>人物ドシエ</td><td><code>/follow/:name/player/:slug</code></td><td>§11</td></tr>
+<tr><td>連載</td><td><code>/atlas/:slug</code></td><td>§12（現状維持が基準線）</td></tr>
+<tr><td>概念</td><td><code>/atlas/:slug/concept/:cslug</code></td><td>§12</td></tr>
+<tr><td>記録帖</td><td><code>/log/:topic</code></td><td>§13（比較／1件のみ）</td></tr>
+<tr><td>1記録</td><td><code>/log/:topic/entry/:slug</code></td><td>§13</td></tr>
+<tr><td colspan="3" style="color:var(--red)"><b>廃止</b> — <code>/notes</code>（90件フラット）／<code>/moc/:slug</code>（生markdown）／<code>/logs</code>（トピック索引）。着地は §14</td></tr>
+</tbody>
+</table>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="men"><span class="num">02</span>面 — 今日の紙面<span class="route">/</span></h2>
+<p class="lede">
+開いて3秒で今日読むものが決まっている。<b>スコア順のフィードではなく、固定の段がある</b>。各段には適格なカード型が優先順に落ちてきて、在庫が無ければ次の型に落ちる——これが「材料が枯れても面が死なない」ことの構造的保証。
+</p>
+
+<div class="block">
+  <div>
+    <p class="caption">▣ 面 / 既定状態（2026-07-31 木・最終push 4日前）</p>
+    <div class="screen tall">
+      <div class="masthead">
+        <div class="mt">muninn</div>
+        <div class="mr"><span>2026-07-31 木</span><span>更新 4日前</span></div>
+      </div>
+      <div class="sbody">
+
+        <div class="slot">リード<span class="cnt">1枠</span></div>
+        <div class="card lead">
+          <div class="kick">復刻 · 40日ぶり <span class="n" style="margin-left:4px">1</span></div>
+          <div class="hl">ぬるめの湯船は副交感神経を優位にしてセロトニンとエンドルフィンを出す</div>
+          <span class="ph w95" style="margin-top:7px"></span>
+          <span class="ph w70"></span>
+          <div class="row sb" style="margin-top:8px">
+            <span class="chip">health/bathing</span>
+            <span class="mini">記事 ›</span>
+          </div>
+        </div>
+
+        <div class="slot">袖<span class="cnt">0–2</span></div>
+        <div class="card tint">
+          <div class="row sb">
+            <span class="tx">次戦 アルゼンチン代表</span>
+            <span class="mini">あと12日 ›</span>
+          </div>
+        </div>
+
+        <div class="slot">今日の再読<span class="cnt">3枠</span></div>
+        <div class="card">
+          <div class="row sb" style="margin-bottom:6px">
+            <span class="chip b">ゴルフ / 飛距離</span>
+            <span class="mini">1/3</span>
+          </div>
+          <div class="tx" style="color:var(--graphite);font-size:10.5px;line-height:1.65">
+            芯を食う（ミート率）で稼げる距離に上限があるのはなぜか。大幅増の本丸は何か。
+          </div>
+          <div class="btn ghost" style="margin-top:9px">めくる</div>
+          <div class="row" style="justify-content:center;gap:5px;margin-top:8px">
+            <span style="width:5px;height:5px;border-radius:50%;background:var(--graphite)"></span>
+            <span style="width:5px;height:5px;border-radius:50%;background:var(--fill)"></span>
+            <span style="width:5px;height:5px;border-radius:50%;background:var(--fill)"></span>
+          </div>
+          <div style="margin-top:7px"><span class="n">2</span></div>
+        </div>
+
+        <div class="slot">連載<span class="cnt">1枠</span></div>
+        <div class="card">
+          <div class="mini">哲学 — 歴史でたどる</div>
+          <div class="tx" style="color:var(--graphite);font-weight:700;margin:3px 0 6px">次の章：プラトンのイデア論</div>
+          <div class="bar"><i style="width:66%"></i></div>
+          <div class="mini" style="margin-top:4px">読了 4/6</div>
+        </div>
+
+        <div class="slot">特集<span class="cnt">1枠</span></div>
+        <div class="card">
+          <div class="row sb" style="margin-bottom:6px">
+            <span class="tx" style="color:var(--graphite);font-weight:700">ゴルフ「ダフり対策」</span>
+            <span class="mini">4本</span>
+          </div>
+          <div class="stack">
+            <div class="tx">○ 統一仮説：最下点の基準を1つに</div>
+            <div class="tx">○ 手首の基準：1mm浮かせる</div>
+            <div class="tx">○ 腕の基準：伸ばし切らない</div>
+            <div class="mini">＋1本 ›</div>
+          </div>
+          <div style="margin-top:6px"><span class="n">3</span></div>
+        </div>
+
+        <div class="slot">記録<span class="cnt">0–2</span></div>
+        <div class="card">
+          <div class="row sb"><span class="tx" style="color:var(--graphite);font-weight:700">ドライバー飛距離</span><span class="mini">7/27</span></div>
+          <svg class="spark" viewBox="0 0 120 30" role="img" aria-label="総距離の推移 263から267.6ヤード">
+            <path class="area" d="M0,20 L30,17 L60,14 L90,10 L118,5 L118,30 L0,30 Z"/>
+            <path d="M0,20 L30,17 L60,14 L90,10 L118,5"/>
+            <circle cx="118" cy="5" r="2.6"/>
+          </svg>
+          <div class="row sb"><span class="mini">総距離</span><span class="tx" style="color:var(--graphite);font-weight:700">267.6y ▲自己ベスト</span></div>
+        </div>
+
+        <div class="slot">内訳<span class="cnt">1枠</span></div>
+        <div class="card dash">
+          <div class="mini">今号の在庫　90記事 / 11章 / 8観測 / 1記録帖</div>
+          <div class="row" style="gap:5px;margin-top:6px">
+            <span class="chip">棚へ</span><span class="chip">探すへ</span><span class="chip">デスクへ</span>
+          </div>
+        </div>
+
+      </div>
+      <div class="stabs">
+        <div class="on">▣ 面</div><div>▤ 棚</div><div>⌕ 探す</div><div>✎ デスク</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="caption">赤字</p>
+    <ul class="notes">
+      <li><span class="n">1</span><p><b>リード枠は6状態すべてを実装してから出荷する。</b> 落ちてくる順は <code>speed → milestone → chapter-new → brief → feature → revival</code>。<b>この枠が空になる絵を1枚も作ってはいけない</b>——記事が1件でもあれば <code>revival</code>（最終更新が最も古い群からの日替わり）が必ず出る。各状態は §03 に描いた。<span class="src">申し送り①</span><span class="why">現状のホームは「直近の更新7件」が枯れると死ぬ。ここが構造的に死なないことが、低頻度更新（数日〜週単位）という文脈への回答そのもの。</span></p></li>
+      <li><span class="n">2</span><p><b>再読カードは3状態を必ず用意する</b>（<code>recall</code>あり伏せ／めくり後／<code>recall</code>なしdegrade）。そして<b>自己判定ボタンの下に、後から一言入力欄を差し込める可変高さの余白を最初から確保しておく</b>。Phase1は「わかった／あやしい」の2択だけでよいが、レイアウトを破綻させずに追加できる構造にすること。<span class="src">申し送り②③</span><span class="why">審査で名指しされたC案の致命的弱点＝2択自己申告が mn-review の採点規律を骨抜きにする。一言を書かせて q を分岐させるのが処方箋（§15）。</span></p></li>
+      <li><span class="n">3</span><p><b>特集の見出しタップは <code>/shelf/:tag</code> の該当束へアンカーで着地させる</b>（棚板の先頭ではなく、その束の位置まで）。<span class="why">面 → 棚が「同じ束」で繋がることで、編集された面と網羅把握の面が地続きになる。</span></p></li>
+      <li><span class="n">4</span><p><b>紙面はビルド日ではなく閲覧日（クライアントの <code>new Date()</code>）で組む。</b> <code>build-data.mjs</code> の <code>due</code> フラグ計算は<b>廃止</b>し、<code>srs.next</code> を素で渡すこと。<span class="src">PO移植④</span><span class="why">push が2週間止まっても、再読3枚・特集・復刻・連載は毎日入れ替わる。「更新頻度が低い」という制約への直接の解。</span></p></li>
+      <li><span class="n">5</span><p><b>KPIタイル2×2と「復習期限 59」バッジは全撤去。</b> <code>DueBadge</code> コンポーネント自体を消す。数えるのは「今週12件 再読した」という成果だけ。<span class="why">knowledge 59件が全件期限切れで常時点灯＝情報量ゼロの壁紙。減らない借金の額は行動を止める。両審査員が独立に同じ指摘をした。</span></p></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="lead"><span class="num">03</span>リード枠 6状態<span class="route">/ の最上段</span></h2>
+<p class="lede">
+上から順に在庫を確かめ、<b>最初に見つかったものを1枚だけ</b>出す。下2つ（特集・復刻）は常時在庫があるので、リードが空になることは構造的に起きない。
+</p>
+
+<div class="variants">
+  <div class="variant">
+    <div class="vh"><span>① speed 速報</span><em>鮮度3日</em></div>
+    <div class="vb">
+      <div class="card lead">
+        <div class="kick">速報 · 昨日</div>
+        <div class="hl">コーヒー豆：エチオピア イルガチェフェ</div>
+        <span class="ph w85" style="margin-top:6px"></span>
+        <span class="chip" style="margin-top:7px">記録帖</span>
+      </div>
+    </div>
+    <div class="vn">最新の <code>created</code>／git <code>updated</code> が2日以内。<b>入れた直後に確認できる</b>（現状で唯一機能している「直近の更新」の役割を継承）。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>② milestone 節目</span><em>鮮度7日</em></div>
+    <div class="vb">
+      <div class="card lead">
+        <div class="kick">自己ベスト · 7/27</div>
+        <div class="hl">総距離 267.6y — HS46.3で自己ベスト更新</div>
+        <svg class="spark" viewBox="0 0 120 30" role="img" aria-label="自己ベスト更新の推移">
+          <path class="area" d="M0,20 L30,17 L60,14 L90,10 L118,4 L118,30 L0,30 Z"/>
+          <path d="M0,20 L30,17 L60,14 L90,10 L118,4"/><circle cx="118" cy="4" r="2.6"/>
+        </svg>
+      </div>
+    </div>
+    <div class="vn">goal follow の最新 session の <code>metrics</code> が過去全 session の最大／最小を更新したとき。<b>頑張りが一面に出る</b>。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>③ chapter-new 新章</span><em>鮮度7日</em></div>
+    <div class="vb">
+      <div class="card lead">
+        <div class="kick">新章 · 未読</div>
+        <div class="hl">ト・アペイロン — 限定されないもの</div>
+        <div class="tx" style="margin-top:5px">アナクシマンドロスが立てた「無限定なもの」。</div>
+        <span class="chip" style="margin-top:7px">哲学</span>
+      </div>
+    </div>
+    <div class="vn"><code>status: written</code> かつ <code>created</code> 7日以内かつ localStorage で未読の概念。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>④ brief 予習</span><em>試合日まで</em></div>
+    <div class="vb">
+      <div class="card lead">
+        <div class="kick">予習 · あと3日</div>
+        <div class="hl">アルゼンチン代表 vs ブラジル</div>
+        <div class="stack" style="margin-top:6px">
+          <div class="tx">○ 見どころ1：右サイドの深さ</div>
+          <div class="tx">○ 見どころ2：中盤の距離感</div>
+        </div>
+      </div>
+    </div>
+    <div class="vn"><code>follows/*/briefs/</code> に未来7日以内の次戦ブリーフがあるとき。<b>これが <code>/mn-brief</code> のWeb面</b>（現状ゼロ）。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>⑤ feature 特集</span><em>常時在庫</em></div>
+    <div class="vb">
+      <div class="card lead">
+        <div class="kick b">特集 · 日替わり</div>
+        <div class="hl">ゴルフ「ダフり対策」4本</div>
+        <div class="stack" style="margin-top:6px">
+          <div class="tx">○ 統一仮説：最下点の基準を1つに</div>
+          <div class="tx">○ 手首の基準：1mm浮かせる</div>
+          <div class="mini">＋2本 ›</div>
+        </div>
+      </div>
+    </div>
+    <div class="vn">MOCセクション（3件以上のリンクを持つ節）を日替わりローテーション。無ければ <code>tagIndex</code> から束を生成。<b>常時ある</b>。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>⑥ revival 復刻</span><em>最終手段</em></div>
+    <div class="vb">
+      <div class="card lead">
+        <div class="kick">復刻 · 40日ぶり</div>
+        <div class="hl">ぬるめの湯船は副交感神経を優位にして…</div>
+        <span class="ph w95" style="margin-top:6px"></span>
+        <span class="ph w55"></span>
+      </div>
+    </div>
+    <div class="vn">git <code>updated</code> が最も古い20件から日替わり。<b>記事が1件でも必ず出る</b>＝リードが空になる絵は存在しない。</div>
+  </div>
+</div>
+
+<div class="callout blue">
+<b>日替わりは乱数ではなく日付シードのハッシュで決める。</b>
+<code>dayIndex(today) % themes.length</code> のような決定的計算にすること。リロードで引き直せると賭博になり、その日のコミットが消える。同じ日は何度開いても同じ紙面であることが、「今日はこれを読んだ」という記憶を成立させる。
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="recall"><span class="num">04</span>再読カード 3状態<span class="route">/ の中央・記事末尾</span></h2>
+<p class="lede">
+<b>クイズUIではなく伏せ記事</b>。muninn のノートはタイトルが言い切り形＝タイトル自体が答えなので、タイトルを伏せて <code>recall</code> の問いだけを見せる。「クイズを始める」というモード切替が無いので起動コストがゼロ。
+</p>
+
+<div class="variants">
+  <div class="variant">
+    <div class="vh"><span>A. 伏せ（recall あり）</span></div>
+    <div class="vb">
+      <div class="card">
+        <span class="chip b">ゴルフ / 飛距離</span>
+        <div class="tx" style="color:var(--graphite);font-size:11px;line-height:1.7;margin-top:8px">
+          芯を食う（ミート率）で稼げる距離に上限があるのはなぜか。大幅増の本丸は何か。
+        </div>
+        <div class="btn ghost" style="margin-top:10px">めくる</div>
+      </div>
+    </div>
+    <div class="vn"><b>タイトルも本文も伏せる。</b>見せるのはタグと <code>recall</code> の問いだけ。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>B. めくり後</span></div>
+    <div class="vb">
+      <div class="card">
+        <div class="hl" style="font-size:11.5px">ドライバー飛距離はほぼボール初速で決まり、芯化は"タダの距離"だが上限約1.5</div>
+        <span class="ph w95" style="margin-top:8px"></span>
+        <span class="ph w95"></span>
+        <span class="ph w85"></span>
+        <span class="ph w40"></span>
+        <div style="margin-top:10px;border-top:1px dashed var(--rule);padding-top:9px">
+          <div class="mini" style="margin-bottom:6px">思い出せる範囲で一言（任意）</div>
+          <div style="border:1px dashed var(--blue-line);border-radius:6px;height:26px;background:var(--blue-soft)"></div>
+          <div class="row" style="gap:6px;margin-top:8px">
+            <div class="btn solid" style="flex:1">わかった</div>
+            <div class="btn ghost" style="flex:1">あやしい</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="vn"><b>破線の入力欄がPhase2で入る余白</b>。Phase1では2択だけを描画してよいが、この高さを吸収できる構造にしておく。<span class="src">申し送り③</span></div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>C. degrade（recall なし）</span></div>
+    <div class="vb">
+      <div class="card dash">
+        <div class="row" style="gap:4px"><span class="chip">health/hair</span><span class="mini">2026-06-12</span></div>
+        <div class="tx" style="margin-top:8px">
+          <b style="color:var(--pencil)">ここへ来る道：</b><br>
+          「髪の栄養素の話でここに繋がる」
+        </div>
+        <div class="tx" style="color:var(--graphite);margin-top:8px">これ、何の話だったか？</div>
+        <div class="btn ghost" style="margin-top:9px">めくる</div>
+      </div>
+    </div>
+    <div class="vn"><code>recall</code> 未設定のノートはこれ。タグ＋作成日＋<b>バックリンクの文脈一文</b>だけで想起させる。<b>劣化するが壊れない</b>。</div>
+  </div>
+</div>
+
+<div class="callout">
+<b>Phase1途中の見え方も設計に含めること。</b>
+出荷時点では「想起の問いが無い記事」が52件ある（＝状態Cが多数派）。デスクの在庫カウンタが 52 → 0 に近づくにつれてこの段の見え方が変わるので、<b>移行期の絵</b>（3枚のうち2枚がdegrade）も実装者が判断できるようにしておく。<span class="src">申し送り②</span>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="shelf"><span class="num">05</span>棚 — 在庫マップ<span class="route">/shelf</span></h2>
+<p class="lede">
+「何があるんだっけ」に、<b>リストではなく面積で答える</b>。ここが案Cの構造的な強み——タグそのものが第一階層なので、新しい関心事が生まれても<b>宣言なしで自動的にタイルになる</b>。手書き索引に登録し忘れて見えなくなる、という現状の失敗モードを再生産しない。
+</p>
+
+<div class="block">
+  <div>
+    <p class="caption">▤ 棚 / 実タグ分布そのまま</p>
+    <div class="screen tall">
+      <div class="sbar">
+        <div class="t">棚</div>
+        <div class="s">90記事 · 11章 · 8観測 · 1記録帖</div>
+      </div>
+      <div class="sbody">
+        <div class="slot">在庫マップ</div>
+        <div class="treemap">
+          <div class="tile t-golf">
+            <div><b>ゴルフ</b><div class="c">sports/golf</div></div>
+            <div>
+              <div class="bar" style="height:4px;margin-bottom:3px"><i style="width:89%"></i></div>
+              <div class="c">記事 42 · 観測 5</div>
+            </div>
+          </div>
+          <div class="tile t-3x2"><div><b>健康/肌</b></div><div class="c">9 · 観測1</div></div>
+          <div class="tile t-3x2"><div><b>サッカー</b></div><div class="c">7 · 選手10</div></div>
+          <div class="tile t-3x2"><div><b>宇宙論</b></div><div class="c">7</div></div>
+          <div class="tile t-3x2"><div><b>哲学</b></div><div class="c">5 · 章11</div></div>
+          <div class="tile t-2x1"><div><b>栄養</b> <span class="c">6</span></div></div>
+          <div class="tile t-2x1"><div><b>中東</b> <span class="c">6</span></div></div>
+          <div class="tile t-2x1"><div><b>髪</b> <span class="c">5</span></div></div>
+          <div class="tile t-1x1">浴3</div>
+          <div class="tile t-1x1">緊3</div>
+          <div class="tile t-1x1">睡2</div>
+          <div class="tile t-1x1">語1</div>
+          <div class="tile t-1x1">zk1</div>
+          <div class="tile t-1x1" style="background:var(--sheet);border-style:dashed">豆1</div>
+        </div>
+        <div><span class="n">1</span></div>
+
+        <div class="slot">切り口</div>
+        <div class="chips">
+          <span class="chip on">新着</span>
+          <span class="chip">久しく読んでない</span>
+          <span class="chip">孤立している 2</span>
+          <span class="chip">未読の章 5</span>
+          <span class="chip">一度も再読していない 58</span>
+        </div>
+        <div class="stack">
+          <div class="card"><div class="tx" style="color:var(--graphite)">コーヒー豆：エチオピア イルガチェフェ</div><div class="mini">記録帖 · 2日前</div></div>
+          <div class="card"><div class="tx" style="color:var(--graphite)">7/27 の観測 — HS46.3で自己ベスト</div><div class="mini">観測 · 4日前</div></div>
+          <div class="card"><div class="tx" style="color:var(--graphite)">ト・アペイロン — 限定されないもの</div><div class="mini">章 · 4日前</div></div>
+        </div>
+        <div><span class="n">2</span></div>
+
+        <div class="slot">編集済みの束</div>
+        <div class="chips">
+          <span class="chip">ゴルフ ▸ 9束</span><span class="chip">健康 ▸ 4束</span>
+          <span class="chip">サッカー ▸ 3束</span><span class="chip">中東 ▸ 2束</span>
+          <span class="chip">宇宙 ▸ 1束</span>
+        </div>
+        <div><span class="n">3</span></div>
+      </div>
+      <div class="stabs">
+        <div>▣ 面</div><div class="on">▤ 棚</div><div>⌕ 探す</div><div>✎ デスク</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="caption">赤字</p>
+    <ul class="notes">
+      <li><span class="n">1</span><p><b>タイル面積は件数比例で計算し、ゴルフが画面の4割を占める非対称な状態をそのまま描く。</b> 均等グリッドやカード一覧に逃げないこと。<b>「ゴルフに偏っている」という事実が一目で分かる不格好さを恐れるな</b>。<span class="src">申し送り④</span><span class="why">オーナーの「何があるのかわからない」は、90件の内訳が一度も可視化されたことがないから起きている。47%偏重は隠す欠点ではなく、伝えるべき事実。</span></p></li>
+      <li><span class="n">2</span><p><b>切り口ピルは「孤立している」を必ず含める。</b> 実測では被リンク0の真の孤児は <code>cliche-overused-not-necessarily-old</code> と <code>zettelkasten-one-note-one-idea</code> の2件。<b>この数字が小さいことが分かること自体に価値がある</b>（＝繋がりは既に十分ある、という安心）。<span class="why">notes内の <code>[[wikilink]]</code> は実測282本・平均3.1本/ノート。素材はとっくに揃っていて、逆流させていなかっただけ。</span></p></li>
+      <li><span class="n">3</span><p><b>MOCはゲートではなく上乗せ。</b> <code>moc/*.md</code> の <code>##</code> セクションを「編集済みの束」として<b>タイルの下に</b>置く。MOCが無いタグでも在庫マップには必ず出る——ここが案Aとの決定的な違いで、<b>手入れをサボっても到達不能にならない</b>。<span class="why">両審査員が独立に指摘した案Aの急所（手書きマニフェストへの登録漏れ＝不可視化）を、構造で回避する箇所。ここを崩すと採択理由が消える。</span></p></li>
+      <li><span class="n">4</span><p><b>タグが3件未満のときは在庫マップを出さずフラットな全件リストに落とす。</b><span class="why">立ち上げ直後や、将来タグを整理して数が減ったときに、面積マップが1タイルだけの間抜けな絵にならないように。</span></p></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="shelfboard"><span class="num">06</span>棚板 — タグ横断<span class="route">/shelf/:tag</span></h2>
+
+<div class="block">
+  <div>
+    <p class="caption">▤ 棚板 / sports/golf（42記事＋観測5）</p>
+    <div class="screen">
+      <div class="sbar">
+        <div class="nav"><span>‹ 棚</span><span>⌕</span></div>
+        <div class="t">ゴルフ</div>
+        <div class="s">記事 42 · 観測 5 · 束 9</div>
+      </div>
+      <div class="sbody">
+        <div class="slot">編集済みの束<span class="cnt">MOC</span></div>
+        <div class="stack">
+          <div class="card">
+            <div class="row sb"><span class="tx" style="color:var(--graphite);font-weight:700">ダフり対策</span><span class="mini">4</span></div>
+            <div class="stack" style="margin-top:5px">
+              <div class="tx">○ 統一仮説：最下点の基準を1つに</div>
+              <div class="tx">○ 手首の基準：1mm浮かせる</div>
+              <div class="mini">＋2本 ›</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="row sb"><span class="tx" style="color:var(--graphite);font-weight:700">飛距離アップ</span><span class="mini">6</span></div>
+            <span class="ph w85" style="margin-top:5px"></span><span class="ph w70"></span>
+          </div>
+          <div class="card tint"><div class="mini">＋7束 ›</div></div>
+        </div>
+
+        <div class="slot">この棚の観測</div>
+        <div class="card">
+          <div class="row sb"><span class="tx" style="color:var(--graphite);font-weight:700">ドライバー飛距離</span><span class="mini">5回 ›</span></div>
+          <svg class="spark" viewBox="0 0 120 30" role="img" aria-label="総距離の推移">
+            <path class="area" d="M0,20 L30,17 L60,14 L90,10 L118,5 L118,30 L0,30 Z"/>
+            <path d="M0,20 L30,17 L60,14 L90,10 L118,5"/><circle cx="118" cy="5" r="2.6"/>
+          </svg>
+        </div>
+
+        <div class="slot">束に入っていない<span class="cnt">7</span></div>
+        <div class="card dash">
+          <div class="stack">
+            <div class="tx">○ フェース角の管理はHSと連動する</div>
+            <div class="tx">○ ティー高さ40mmの根拠</div>
+            <div class="mini">＋5本 ›</div>
+          </div>
+          <div class="btn copy" style="margin-top:8px">索引を作り直す依頼をコピー <span class="n">1</span></div>
+        </div>
+      </div>
+      <div class="stabs"><div>▣ 面</div><div class="on">▤ 棚</div><div>⌕ 探す</div><div>✎ デスク</div></div>
+    </div>
+  </div>
+
+  <div>
+    <p class="caption">赤字</p>
+    <ul class="notes">
+      <li><span class="n">1</span><p><b>「束に入っていない」を必ず可視化する。</b> MOCの <code>##</code> セクションに載っていないノートを下段に集め、<code>/mn-regen-moc</code> の依頼ボタンを添える。<span class="why">手書き索引の陳腐化を「隠れたまま腐らせる」のではなく「目に見える借金」にする。ただし面には出さない——借金メーターは行動を止めるので、棚板に来た人だけが見る。</span></p></li>
+      <li><span class="n">2</span><p><b>タグの <code>/</code> はURLで <code>--</code> に置換する</b>（<code>/shelf/sports--golf</code>）。HashRouterのパス解決が壊れるため。</p></li>
+      <li><span class="n">3</span><p><b>面の特集からの着地はこの「束」の位置へアンカーする。</b> 棚板の先頭に落とさないこと。</p></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="search"><span class="num">07</span>探す 3状態<span class="route">/search</span></h2>
+<p class="lede">
+編集された面が<b>構造的に答えられない唯一のジョブ</b>なので独立タブにする。ビルド時インデックスは作らない——<code>site.json</code> は復号済みで全メモリ上にあり、90記事の総当たり <code>indexOf</code> は数ミリ秒。過剰設計を避ける。
+</p>
+
+<div class="variants">
+  <div class="variant">
+    <div class="vh"><span>A. 空クエリ</span><em>開いた直後</em></div>
+    <div class="vb">
+      <div class="card tint"><span class="mini">キーワード</span></div>
+      <div class="slot">最近見たもの</div>
+      <div class="stack">
+        <div class="card"><div class="tx">ト・アペイロン</div></div>
+        <div class="card"><div class="tx">ぬるめの湯船は副交感神経を…</div></div>
+      </div>
+      <div class="slot">よく使うタグ</div>
+      <div class="chips">
+        <span class="chip">sports/golf</span><span class="chip">health/skincare</span>
+        <span class="chip">philosophy</span><span class="chip">science/cosmology</span>
+      </div>
+    </div>
+    <div class="vn"><b>検索窓を開いただけで回遊が始まる</b>。localStorage の閲覧履歴8件＋タグ上位6。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>B. 結果</span><em>「ミート」</em></div>
+    <div class="vb">
+      <div class="card tint"><span class="tx" style="color:var(--graphite)">ミート</span></div>
+      <div class="slot">記事<span class="cnt">6</span></div>
+      <div class="stack">
+        <div class="card">
+          <div class="tx" style="color:var(--graphite);font-weight:700">ドライバー飛距離はほぼボール初速で…</div>
+          <div class="mini" style="margin-top:3px">…芯化（<b style="color:var(--graphite)">ミート</b>率）はタダの距離だが上限が…</div>
+        </div>
+      </div>
+      <div class="slot">観測<span class="cnt">4</span></div>
+      <div class="card">
+        <div class="tx" style="color:var(--graphite)">2026-07-27 の観測</div>
+        <div class="mini" style="margin-top:3px">…<b style="color:var(--graphite)">ミート</b>1.40と落ちてもHS上昇分が…</div>
+      </div>
+    </div>
+    <div class="vn"><b>本文込み・全concern横断</b>。concern別にグルーピングし、前後40字のスニペットを付ける。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>C. 0件</span><em>「ケトン体」</em></div>
+    <div class="vb">
+      <div class="card tint"><span class="tx" style="color:var(--graphite)">ケトン体</span></div>
+      <div class="card dash" style="text-align:center;padding:16px 10px">
+        <div class="tx">muninn にはまだ無い</div>
+        <div class="btn copy" style="margin-top:10px">これを調べて記録してもらう</div>
+      </div>
+    </div>
+    <div class="vn"><b>探して無かったことが、次の蓄積の入口になる。</b> クエリを埋め込んだ <code>/mn</code> プロンプトをコピー。</div>
+  </div>
+</div>
+
+<div class="callout blue">
+<b>検索対象は現状から全面拡張する。</b>
+notes（title / tags / <b>body</b>）／concepts（title / gist / body）／MOCセクション見出し／follow profile・<b>sessions body</b>／entities／log entries（title / fields / body）。現状は <code>/notes</code> ページ内の「タイトルとタグのみ・notes限定」——これが「情報があるのに辿り着けない」の直接の原因のひとつ。
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="desk"><span class="num">08</span>デスク＋伝票 4状態<span class="route">/desk</span></h2>
+<p class="lede">
+「何ができるか」を説明するページと「それをやる」ページを<b>同じページにする</b>のが肝。説明だけのページは読まれない。サイトは書き込めないが、<b>書き込みの意図は溜められる</b>——これが読むのはスマホ・書くのはMacという分断への橋。
+</p>
+
+<div class="block">
+  <div>
+    <p class="caption">✎ デスク / 伝票9件</p>
+    <div class="screen tall">
+      <div class="sbar">
+        <div class="t">デスク</div>
+        <div class="s">投げると、こうなる</div>
+      </div>
+      <div class="sbody">
+        <div class="slot">未送信の伝票<span class="cnt">9件</span></div>
+        <div class="card">
+          <div class="stack">
+            <div class="row sb"><span class="tx">答え合わせ</span><span class="mini">7件</span></div>
+            <div class="row sb"><span class="tx">深掘り（ト・アペイロン）</span><span class="mini">1件</span></div>
+            <div class="row sb"><span class="tx">次の章（哲学ルート）</span><span class="mini">1件</span></div>
+          </div>
+          <div class="btn solid" style="margin-top:9px">ぜんぶコピー</div>
+          <div style="margin-top:7px"><span class="n">1</span></div>
+        </div>
+
+        <div class="slot">できること<span class="cnt">5</span></div>
+        <div class="stack">
+          <div class="card">
+            <div class="tx" style="color:var(--graphite);font-weight:700">覚える</div>
+            <div class="tx" style="margin-top:3px">調べた事実を1枚ずつに分けて貯め、期日が来たら面に出す</div>
+            <div class="btn copy" style="margin-top:7px">「〜を調べて notes にして」</div>
+          </div>
+          <div class="card">
+            <div class="tx" style="color:var(--graphite);font-weight:700">追う</div>
+            <div class="tx" style="margin-top:3px">1つの対象を同じ条件で観測して前回と比べる</div>
+            <div class="btn copy" style="margin-top:7px">「今日のスイング見て」</div>
+          </div>
+          <div class="row" style="gap:6px">
+            <div class="card" style="flex:1"><div class="tx" style="color:var(--graphite);font-weight:700;font-size:9px">学ぶ</div></div>
+            <div class="card" style="flex:1"><div class="tx" style="color:var(--graphite);font-weight:700;font-size:9px">比べる</div></div>
+            <div class="card" style="flex:1"><div class="tx" style="color:var(--graphite);font-weight:700;font-size:9px">思い出す</div></div>
+          </div>
+        </div>
+        <div><span class="n">2</span></div>
+
+        <div class="slot">在庫の健康</div>
+        <div class="card">
+          <div class="stack">
+            <div class="row sb"><span class="tx">想起の問いが無い記事</span><span class="row" style="gap:5px"><b class="tx" style="color:var(--graphite)">52</b><span class="chip b">📋</span></span></div>
+            <div class="row sb"><span class="tx">数値未記入の観測</span><span class="row" style="gap:5px"><b class="tx" style="color:var(--graphite)">5</b><span class="chip b">📋</span></span></div>
+            <div class="row sb"><span class="tx">どこからも辿れない記事</span><span class="row" style="gap:5px"><b class="tx" style="color:var(--graphite)">2</b><span class="chip b">📋</span></span></div>
+            <div class="row sb"><span class="tx">未執筆の章</span><span class="row" style="gap:5px"><b class="tx" style="color:var(--graphite)">4</b><span class="chip b">📋</span></span></div>
+          </div>
+          <div style="margin-top:7px"><span class="n">3</span></div>
+        </div>
+      </div>
+      <div class="stabs"><div>▣ 面</div><div>▤ 棚</div><div>⌕ 探す</div><div class="on">✎ デスク</div></div>
+    </div>
+  </div>
+
+  <div>
+    <p class="caption">赤字</p>
+    <ul class="notes">
+      <li><span class="n">1</span><p><b>伝票ブロックは0件／1〜2件／3件以上の3状態を必ず描く。</b> 3件以上のときだけ面の袖にも同数が出るので、<b>面とデスクを並べて件数の整合を目視確認できるようにすること</b>。0件なら<b>ブロックごと非表示</b>（「0件です」とは書かない）。<span class="src">申し送り⑥</span></p></li>
+      <li><span class="n">2</span><p><b>見出しは concern 名ではなく目的語で立てる。</b> 「ノート」「フォロー」「アトラス」「ログ」ではなく<b>覚える／追う／学ぶ／比べる／思い出す</b>。各カードに実際に投げる例文とコピーボタンを置く。<span class="why">オーナーの訴え「何ができるんだっけ」は、内部用語で機能が並んでいることが原因。ここが唯一の翻訳表になる。</span></p></li>
+      <li><span class="n">3</span><p><b>在庫の健康が全部0になったときの表示も用意する。</b> バッジは出さず「在庫はきれいだ」の1行で締める。<span class="src">申し送り⑥</span><span class="why">数字が減っていく快感が続けるモチベーションだが、ゼロになった瞬間に空白の箱が残るのは設計漏れ。</span></p></li>
+      <li><span class="n">4</span><p><b>コピーは1.8秒だけ「✓ コピーした」に変える</b>（<code>atlas.jsx</code> の先行実装と同じ挙動）。<code>navigator.clipboard</code> 失敗時の <code>textarea</code> フォールバックも同じく踏襲。</p></li>
+    </ul>
+  </div>
+</div>
+
+<h3>伝票の4状態</h3>
+<div class="variants">
+  <div class="variant">
+    <div class="vh"><span>0件</span></div>
+    <div class="vb"><div class="card dash" style="text-align:center;padding:14px"><span class="mini">ブロックごと非表示</span></div></div>
+    <div class="vn">面の袖にも出ない。<b>「0件」と書かない</b>。</div>
+  </div>
+  <div class="variant">
+    <div class="vh"><span>1〜2件</span></div>
+    <div class="vb">
+      <div class="card">
+        <div class="row sb"><span class="tx">答え合わせ</span><span class="mini">2件</span></div>
+        <div class="btn ghost" style="margin-top:8px">コピー</div>
+      </div>
+    </div>
+    <div class="vn">デスクにのみ表示。面の袖には<b>まだ出さない</b>（閾値3件）。</div>
+  </div>
+  <div class="variant">
+    <div class="vh"><span>3件以上</span></div>
+    <div class="vb">
+      <div class="card">
+        <div class="row sb"><span class="tx">答え合わせ</span><span class="mini">7件</span></div>
+        <div class="row sb"><span class="tx">深掘り</span><span class="mini">1件</span></div>
+        <div class="btn solid" style="margin-top:8px">ぜんぶコピー</div>
+      </div>
+      <div class="card tint"><div class="mini">↑ 面の袖にも「伝票 9件 ›」が出る</div></div>
+    </div>
+    <div class="vn"><code>slip</code> カードが袖の段に発火。<b>面とデスクで同じ数字</b>であることを確認できる絵にする。</div>
+  </div>
+  <div class="variant" style="border-color:var(--red)">
+    <div class="vh" style="background:var(--red-soft);color:var(--red)"><span>20件超</span><em>校正</em></div>
+    <div class="vb">
+      <div class="card" style="border-color:var(--red)">
+        <div class="kick">校正チェックポイント</div>
+        <div class="tx" style="color:var(--graphite);margin-top:4px">
+          サイトの自己判定が20件溜まった。<b>本気の1問だけ <code>/mn-review</code> で受けてみないか。</b>
+        </div>
+        <div class="btn copy" style="margin-top:8px">1問もらう依頼をコピー</div>
+      </div>
+    </div>
+    <div class="vn"><b>審査で名指しされた最大リスクの処方箋。</b>2択自己申告の甘さが積もる前に、site判定とskill判定の乖離を本人が確認する導線。<span class="src">申し送り⑥</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="note"><span class="num">09</span>記事 2状態<span class="route">/note/:slug</span></h2>
+<p class="lede">
+<b>現状「開いたら行き止まり」なのが最大の欠陥。</b>バックリンクを計算していないので、リンクは片方向にしか流れていない。実測で notes 内に <code>[[wikilink]]</code> が282本あり、しかもmuninnのリンク規約は <code>- [[x]] — なぜ関連するか</code> という形式——<b>「リンク元が書いた理由」ごと逆流させられる資産がすでに全ノートにある</b>。
+</p>
+
+<div class="block">
+  <div>
+    <p class="caption">記事 / 通常（被リンク6件）</p>
+    <div class="screen tall">
+      <div class="sbar">
+        <div class="nav"><span>‹ 戻る</span><span>⌕</span></div>
+        <div class="t" style="font-size:11.5px;line-height:1.4">ドライバー飛距離はほぼボール初速で決まり、芯化は"タダの距離"だが上限がある</div>
+      </div>
+      <div class="sbody">
+        <div class="row sb">
+          <div class="chips"><span class="chip b">sports/golf</span></div>
+          <span class="mini">最後に読んだ 12日前</span>
+        </div>
+        <div><span class="n">1</span></div>
+
+        <div>
+          <span class="ph w95"></span><span class="ph w95"></span><span class="ph w85"></span>
+          <span class="ph w95"></span><span class="ph w70"></span>
+          <span class="ph w95" style="margin-top:9px"></span><span class="ph w85"></span><span class="ph w40"></span>
+        </div>
+
+        <div class="slot">ここへ来る道<span class="cnt">6</span></div>
+        <div class="card">
+          <div class="stack">
+            <div>
+              <div class="tx" style="color:var(--graphite);font-weight:700">ゴルフ ドライバー飛距離（観測）</div>
+              <div class="mini">「詳細な方針はこれを正本とする」</div>
+            </div>
+            <div style="border-top:1px solid var(--hair);padding-top:6px">
+              <div class="tx" style="color:var(--graphite);font-weight:700">低スピンロフト体質の最適化</div>
+              <div class="mini">「飛距離の前提として初速の話がここ」</div>
+            </div>
+            <div class="mini">＋4件 ›</div>
+          </div>
+          <div style="margin-top:7px"><span class="n">2</span></div>
+        </div>
+
+        <div class="slot">想起</div>
+        <div class="card tint">
+          <div class="tx" style="color:var(--graphite)">芯を食う（ミート率）で稼げる距離に上限があるのはなぜか。</div>
+          <div class="row" style="gap:6px;margin-top:8px">
+            <div class="btn ghost" style="flex:1">わかった</div>
+            <div class="btn ghost" style="flex:1">あやしい</div>
+          </div>
+        </div>
+
+        <div class="slot">次の1枚</div>
+        <div class="card">
+          <div class="tx" style="color:var(--graphite);font-weight:700">フェース角の管理はHS上昇と連動する</div>
+          <div class="mini" style="margin-top:3px">同じタグ・未再読・最も期限超過</div>
+          <div style="margin-top:6px"><span class="n">3</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="caption">赤字</p>
+    <ul class="notes">
+      <li><span class="n">1</span><p><b>タグチップを押せるようにする</b>（→ <code>/shelf/:tag</code>）。現状 <code>Chips</code> はただの装飾。そして<b>復習バッジは廃止</b>し、代わりにローカル影SRS由来の「最後に読んだ 12日前」を小さく置く。</p></li>
+      <li><span class="n">2</span><p><b>「ここへ来る道」は note / concept / follow / entity / logentry の全詳細ページテンプレートに例外なく配置する。</b> <b>型によって有無が分かれる実装は課題Dの再発を招く</b>。0件時の文言「この記事はまだどこからも辿れない」＋繋ぎ直し依頼ボタンも、全型で同じ文言・同じ位置に出すこと。<span class="src">申し送り⑤ / B案移植</span></p></li>
+      <li><span class="n">3</span><p><b>「次の1枚」は決定的に1枚だけ。</b> 優先順は ①同タグかつ未再読で最も期限超過 → ②被リンクを共有するノート → ③同じMOC束の隣。<b>選ばせないことが重要</b>。<span class="why">3枚並べた瞬間に「どれを読むか」という判断コストが発生し、行き止まりが「選択の麻痺」に置き換わるだけになる。</span></p></li>
+      <li><span class="n">4</span><p><b>先に <code>build-data.mjs</code> の実バグを直す（+5行）。</b> follow の <code>sessions</code> だけ <code>links: wikiTargets(body)</code> が抜けており、<b>実測24本のリンクがビルド時に捨てられている</b>。notes / mocs / entities / concepts / entries は全部やっているのに sessions だけ素通り。<span class="src">両審査員が最優先で一致</span><span class="why">ゴルフの観測記録がノートに張ったリンクが、まるごと存在しないことになっている。刷新と無関係に単体で直す価値がある。</span></p></li>
+    </ul>
+  </div>
+</div>
+
+<h3>バックリンク0件（全型共通の空状態）</h3>
+<div class="variants">
+  <div class="variant" style="max-width:280px">
+    <div class="vh"><span>ここへ来る道 0件</span></div>
+    <div class="vb">
+      <div class="card dash">
+        <div class="tx">この記事はまだどこからも辿れない</div>
+        <div class="btn copy" style="margin-top:9px">繋ぎ直しを依頼（候補タグ付き）</div>
+      </div>
+    </div>
+    <div class="vn">実データでは2件のみ（<code>cliche-…</code> / <code>zettelkasten-…</code>）。<b>課題Dを能動的に埋める導線</b>にする。全型で同一文言・同一位置。</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="follow"><span class="num">10</span>定点 3型<span class="route">/follow/:name</span></h2>
+<p class="lede">
+現状のタブ構成（ダッシュボード／タイムライン／蘊蓄／概要）を廃止し、<b>推移グラフを最上段</b>へ。定点観測の本質は「同条件で観て前回と比べる」なのに、5回分の数値が静止したタイルと生markdownの縦積みになっているのが現状。
+</p>
+
+<div class="variants" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr))">
+  <div class="variant">
+    <div class="vh"><span>A. goal / 観測2点以上</span><em>golf・5回</em></div>
+    <div class="vb">
+      <div class="card tint">
+        <div class="tx">HS46.3で総267.6yの自己ベスト更新</div>
+        <div class="mini" style="margin-top:3px">①→③移行が実データで成立</div>
+      </div>
+      <div class="slot">推移</div>
+      <div class="card">
+        <svg class="spark" viewBox="0 0 120 34" style="height:38px" role="img" aria-label="総距離263から267.6の推移">
+          <path class="area" d="M0,24 L28,21 L56,17 L84,12 L118,5 L118,34 L0,34 Z"/>
+          <path d="M0,24 L28,21 L56,17 L84,12 L118,5"/><circle cx="118" cy="5" r="3"/>
+        </svg>
+        <div class="row sb"><span class="mini">総距離</span><span class="tx" style="color:var(--graphite);font-weight:700">267.6y <span style="font-size:8px">▲+4.6</span></span></div>
+        <div class="row sb" style="margin-top:4px"><span class="mini">ヘッドスピード</span><span class="tx" style="color:var(--graphite);font-weight:700">46.3 <span style="font-size:8px">▲best</span></span></div>
+        <div class="row sb" style="margin-top:4px"><span class="mini">ミート率</span><span class="tx" style="color:var(--graphite);font-weight:700">1.40 <span style="font-size:8px">▼-0.02</span></span></div>
+      </div>
+      <div class="slot">重点課題</div>
+      <div class="card"><div class="tx">① 縦の打点を揃える <span class="chip">最優先</span></div></div>
+      <div class="slot">観測<span class="cnt">5</span></div>
+      <div class="stack">
+        <div class="card"><div class="row sb"><span class="tx" style="color:var(--graphite)">7/27</span><span class="mini">▾</span></div><div class="mini">HS46.3 / 総267.6（自己ベスト）</div></div>
+        <div class="card"><div class="row sb"><span class="tx" style="color:var(--graphite)">7/15</span><span class="mini">▾</span></div><div class="mini">HS44.8 / 総264.7</div></div>
+      </div>
+    </div>
+    <div class="vn"><b>セッションは1行サマリで畳む</b>（見出し＝profileの変遷タイムライン1行、開くと全文）。現状の「全文縦積みで読めない」を解消。</div>
+  </div>
+
+  <div class="variant" style="border-color:var(--red)">
+    <div class="vh" style="background:var(--red-soft);color:var(--red)"><span>B. goal / 観測1点のみ</span><em>skincare</em></div>
+    <div class="vb">
+      <div class="card tint"><div class="tx">たるみ毛穴のケアを開始</div></div>
+      <div class="slot">推移</div>
+      <div class="card dash" style="text-align:center;padding:14px 10px">
+        <div class="tx">まだ1回しか観測がない</div>
+        <div class="mini" style="margin-top:4px">もう1回記録すると推移が出る</div>
+        <div class="btn copy" style="margin-top:9px">観測を依頼</div>
+      </div>
+      <div class="slot">重点課題</div>
+      <div class="card"><div class="tx">① 日焼け止めとナイアシンアミドの継続</div></div>
+      <div class="slot">観測<span class="cnt">1</span></div>
+      <div class="card"><div class="tx" style="color:var(--graphite)">7/26</div></div>
+    </div>
+    <div class="vn"><b>グラフが描けない観測を空白のまま放置しないこと。</b>スパークラインを出さず、代替表示（記録依頼への転化）を必ず置く。<span class="src">申し送り⑧</span></div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>C. interest</span><em>argentina-nt</em></div>
+    <div class="vb">
+      <div class="card lead" style="border-width:1px">
+        <div class="kick">次戦 · あと12日</div>
+        <div class="hl" style="font-size:11px">vs ブラジル（南米予選）</div>
+        <div class="stack" style="margin-top:6px">
+          <div class="tx">○ 見どころ1：右サイドの深さ</div>
+          <div class="tx">○ 見どころ2：中盤の距離感</div>
+          <div class="tx">○ 見どころ3：セットプレーの高さ</div>
+        </div>
+      </div>
+      <div class="slot">スカッド<span class="cnt">10</span></div>
+      <div class="row" style="gap:5px;flex-wrap:wrap">
+        <div class="card" style="flex:1;min-width:76px;padding:6px"><div class="tx" style="color:var(--graphite);font-weight:700;font-size:9px">メッシ ★</div><div class="mini">FW · インテル・マイアミ</div></div>
+        <div class="card" style="flex:1;min-width:76px;padding:6px"><div class="tx" style="color:var(--graphite);font-weight:700;font-size:9px">マルティネス</div><div class="mini">GK · アストン・ヴィラ</div></div>
+      </div>
+      <div class="slot">この対象の蘊蓄<span class="cnt">7</span></div>
+      <div class="card"><div class="tx">アルゼンチンはコパ・アメリカ最多16回優勝</div></div>
+    </div>
+    <div class="vn"><b>予習ブリーフがあれば見どころ3点を次戦カードに展開</b>。これが <code>/mn-brief</code> のWeb面（現状ゼロ）。スカッド・日程・蘊蓄は現状維持。</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="entity"><span class="num">11</span>人物ドシエ<span class="route">/follow/:name/player/:slug</span></h2>
+
+<div class="block">
+  <div>
+    <p class="caption">人物 / メッシ</p>
+    <div class="screen">
+      <div class="sbar">
+        <div class="nav"><span>‹ アルゼンチン代表</span><span>⌕</span></div>
+        <div class="t">リオネル・メッシ</div>
+        <div class="s">FW · インテル・マイアミ · #10</div>
+      </div>
+      <div class="sbody">
+        <div class="chips">
+          <span class="chip">FW</span><span class="chip">active</span><span class="chip b">★ 深掘り</span>
+        </div>
+        <div class="slot">強み</div>
+        <div class="chips"><span class="chip">ラストパス</span><span class="chip">左足の精度</span><span class="chip">ゲームメイク</span></div>
+        <div class="slot">直近フォーム</div>
+        <div class="card">
+          <div class="stack">
+            <div class="tx"><b style="color:var(--graphite)">7/24</b> — 直近3試合で2ゴール1アシスト</div>
+            <div class="tx"><b style="color:var(--graphite)">6/30</b> — 負傷明けから復帰</div>
+          </div>
+        </div>
+        <div class="slot">参考クリップ</div>
+        <div class="card"><div class="tx">▶ 2022決勝のハイライト</div></div>
+        <div class="slot">ここへ来る道<span class="cnt">3</span></div>
+        <div class="card">
+          <div class="tx" style="color:var(--graphite);font-weight:700">アルゼンチン代表（定点）</div>
+          <div class="mini">「深掘り対象として設定」</div>
+          <div style="margin-top:6px"><span class="n">1</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <p class="caption">赤字</p>
+    <ul class="notes">
+      <li><span class="n">1</span><p><b>人物ドシエにも「ここへ来る道」を必ず置く。</b> 記事だけに実装して他の型を後回しにすると、行き止まりが型ごとにまだら模様で残る。<b>テンプレートの共通部品として先に切ること</b>。<span class="src">申し送り⑤</span></p></li>
+      <li><span class="n">2</span><p>entity から知識を切り出したノートがあれば、記事側にも逆向きのリンクが出るようにする（<code>notes:</code> の逆引き）。</p></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="atlas"><span class="num">12</span>連載・概念<span class="route">/atlas/:slug · /atlas/:slug/concept/:cslug</span></h2>
+<p class="lede">
+<b>現状が基準線なので原則そのまま維持する。</b>マップ／ルートの二層モデル、<code>requires</code> 最長鎖の決定的レイアウト、7種のつながりラベル、localStorage の読了トラッキング——ここは muninn で最も完成度が高い。追加は3点のみ。
+</p>
+
+<div class="block">
+  <div>
+    <p class="caption">連載 / philosophy（概念11・執筆7）</p>
+    <div class="screen">
+      <div class="sbar">
+        <div class="nav"><span>‹ 戻る</span><span>⌕</span></div>
+        <div class="t">哲学 — 知識アトラス</div>
+        <div class="s">概念 11（執筆済 7） · 読了 4</div>
+      </div>
+      <div class="sbody">
+        <div class="chips"><span class="chip on">ルート</span><span class="chip">マップ</span></div>
+        <div class="chips"><span class="chip b">歴史でたどる</span><span class="chip">分野でたどる</span></div>
+        <div class="bar"><i style="width:66%"></i></div>
+        <div class="mini">4/6 読了</div>
+        <div class="stack">
+          <div class="card"><div class="row" style="gap:7px"><span class="chip on">✓</span><div><div class="tx" style="color:var(--graphite);font-weight:700">哲学とは何か</div></div></div></div>
+          <div class="card"><div class="row" style="gap:7px"><span class="chip on">✓</span><div><div class="tx" style="color:var(--graphite);font-weight:700">哲学の誕生</div></div></div></div>
+          <div class="card" style="border-color:var(--graphite)"><div class="row" style="gap:7px"><span class="chip">5</span><div><div class="tx" style="color:var(--graphite);font-weight:700">プラトンのイデア論</div><div class="mini">次に読む</div></div></div></div>
+          <div class="card dash"><div class="row" style="gap:7px"><span class="chip">6</span><div><div class="tx">分野で見る哲学</div><div class="mini">未執筆</div></div></div>
+            <div class="btn copy" style="margin-top:7px">執筆を依頼 <span class="n">2</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="caption">追加は3点のみ</p>
+    <ul class="notes">
+      <li><span class="n">1</span><p><b>概念の <code>notes:</code> 蒸留リンクを逆向きにも出す。</b> いまは概念 → 記事の一方通行。記事側に「この知識はどの章から蒸留されたか」を出して、<b>読み物レイヤーと原子ノートを往復できるようにする</b>。</p></li>
+      <li><span class="n">2</span><p><b>未執筆（stub）の章に「執筆を依頼」ボタン</b>。デスクの在庫の健康「未執筆の章 4」と同じ導線に繋げる。</p></li>
+      <li><span class="n">3</span><p><b>「深掘りを依頼」は伝票に積む方式にも対応する。</b> 従来の即コピーも残しつつ、デスクで束ねて1回で送れるようにする。<span class="why">スマホで読んでいる最中に何度もコピー＆アプリ切り替えをさせない。読む流れを切らないことが継続の条件。</span></p></li>
+      <li><span class="n">4</span><p><b>マップの決定的レイアウトは死守。</b> force-directed に置き換えない。同じデータなら毎回同じ場所に描かれることが記憶の手がかりになる。<b>一度に描くノードは12点まで</b>、超えたら束に畳む。<span class="src">B案移植 / 両審査員一致</span></p></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="log"><span class="num">13</span>記録帖 3状態<span class="route">/log/:topic · /log/:topic/entry/:slug</span></h2>
+<p class="lede">
+logs の設計思想は<b>「並べて比べる」</b>。だが現状は記録1件のグリッドと絞り込みピルだけで、比較テーブルもソートも無い——思想がUIに到達していない。
+</p>
+
+<div class="variants" style="grid-template-columns:repeat(auto-fill,minmax(255px,1fr))">
+  <div class="variant" style="border-color:var(--red)">
+    <div class="vh" style="background:var(--red-soft);color:var(--red)"><span>A. entries = 1</span><em>いまの実データ</em></div>
+    <div class="vb">
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="height:60px;background:var(--fill)"></div>
+        <div style="padding:8px">
+          <div class="tx" style="color:var(--graphite);font-weight:700">エチオピア イルガチェフェ</div>
+          <div class="mini">ウォッシュト · 浅煎り</div>
+          <div class="mini" style="margin-top:3px">★★★★☆</div>
+        </div>
+      </div>
+      <div class="card dash" style="text-align:center;padding:14px 10px">
+        <div class="tx">もう1件記録すると比べられる</div>
+        <div class="btn copy" style="margin-top:9px">豆を記録する依頼</div>
+      </div>
+    </div>
+    <div class="vn"><b>比較ビューを出さない。</b>現状「比較機能が空回り」しているのを、空状態として正しく扱う。<b>1件のグリッドに絞り込みピルを出すのも禁止</b>（絞る意味がない）。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>B. entries ≥ 2</span><em>比較が既定</em></div>
+    <div class="vb">
+      <div class="chips"><span class="chip on">比較</span><span class="chip">グリッド</span></div>
+      <div style="overflow-x:auto;border:1px solid var(--rule);border-radius:6px">
+        <table style="min-width:0;font-size:8.5px;border:none">
+          <thead><tr>
+            <th style="font-size:8px;padding:5px 6px">豆</th>
+            <th style="font-size:8px;padding:5px 6px">焙煎 ▾</th>
+            <th style="font-size:8px;padding:5px 6px">評価</th>
+          </tr></thead>
+          <tbody>
+            <tr style="background:var(--blue-soft)"><td style="padding:5px 6px">イルガチェフェ</td><td class="num" style="padding:5px 6px">浅</td><td class="num" style="padding:5px 6px">4</td></tr>
+            <tr><td style="padding:5px 6px">グアテマラ</td><td class="num" style="padding:5px 6px">中</td><td class="num" style="padding:5px 6px">3</td></tr>
+            <tr><td style="padding:5px 6px">マンデリン</td><td class="num" style="padding:5px 6px">深</td><td class="num" style="padding:5px 6px">5</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mini">列ヘッダタップでソート · <span style="background:var(--blue-soft);padding:0 3px">再購入</span>行をハイライト</div>
+    </div>
+    <div class="vn"><code>fields</code> の <code>number</code> / <code>rating</code> / <code>enum</code> / <code>bool</code> を列にした<b>横スクロールのソート可能テーブル</b>。テーブルは必ず自前の <code>overflow-x:auto</code> に入れ、<b>ページ本体を横スクロールさせない</b>。</div>
+  </div>
+
+  <div class="variant">
+    <div class="vh"><span>C. 1記録</span><em>/entry/:slug</em></div>
+    <div class="vb">
+      <div style="height:70px;background:var(--fill);border-radius:6px"></div>
+      <div class="card">
+        <div class="stack">
+          <div class="row sb"><span class="mini">産地</span><span class="tx" style="color:var(--graphite)">エチオピア</span></div>
+          <div class="row sb"><span class="mini">精製</span><span class="tx" style="color:var(--graphite)">ウォッシュト</span></div>
+          <div class="row sb"><span class="mini">焙煎度</span><span class="tx" style="color:var(--graphite)">浅煎り</span></div>
+          <div class="row sb"><span class="mini">評価</span><span class="tx" style="color:var(--graphite)">★★★★☆</span></div>
+        </div>
+      </div>
+      <span class="ph w95"></span><span class="ph w70"></span>
+      <div class="slot">ここへ来る道<span class="cnt">0</span></div>
+      <div class="card dash"><div class="tx">まだどこからも辿れない</div></div>
+    </div>
+    <div class="vn">スキーマ順のフィールド表＋本文。<b>ここにも「ここへ来る道」を置く</b>（全型必須の原則）。</div>
+  </div>
+</div>
+
+<div class="callout">
+<b>画像の公開範囲に注意。</b>
+サイトのテキストは <code>site.enc.json</code> として暗号化されるが、<b><code>log-media/</code> の画像は Pages 上で素の公開になる</b>（直URLで見える）。ワイヤーフレームでは灰色の箱で描いているが、実装時に機微なトピックは <code>image_visibility: none</code> で落ちることを確認すること。
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="legacy"><span class="num">14</span>旧ルート着地<span class="route">/notes · /moc/:slug · /logs</span></h2>
+<p class="lede">
+PWAのホーム画面追加・ブックマークからの起動で旧URLが踏まれるケースは<b>実運用で必ず発生する</b>。黙ってトップに飛ばすと「前に見たページが消えた」という体験になる。
+</p>
+
+<div class="block">
+  <div>
+    <p class="caption">旧 /notes を開いたとき</p>
+    <div class="screen">
+      <div class="sbar">
+        <div class="t">棚</div>
+        <div class="s">90記事 · 11章 · 8観測 · 1記録帖</div>
+      </div>
+      <div class="sbody">
+        <div class="card tint" style="border-color:var(--blue-line)">
+          <div class="tx" style="color:var(--graphite)">
+            「全ノート一覧」は<b>棚</b>になった。<br>
+            面積で全体を見るか、探すで直接引ける。
+          </div>
+          <div class="row" style="gap:6px;margin-top:8px">
+            <div class="btn ghost" style="flex:1">探すを開く</div>
+            <div class="btn ghost" style="flex:1">閉じる</div>
+          </div>
+          <div style="margin-top:6px"><span class="n">1</span></div>
+        </div>
+        <div class="slot">在庫マップ</div>
+        <div class="treemap" style="grid-auto-rows:22px">
+          <div class="tile t-golf"><div><b>ゴルフ</b></div><div class="c">42</div></div>
+          <div class="tile t-3x2"><div><b>健康/肌</b></div><div class="c">9</div></div>
+          <div class="tile t-3x2"><div><b>サッカー</b></div><div class="c">7</div></div>
+        </div>
+      </div>
+      <div class="stabs"><div>▣ 面</div><div class="on">▤ 棚</div><div>⌕ 探す</div><div>✎ デスク</div></div>
+    </div>
+  </div>
+  <div>
+    <p class="caption">赤字</p>
+    <ul class="notes">
+      <li><span class="n">1</span><p><b>リダイレクト先で「何がどこへ行ったか」を1回だけ告げる。</b> 一度閉じたら localStorage に記録して二度と出さない。<b>黙って飛ばさない／出し続けない</b>のどちらも避ける。<span class="src">申し送り⑦</span></p></li>
+      <li><span class="n">2</span><p>着地の対応表 — <code>/notes</code> → <code>/shelf</code>／<code>/moc/:slug</code> → <code>/shelf/:tag</code>（対応タグへ）／<code>/logs</code> → <code>/shelf</code>（コーヒーのタイルへアンカー）。</p></li>
+      <li><span class="n">3</span><p><b>service worker のキャッシュ更新も忘れないこと。</b> 旧ルートが sw にキャッシュされたまま残ると、リダイレクト表に到達する前に古い画面が出る。</p></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<h2 id="rules"><span class="num">15</span>全画面共通の規約</h2>
+
+<div class="tablewrap">
+<table>
+<thead><tr><th>規約</th><th>内容</th><th>出典</th></tr></thead>
+<tbody>
+<tr>
+  <td><b>つながりは全型必須</b></td>
+  <td>note / concept / entity / session / logentry の全詳細ページに「ここへ来る道」を同じ文言・同じ位置で置く。0件時の空状態も共通。<b>型によって有無が分かれる実装を禁止する</b></td>
+  <td>B案移植・両審査員一致</td>
+</tr>
+<tr>
+  <td><b>数えるのは成果だけ</b></td>
+  <td>未消化の件数をバッジで出さない。「復習期限 59」「KPIタイル2×2」「<code>DueBadge</code>」は全廃。出すのは「今週12件 再読した」</td>
+  <td>両審査員一致</td>
+</tr>
+<tr>
+  <td><b>紙面は閲覧日で組む</b></td>
+  <td>ビルド時は素材の下ごしらえまで。「今日どれを載せるか」はクライアントの <code>new Date()</code>。<code>due</code> フラグのビルド時計算は廃止し <code>srs.next</code> を素で渡す</td>
+  <td>PO移植④</td>
+</tr>
+<tr>
+  <td><b>影SRSは同一SM-2式</b></td>
+  <td>localStorage 側と <code>/mn-review</code> 側で<b>まったく同じ式</b>を使う。値が必ず一致するので乖離しない。同期判定は <code>site.notes[slug].srs.last >= pending.date</code> で「反映済み」とみなして pending から削除し、サーバ値で上書き</td>
+  <td>PO移植③（自己修復同期）</td>
+</tr>
+<tr>
+  <td><b>自己判定の質を守る</b></td>
+  <td>①一言入力の有無で q を分岐（書いてわかった=q5 / 書かずわかった=q4 / あやしい=q2）②site由来の <code>ease</code> 成長を skill 由来より2〜3割抑える ③伝票20件で校正チェックポイント</td>
+  <td>デザイン統括・最大リスクの処方箋</td>
+</tr>
+<tr>
+  <td><b>グラフの憲法</b></td>
+  <td>一度に描くノードは12点まで／レイアウトは決定的（乱数・force-directed 禁止）／図は必ずリストで代替可能にする</td>
+  <td>B案移植</td>
+</tr>
+<tr>
+  <td><b>維持するもの</b></td>
+  <td>ダークなグラス質感（<code>theme.js</code> 11トークン）／モバイルファースト・<code>env(safe-area-inset-*)</code>／PWA／パスワード1枚／完全静的／正本はmarkdown</td>
+  <td>刷新で触らない</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3>ビルドへの追加（<code>build-data.mjs</code>）</h3>
+<div class="tablewrap">
+<table>
+<thead><tr><th>項目</th><th>内容</th><th>効く画面</th></tr></thead>
+<tbody>
+<tr><td><b>session links バグ修正</b></td><td><code>sessions</code> に <code>links: wikiTargets(body)</code> を追加（+5行）。実測24本のリンクが復活</td><td>ここへ来る道（全型）</td></tr>
+<tr><td><b>backlinks</b></td><td>全ノード型の被リンクを逆引きで生成。<b>リンク元の一文（<code>— 理由</code>）ごと持たせる</b></td><td>記事・概念・人物・記録</td></tr>
+<tr><td><b>tagIndex</b></td><td>タグ→全concernのノード。件数・concern別内訳つき</td><td>棚・棚板</td></tr>
+<tr><td><b>MOCセクション分解</b></td><td><code>##</code> 見出しを束として構造化（生markdown描画をやめる）</td><td>棚板・特集</td></tr>
+<tr><td><b>git 最終更新日</b></td><td><code>pages.yml</code> に <code>fetch-depth: 0</code> を追加し、各ファイルの最終更新を取得</td><td>復刻・久しく読んでない</td></tr>
+<tr><td><b>metrics 抽出</b></td><td>session frontmatter に <code>metrics:</code> を足して数値を構造化（表のパースに頼らない）</td><td>推移グラフ・節目</td></tr>
+<tr><td><b>due 廃止</b></td><td><code>due</code> フラグ計算を削除し <code>srs.next</code> を素で渡す</td><td>面（閲覧日で組むため）</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout blue">
+<b>採択の経緯（記録として）。</b>
+PO審査は案A（80 / C=77 / B=73）、デザイン統括審査は案C（87 / A=84 / B=79）で1-1に割れた。<b>「オーナーの5つの訴えを殺すか」という基準では両審査員ともAとCを同点に採点しており、課題解決力では決着していない</b>。決め手になったのは、案Aの中核（7テーマの手動キュレーション）が<b>両審査員に独立して同じ急所を指摘された</b>こと——手書きマニフェストへの登録漏れが新しい関心事を不可視化し、「情報があるのに辿り着けない」を形を変えて再生産する。案Cはタグが第一階層なので構造的にこれを持たない。オーナー裁定によりC案を採択した。
+</div>
+
+<footer>
+muninn web renewal — wireframe layout sheet<br>
+前提資料: docs/web-renewal/01-current-state.md · 02-proposal-a/b/c.md · 03-review-po.md · 03-review-design-director.md<br>
+この資料は構造の確定のみを担う。視覚デザイン（配色・質感・タイポグラフィ）は既存の theme.js を正本とする。
+</footer>
+
+</div>
+</body>
+</html>
