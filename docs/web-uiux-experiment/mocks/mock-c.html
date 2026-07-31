@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>muninn — 紙面をめくる（案C）</title>
+<style>
+/* ==========================================================================
+   案C「紙面をめくる」— 組版が編集判断
+   質感: 紙・インク・活版（ダーク＋グラスを捨てる）
+   ========================================================================== */
+:root{
+  --paper:#f1ecdf;
+  --paper-2:#e7dfcc;
+  --paper-3:#dcd2ba;
+  --ink:#191713;
+  --ink-2:#524b3e;
+  --ink-3:#7d7364;
+  --rule:#191713;
+  --rule-thin:rgba(25,23,19,.28);
+  --red:#ad3225;
+  --blue:#1c3f63;
+  --hl:#e0d08a;
+  --mincho:"Hiragino Mincho ProN","HiraMinProN-W3","Yu Mincho",YuMincho,"MS PMincho","Songti SC",serif;
+  --gothic:"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",YuGothic,"Noto Sans JP",system-ui,-apple-system,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+  --turn:170ms;
+  --flip:180ms;
+}
+/* 夜刊（インク反転）。紙のトーンは捨てず、黒インクを生成りに置き換えるだけ */
+@media (prefers-color-scheme: dark){
+  :root:not([data-ink="day"]){
+    --paper:#14120d; --paper-2:#1d1a13; --paper-3:#2a251a;
+    --ink:#ece4d0; --ink-2:#b3a992; --ink-3:#8b8271;
+    --rule:#ece4d0; --rule-thin:rgba(236,228,208,.3);
+    --red:#e4705d; --blue:#8fb6dd; --hl:#4a4028;
+  }
+}
+:root[data-ink="night"]{
+  --paper:#14120d; --paper-2:#1d1a13; --paper-3:#2a251a;
+  --ink:#ece4d0; --ink-2:#b3a992; --ink-3:#8b8271;
+  --rule:#ece4d0; --rule-thin:rgba(236,228,208,.3);
+  --red:#e4705d; --blue:#8fb6dd; --hl:#4a4028;
+}
+:root[data-ink="night"] .grain{ opacity:.075; mix-blend-mode:screen; }
+:root[data-ink="night"] .misreg{ text-shadow:1.4px -1.1px 0 rgba(228,112,93,.45); }
+:root[data-ink="night"] body{ background:#0b0a07; }
+@media (prefers-reduced-motion: reduce){
+  :root{ --turn:0ms; --flip:0ms; }
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ height:100%; margin:0; }
+body{
+  background:#3a3833;
+  font-family:var(--gothic);
+  color:var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+button{ font:inherit; color:inherit; background:none; border:none; padding:0; cursor:pointer; }
+
+/* ---------- 端末フレーム ---------- */
+#device{
+  position:relative; width:390px; height:844px; overflow:hidden;
+  background:var(--paper); color:var(--ink);
+  box-shadow:0 0 0 10px #17150f, 0 26px 70px rgba(0,0,0,.6);
+  border-radius:34px;
+}
+@media (max-width:479px){
+  body{ display:block; background:var(--paper); }
+  #device{ width:100vw; height:100vh; height:100dvh; border-radius:0; box-shadow:none; }
+}
+
+/* ---------- 紙の質感（ノイズ／版ズレ） ---------- */
+.grain{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:70;
+        opacity:.06; mix-blend-mode:multiply; }
+@media (prefers-color-scheme: dark){ :root:not([data-ink="day"]) .grain{ opacity:.075; mix-blend-mode:screen; } }
+.misreg{ text-shadow:1.4px -1.1px 0 rgba(173,50,37,.5); }
+
+/* ---------- 面（横ページング） ---------- */
+#track{
+  position:absolute; inset:0; display:flex; width:400%; height:100%;
+  will-change:transform;
+}
+#track.anim{ transition:transform var(--turn) cubic-bezier(.22,.68,.3,1); }
+.sheet{
+  width:25%; height:100%; overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch; touch-action:pan-y;
+  padding:0 14px calc(96px + env(safe-area-inset-bottom)) 14px;
+  background:var(--paper);
+  border-right:1px solid var(--rule-thin);
+  box-shadow:-7px 0 14px -9px rgba(0,0,0,.45);   /* 紙の小口。めくっている最中だけ見える */
+}
+.sheet::-webkit-scrollbar{ width:0; }
+
+/* ---------- 題字（一面のみ） ---------- */
+.masthead{ padding-top:calc(14px + env(safe-area-inset-top)); }
+.rule-double{ border-top:2.5px solid var(--rule); border-bottom:1px solid var(--rule); height:4px; }
+.rule-1{ border-top:1px solid var(--rule); }
+.rule-hair{ border-top:1px solid var(--rule-thin); }
+.mh-row{ display:flex; align-items:flex-end; gap:9px; padding:8px 0 7px; }
+.mh-tate{
+  writing-mode:vertical-rl; font-family:var(--gothic); font-weight:800;
+  font-size:11px; letter-spacing:.34em; line-height:1;
+  border:1.5px solid var(--rule); padding:5px 3px 4px; height:60px;
+  display:flex; align-items:center; justify-content:center;
+}
+.mh-name{ font-family:var(--mincho); font-weight:700; font-size:40px; line-height:.95;
+          letter-spacing:.01em; flex:1; }
+.mh-meta{ text-align:right; font-family:var(--mincho); font-size:12px; line-height:1.7; color:var(--ink-2); }
+.mh-count{ font-family:var(--gothic); font-size:10px; letter-spacing:.04em; color:var(--ink-3); }
+.mh-count b{ font-family:var(--mincho); font-size:16px; color:var(--ink); font-weight:700; }
+
+/* ---------- 段（記事モジュール） ---------- */
+.dan{ display:flex; gap:10px; padding:13px 0; border-bottom:1px solid var(--rule-thin); }
+.dan:last-child{ border-bottom:none; }
+.rail{
+  writing-mode:vertical-rl; font-family:var(--gothic); font-weight:800;
+  font-size:12.5px; letter-spacing:.3em; line-height:1;
+  border-right:2.5px solid var(--rule); padding:1px 5px 1px 0;
+  flex:0 0 auto; align-self:flex-start; white-space:nowrap;
+  color:var(--ink);
+}
+.rail.red{ border-right-color:var(--red); color:var(--red); }
+.dan-body{ flex:1 1 auto; min-width:0; }
+.dan-kicker{ font-size:10.5px; letter-spacing:.14em; color:var(--ink-3); font-weight:700; margin-bottom:5px; }
+
+/* ---------- 想起（今日の一問） ---------- */
+.card{ perspective:1100px; }
+.card-inner{ position:relative; transform-style:preserve-3d; transition:transform var(--flip) ease-out; }
+.card.flipped .card-inner{ transform:rotateX(-180deg); }
+.face{ backface-visibility:hidden; -webkit-backface-visibility:hidden; }
+.face.back{ position:absolute; inset:0; transform:rotateX(180deg); overflow:hidden; }
+.q-mark{ font-family:var(--mincho); font-weight:700; font-size:13px; border:1.5px solid var(--rule);
+         display:inline-block; padding:1px 6px; margin-bottom:9px; letter-spacing:.2em; }
+.q-text{ font-family:var(--mincho); font-size:22px; line-height:1.6; font-weight:700;
+         letter-spacing:.005em; }
+.a-title{ font-family:var(--mincho); font-size:19px; line-height:1.5; font-weight:700; margin:0 0 7px; }
+.a-body{ font-family:var(--mincho); font-size:13px; line-height:1.72; color:var(--ink-2);
+         max-height:118px; overflow:hidden; position:relative; }
+.a-body::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:26px;
+  background:linear-gradient(to bottom, transparent, var(--paper)); }
+.card-actions{ display:flex; gap:8px; margin-top:12px; }
+.btn{
+  font-family:var(--gothic); font-weight:700; font-size:14px;
+  border:1.5px solid var(--rule); background:transparent; color:var(--ink);
+  min-height:46px; padding:10px 14px; border-radius:2px; letter-spacing:.06em;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn:active{ transform:translateY(1px); }
+.btn.solid{ background:var(--ink); color:var(--paper); }
+.btn.wide{ flex:1; }
+.btn.big{ min-height:52px; font-size:16px; }
+.btn.red{ border-color:var(--red); color:var(--red); }
+.btn.sm{ min-height:44px; font-size:13px; padding:8px 12px; }
+.progress{ font-family:var(--mono); font-size:10.5px; color:var(--ink-3); letter-spacing:.1em;
+           margin-top:9px; display:flex; justify-content:space-between; align-items:center; }
+.pips{ display:flex; gap:4px; }
+.pip{ width:16px; height:4px; background:var(--rule-thin); }
+.pip.on{ background:var(--ink); }
+.pip.now{ background:var(--red); }
+.done-note{ font-family:var(--mincho); font-size:15px; line-height:1.7; }
+.done-note b{ font-size:22px; }
+
+/* ---------- 記事の扱い（大・中・小） ---------- */
+.a-lead{ display:block; text-align:left; width:100%; }
+.a-lead h3{ font-family:var(--mincho); font-size:20px; line-height:1.42; font-weight:700; margin:0 0 6px; letter-spacing:.005em; }
+.a-lead p{ font-family:var(--mincho); font-size:12.5px; line-height:1.68; color:var(--ink-2); margin:0;
+  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.a-mid{ display:block; text-align:left; width:100%; padding:8px 0; border-top:1px solid var(--rule-thin); }
+.a-mid h4{ font-family:var(--mincho); font-size:14px; line-height:1.5; font-weight:700; margin:0 0 3px; }
+.a-mid p{ font-family:var(--gothic); font-size:11px; line-height:1.55; color:var(--ink-3); margin:0;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.a-min{ border-top:1px solid var(--rule-thin); padding-top:7px; margin-top:8px;
+        font-family:var(--mincho); font-size:12.5px; line-height:1.85; }
+.a-min button{ display:inline; text-align:left; border-bottom:1px solid var(--rule-thin); margin-right:.75em; }
+.a-min .sep{ display:none; }
+.tagchip{ font-family:var(--gothic); font-size:9.5px; font-weight:700; letter-spacing:.08em;
+  border:1px solid var(--rule-thin); padding:1px 5px; color:var(--ink-3); vertical-align:2px; margin-right:5px; }
+
+/* ---------- 観測（スパークライン） ---------- */
+.obs-line{ font-family:var(--mincho); font-size:13.5px; line-height:2.15; display:flex;
+  align-items:baseline; gap:7px; border-bottom:1px dotted var(--rule-thin); }
+.obs-line .k{ flex:0 0 auto; }
+.obs-line svg{ flex:0 0 auto; }
+.obs-line .v{ font-family:var(--mono); font-size:12.5px; font-weight:700; margin-left:auto; }
+.up{ color:var(--blue); } .down{ color:var(--red); } .neutral{ color:var(--ink-2); }
+.obs-note{ font-family:var(--gothic); font-size:11px; color:var(--ink-3); line-height:1.6; margin-top:4px; }
+
+/* ---------- 奥付 ---------- */
+.colophon{ margin-top:16px; border-top:2.5px solid var(--rule); padding-top:9px;
+  font-family:var(--mincho); font-size:11.5px; line-height:1.85; color:var(--ink-2); }
+.colophon b{ color:var(--ink); font-size:14px; }
+
+/* ---------- 面の題（一面以外） ---------- */
+.sheet-head{ padding-top:calc(16px + env(safe-area-inset-top)); }
+.sh-row{ display:flex; align-items:flex-end; gap:10px; padding:7px 0 8px; }
+.sh-title{ font-family:var(--mincho); font-size:27px; font-weight:700; letter-spacing:.16em; line-height:1; }
+.sh-sub{ font-family:var(--gothic); font-size:10.5px; color:var(--ink-3); letter-spacing:.1em;
+  margin-left:auto; text-align:right; line-height:1.5; }
+
+/* ---------- 棚（級数で物量を出す） ---------- */
+.stock{ line-height:1.15; padding:4px 0 2px; }
+.stock button{ font-family:var(--mincho); font-weight:700; display:inline-block;
+  margin:0 11px 6px 0; vertical-align:baseline; letter-spacing:.02em; }
+.stock button sup{ font-family:var(--mono); font-size:9.5px; font-weight:400; color:var(--ink-3);
+  vertical-align:super; margin-left:2px; letter-spacing:0; }
+.stock button:active{ color:var(--red); }
+.route-list{ counter-reset:c; }
+.route-item{ display:flex; gap:8px; align-items:baseline; padding:5px 0; border-bottom:1px dotted var(--rule-thin);
+  width:100%; text-align:left; }
+.route-no{ font-family:var(--mono); font-size:10px; color:var(--ink-3); flex:0 0 20px; }
+.route-t{ font-family:var(--mincho); font-size:13.5px; line-height:1.45; flex:1; }
+.route-t small{ display:block; font-family:var(--gothic); font-size:10px; color:var(--ink-3); line-height:1.5; margin-top:2px; }
+.stub{ font-family:var(--gothic); font-size:9px; border:1px solid var(--rule-thin); padding:0 4px; color:var(--ink-3); }
+
+/* ---------- 索引（探す） ---------- */
+#sheet-index{ display:flex; flex-direction:column; padding-bottom:0; }
+.idx-scroll{ flex:1 1 auto; overflow-y:auto; touch-action:pan-y; padding-bottom:10px; }
+.idx-bar{ flex:0 0 auto; border-top:2.5px solid var(--rule); background:var(--paper);
+  padding:9px 0 calc(88px + env(safe-area-inset-bottom)); }
+.idx-input{
+  width:100%; font-size:16px; font-family:var(--mincho); color:var(--ink);
+  background:var(--paper-2); border:1.5px solid var(--rule); border-radius:2px;
+  padding:12px 12px; min-height:48px; outline:none;
+}
+.idx-input::placeholder{ color:var(--ink-3); }
+.idx-input::-webkit-search-cancel-button{ -webkit-appearance:none; appearance:none; }
+.idx-row{ display:flex; gap:7px; align-items:stretch; }
+#q-clear{ flex:0 0 48px; min-height:48px; border:1.5px solid var(--rule); border-radius:2px;
+  font-family:var(--mincho); font-size:15px; font-weight:700; display:none;
+  align-items:center; justify-content:center; }
+#q-clear.on{ display:flex; }
+.hit{ display:block; width:100%; text-align:left; padding:8px 0; border-bottom:1px solid var(--rule-thin); }
+.hit h4{ font-family:var(--mincho); font-size:14.5px; line-height:1.45; margin:0 0 3px; font-weight:700; }
+.hit p{ font-family:var(--gothic); font-size:10.5px; color:var(--ink-3); margin:0; line-height:1.5;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.hit mark{ background:var(--hl); color:inherit; }
+.kind-mark{ font-family:var(--gothic); font-size:9px; font-weight:800; letter-spacing:.1em;
+  border:1px solid var(--rule); padding:0 4px; margin-right:6px; vertical-align:2px; }
+
+/* ---------- 伝票 ---------- */
+.ticket{ border:1.5px solid var(--rule); background:var(--paper-2); padding:10px 11px; margin-bottom:9px; position:relative; }
+.ticket .no{ font-family:var(--mono); font-size:10px; color:var(--ink-3); letter-spacing:.14em; }
+.ticket p{ font-family:var(--mincho); font-size:13.5px; line-height:1.7; margin:4px 0 0; white-space:pre-wrap; padding-right:34px; }
+.ticket .del{ position:absolute; top:4px; right:4px; width:44px; height:44px; font-size:16px; color:var(--ink-3); }
+.slip-empty{ font-family:var(--mincho); font-size:14px; line-height:1.85; color:var(--ink-2); }
+
+/* ---------- 別刷り（記事：読む軸） ---------- */
+#reader{
+  position:absolute; inset:0; z-index:40; background:var(--paper);
+  transform:translateY(100%); transition:transform var(--turn) cubic-bezier(.22,.68,.3,1);
+  display:flex; flex-direction:column; box-shadow:0 -14px 40px rgba(0,0,0,.28);
+}
+#reader.open{ transform:translateY(0); }
+.rd-scroll{ flex:1 1 auto; overflow-y:auto; touch-action:pan-y;
+  padding:calc(16px + env(safe-area-inset-top)) 16px calc(100px + env(safe-area-inset-bottom)); }
+.rd-kicker{ display:flex; align-items:center; gap:7px; font-family:var(--gothic); font-size:10px;
+  letter-spacing:.12em; color:var(--ink-3); border-bottom:2.5px solid var(--rule); padding-bottom:6px; }
+.rd-title{ font-family:var(--mincho); font-size:23px; line-height:1.45; font-weight:700; margin:12px 0 4px; letter-spacing:.005em; }
+.rd-meta{ font-family:var(--mono); font-size:10px; color:var(--ink-3); letter-spacing:.08em;
+  border-bottom:1px solid var(--rule-thin); padding-bottom:9px; margin-bottom:12px; }
+.rd-body{ font-family:var(--mincho); font-size:15px; line-height:1.95; letter-spacing:.012em; }
+.rd-body p{ margin:0 0 .95em; }
+.rd-body h2,.rd-body h3{ font-family:var(--gothic); font-size:12px; font-weight:800; letter-spacing:.12em;
+  margin:1.5em 0 .5em; padding-left:7px; border-left:3px solid var(--red); }
+.rd-body ul{ margin:0 0 .95em; padding-left:1.1em; }
+.rd-body li{ margin-bottom:.3em; }
+.rd-body strong{ font-weight:700; background:linear-gradient(transparent 62%, var(--hl) 62%); }
+.rd-body code{ font-family:var(--mono); font-size:12.5px; background:var(--paper-3); padding:0 3px; }
+.rd-body table{ border-collapse:collapse; font-family:var(--mono); font-size:11px; margin:0 0 1em; width:100%; }
+.rd-body td,.rd-body th{ border:1px solid var(--rule-thin); padding:3px 6px; text-align:left; }
+.wl{ border-bottom:1.5px solid var(--red); color:inherit; font-weight:600; }
+
+/* 傍注（Tufte／欄外の罫囲み） */
+.sidenote{
+  border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+  background:var(--paper-2); padding:8px 10px; margin:.4em 0 1.1em;
+  display:block; width:100%; text-align:left;
+}
+.sidenote .sn-no{ font-family:var(--mono); font-size:9.5px; color:var(--red); font-weight:700;
+  letter-spacing:.12em; }
+.sidenote .sn-r{ font-family:var(--gothic); font-size:11.5px; line-height:1.68; color:var(--ink-2);
+  margin:3px 0 5px; }
+.sidenote .sn-t{ font-family:var(--mincho); font-size:13.5px; line-height:1.5; font-weight:700;
+  border-bottom:1.5px solid var(--red); display:inline; }
+.sn-anchor{ font-family:var(--mono); font-size:9.5px; color:var(--red); font-weight:700; vertical-align:super; }
+.marginalia{ display:flex; gap:10px; margin:1.4em 0 0; padding-top:10px; border-top:1px solid var(--rule-thin); }
+.marginalia .sidenote{ margin:0 0 9px; }
+.marginalia .sidenote:last-child{ margin-bottom:0; }
+.abstract-end{ font-family:var(--gothic); font-size:10.5px; color:var(--ink-3); letter-spacing:.1em;
+  text-align:right; border-top:1px solid var(--rule-thin); padding-top:5px; margin-top:2px; }
+
+/* ここへ来る道（被リンク＝引用組み） */
+.inbound{ margin-top:22px; border-top:2.5px solid var(--rule); padding-top:10px; }
+.inbound-h{ font-family:var(--gothic); font-size:11px; font-weight:800; letter-spacing:.18em; margin-bottom:9px; }
+.inb{ display:block; width:100%; text-align:left; border-left:3px solid var(--rule); padding:2px 0 2px 10px; margin-bottom:12px; }
+.inb q{ font-family:var(--mincho); font-size:13px; line-height:1.72; color:var(--ink-2); quotes:"「" "」"; display:block; }
+.inb .src{ font-family:var(--gothic); font-size:11px; font-weight:700; margin-top:4px; display:block; }
+.inb .src::before{ content:"— "; color:var(--ink-3); }
+.edge-grid{ display:grid; grid-template-columns:auto 1fr; gap:8px 9px; align-items:start; }
+.edge-k{ font-family:var(--gothic); font-size:9.5px; font-weight:800; letter-spacing:.1em;
+  border:1px solid var(--rule); padding:2px 5px; white-space:nowrap; margin-top:2px;
+  justify-self:start; }
+.edge-v button{ font-family:var(--mincho); font-size:13px; line-height:1.5; text-align:left;
+  border-bottom:1px solid var(--rule-thin); }
+
+/* ---------- めくり帯（親指ゾーン） ---------- */
+#knob{
+  position:absolute; left:0; right:0; bottom:0; z-index:50;
+  background:var(--paper); border-top:2.5px solid var(--rule);
+  padding:0 0 env(safe-area-inset-bottom);
+  touch-action:none; user-select:none; -webkit-user-select:none;
+}
+/* 左右 24px は OS のエッジジェスチャ（iOSの戻る）に明け渡す帯の余白。
+   ここには操作を置かず、ここから始まるドラッグも受け取らない。 */
+.knob-names{ display:flex; align-items:stretch; height:48px; padding:0 24px; }
+.kn{ flex:1 1 0; display:flex; align-items:center; justify-content:center;
+  font-family:var(--mincho); font-size:14.5px; font-weight:700; letter-spacing:.16em;
+  border-right:1px solid var(--rule-thin); color:var(--ink-3); position:relative; }
+.kn:last-child{ border-right:none; }
+.kn.on{ background:var(--ink); color:var(--paper); }
+.kn-edge{ flex:0 0 46px; display:flex; align-items:center; justify-content:center;
+  font-size:15px; color:var(--ink-2); }
+.knob-strip{ height:22px; display:flex; align-items:center; justify-content:center; gap:5px;
+  border-top:1px solid var(--rule-thin); }
+.knob-strip .hint{ font-family:var(--gothic); font-size:9.5px; letter-spacing:.16em; color:var(--ink-3); }
+.knob-strip .grip{ width:34px; height:3px; background:var(--rule-thin); }
+#knob.dragging .knob-strip .grip{ background:var(--red); }
+.knob-actions{ display:none; height:56px; align-items:stretch; gap:0; padding:0 24px; }
+#knob.reader .knob-names,#knob.reader .knob-strip,#knob.reader #deck-bar{ display:none; }
+#knob.reader .knob-actions{ display:flex; }
+/* 操作卓：想起の操作は必ず下端に置く（判定を上に置かない） */
+#deck-bar{ display:none; border-bottom:1px solid var(--rule-thin); padding:8px 24px 9px; gap:7px; }
+#deck-bar.on{ display:flex; }
+#deck-bar .db{
+  flex:1 1 0; min-height:50px; display:flex; align-items:center; justify-content:center;
+  font-family:var(--gothic); font-weight:800; font-size:15px; letter-spacing:.1em;
+  border:1.5px solid var(--rule); border-radius:2px; background:transparent; color:var(--ink);
+}
+#deck-bar .db.solid{ background:var(--ink); color:var(--paper); }
+#deck-bar .db.red{ border-color:var(--red); color:var(--red); }
+#deck-bar .db.slim{ flex:0 0 62px; font-size:12px; font-weight:700; letter-spacing:.06em; }
+#deck-bar .db.slim2{ flex:0 0 108px; font-size:12.5px; font-weight:700; letter-spacing:.06em; }
+#deck-bar .db:active{ transform:translateY(1px); }
+#device.barred #sheet-today,
+#device.barred #sheet-shelf,
+#device.barred #sheet-desk{ padding-bottom:calc(170px + env(safe-area-inset-bottom)); }
+#device.barred #sheet-index .idx-bar{ padding-bottom:calc(160px + env(safe-area-inset-bottom)); }
+.ka{ flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:5px;
+  font-family:var(--gothic); font-size:13.5px; font-weight:700; letter-spacing:.08em;
+  border-right:1px solid var(--rule-thin); min-height:48px; }
+.ka:last-child{ border-right:none; }
+.ka.solid{ background:var(--ink); color:var(--paper); }
+.ka[hidden]{ display:none; }
+#undo{ position:absolute; left:0; right:0; bottom:100%; display:flex; justify-content:center;
+  padding:0 0 7px; pointer-events:none; }
+#undo button{ pointer-events:auto; background:var(--ink); color:var(--paper);
+  font-family:var(--gothic); font-size:12px; font-weight:700; letter-spacing:.1em;
+  padding:9px 16px; min-height:44px; border-radius:2px; box-shadow:0 4px 14px rgba(0,0,0,.3); }
+
+/* ---------- モーダル（依頼を書く／説明） ---------- */
+.modal{ position:absolute; inset:0; z-index:80; background:rgba(20,18,14,.62);
+  display:flex; align-items:flex-end; }
+.modal[hidden]{ display:none; }
+.modal-inner{ width:100%; background:var(--paper); border-top:3px solid var(--rule);
+  padding:16px 16px calc(20px + env(safe-area-inset-bottom)); max-height:92%; overflow-y:auto; }
+.modal h3{ font-family:var(--mincho); font-size:19px; margin:0 0 4px; letter-spacing:.08em; }
+.modal .lead{ font-family:var(--gothic); font-size:11px; color:var(--ink-3); margin:0 0 11px; line-height:1.6; }
+#ticket-text{
+  width:100%; min-height:132px; font-size:16px; font-family:var(--mincho); line-height:1.8;
+  color:var(--ink); background:var(--paper-2); border:1.5px solid var(--rule); border-radius:2px;
+  padding:11px; outline:none; resize:none;
+  background-image:repeating-linear-gradient(var(--paper-2) 0 27px, var(--rule-thin) 27px 28px);
+}
+.modal-actions{ display:flex; gap:8px; margin-top:12px; }
+
+/* ---------- 起動時の説明 ---------- */
+#intro{ position:absolute; inset:0; z-index:90; background:var(--paper);
+  padding:calc(26px + env(safe-area-inset-top)) 20px 22px; overflow-y:auto; }
+#intro[hidden]{ display:none; }
+#intro .ttl{ font-family:var(--mincho); font-size:26px; font-weight:700; letter-spacing:.1em; }
+#intro .rule{ border-top:2.5px solid var(--rule); border-bottom:1px solid var(--rule); height:4px; margin:10px 0 16px; }
+#intro ol{ margin:0; padding-left:1.2em; }
+#intro li{ font-family:var(--mincho); font-size:14.5px; line-height:1.85; margin-bottom:11px; }
+#intro li b{ background:linear-gradient(transparent 62%, var(--hl) 62%); }
+#intro .btn{ width:100%; }
+.diagram{ font-family:var(--mono); font-size:10px; line-height:1.5; color:var(--ink-2);
+  border:1px solid var(--rule-thin); background:var(--paper-2); padding:10px; margin:14px 0 16px;
+  white-space:pre; overflow-x:auto; }
+.sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div id="device">
+  <svg class="grain" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <filter id="grainf"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+    <rect width="100%" height="100%" filter="url(#grainf)"/>
+  </svg>
+
+  <div id="track">
+    <section class="sheet" id="sheet-today"></section>
+    <section class="sheet" id="sheet-shelf"></section>
+    <section class="sheet" id="sheet-index">
+      <div class="idx-scroll" id="idx-scroll"></div>
+      <div class="idx-bar">
+        <div class="idx-row">
+          <input class="idx-input" id="q" type="search" inputmode="search" autocomplete="off"
+                 placeholder="語を入れる（例: メッシ、毛穴、イデア）">
+          <button id="q-clear" aria-label="入力を消す">消</button>
+        </div>
+      </div>
+    </section>
+    <section class="sheet" id="sheet-desk"></section>
+  </div>
+
+  <div id="reader"><div class="rd-scroll" id="rd-scroll"></div></div>
+
+  <nav id="knob">
+    <div id="undo"></div>
+    <div id="deck-bar"></div>
+    <div class="knob-names" id="knob-names"></div>
+    <div class="knob-strip"><span class="hint">◀</span><span class="grip"></span><span class="hint">この帯をなぞって めくる</span><span class="grip"></span><span class="hint">▶</span></div>
+    <div class="knob-actions">
+      <button class="ka" id="ka-back" hidden>◀ もどる</button>
+      <button class="ka" id="ka-ticket">依頼を書く</button>
+      <button class="ka solid" id="ka-close">紙面へ戻る</button>
+    </div>
+  </nav>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal-inner">
+      <h3 id="modal-title">依頼を書く</h3>
+      <p class="lead">サイトからは書き込めない。ここで文面を作って伝票に溜め、あとでまとめて渡す。</p>
+      <textarea id="ticket-text"></textarea>
+      <div class="modal-actions">
+        <button class="btn wide" id="modal-cancel">やめる</button>
+        <button class="btn solid wide" id="modal-save">伝票に綴じる</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="intro">
+    <div class="ttl misreg">本紙の読みかた</div>
+    <div class="rule"></div>
+    <ol>
+      <li>面は<b>「めくる」</b>。画面の下の帯を指でなぞると、一面 → 棚 → 索引 → 伝票と紙が動く。帯の名前を押せば直行もできる。</li>
+      <li>記事だけは<b>「読む」</b>。別刷りが下から上がってきたら、そこは縦に読む。<b>めくる軸（下の帯・横）と読む軸（紙面・縦）は場所が違う</b>ので、ぶつからない。</li>
+      <li>一面の頭は<b>今日の一問</b>。答えを伏せた問いが出る。思い出してから［めくる］を押し、わかった／あやしいを打つ。</li>
+      <li>リンクには「なぜ関連するか」が必ず書いてある。本文の欄外に、<b>書いた本人の言葉のまま</b>傍注として組んである。</li>
+    </ol>
+    <div class="diagram">   ┌──────────────────┐
+   │                  │  ← 読む軸（縦）
+   │      紙  面      │     記事はここで縦に読む
+   │                  │
+   ├──────────────────┤
+   │ 一面 棚 索引 伝票│  ← 名前を押す＝直行
+   │ ◀━━━━ なぞる ━━━▶│  ← めくる軸（横）
+   └──────────────────┘</div>
+    <button class="btn solid big wide" id="intro-close">読みはじめる</button>
+  </div>
+</div>
+
+<script src="mn-data.js"></script>
+<script>
+/* ==========================================================================
+   案C 実装（素のDOM。フレームワーク・外部リソースなし）
+   ========================================================================== */
+(function(){
+"use strict";
+var MN = window.MN;
+var $ = function(s,r){ return (r||document).querySelector(s); };
+var el = function(t,c,x){ var e=document.createElement(t); if(c) e.className=c; if(x!=null) e.textContent=x; return e; };
+
+/* ---------- 語彙（画面に内部語彙を出さない） ---------- */
+var TAGJA = {
+  "sports/golf":"ゴルフ","philosophy/ancient":"古代哲学","philosophy/epistemology":"認識論",
+  "philosophy":"哲学","health/skincare":"スキンケア","sports/football":"サッカー",
+  "science/cosmology":"宇宙論","geopolitics/middle-east":"中東","health/nutrition":"栄養",
+  "health/hair":"髪","health/stress":"ストレス","health/bathing":"入浴","health/sleep":"睡眠",
+  "language/vocabulary":"ことば","knowledge/zettelkasten":"知の整理","log/coffee":"珈琲"
+};
+function tagJa(t){ return TAGJA[t] || (t.split("/").pop()); }
+var WD = ["日","月","火","水","木","金","土"];
+
+/* ---- 画面に内部語彙を出さないための表示フィルタ ----
+   正本の markdown には notes/follows/atlas/logs/MOC といった作り手側の語が入っている。
+   正本は汚さず、紙面に出す瞬間だけ読者の語（記事・定点・連載・記録帳・束）に組み替える。 */
+function deJargon(s){
+  return String(s||"")
+    .replace(/`[^`]*`/g,"")
+    .replace(/[（(]\s*(atlas|follows?|logs?|notes?|moc)s?\s*\/?\s*[）)]/gi,"")
+    .replace(/学習アトラス/g,"連載").replace(/知識アトラス/g,"連載").replace(/アトラス/g,"連載")
+    .replace(/フォロー/g,"定点")
+    .replace(/ログ/g,"記録帳")
+    .replace(/MOC/gi,"束")
+    .replace(/\s{2,}/g," ").trim();
+}
+/* 理由文は、コマンドやパスに触れている文だけ落としてから組み替える */
+function deJargonReason(s){
+  var parts=String(s||"").split("。").filter(function(p){
+    return p.trim() && !/`/.test(p) && !/\/mn/.test(p) && !/(atlas|follows?|logs?|notes?|moc)\//i.test(p);
+  });
+  if(!parts.length) return deJargon(String(s||"").replace(/`[^`]*`/g,""));
+  return deJargon(parts.join("。"))+"。";
+}
+/* 見出しの末尾に付く「— フォロー」「— 知識アトラス」等の分類名を落とす */
+function title2(s){
+  return deJargon(s).replace(/\s*[—–\-]\s*(定点(観測トラック)?|束|連載|記録帳)\s*$/,"").trim();
+}
+function mocTitle(m){
+  if(m.slug==="home") return "総目次";
+  var t=deJargon(m.title), tail=t.split("—").pop().trim();
+  tail=tail.replace(/の?束$/,"").trim();
+  if(tail) return tail;
+  var head=t.split("—")[0].trim(), par=head.match(/[（(]([^）)]+)[）)]/);
+  return par ? par[1] : head;
+}
+
+/* ---------- 日付（閲覧日で組む） ---------- */
+var NOW = new Date();
+function ymd(d){ var m=d.getMonth()+1,dd=d.getDate();
+  return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(dd<10?"0":"")+dd; }
+var TODAY = ymd(NOW);
+function parseD(s){ var p=String(s||"").split("-"); return new Date(+p[0],(+p[1]||1)-1,+p[2]||1); }
+function daysBetween(a,b){ return Math.round((b-a)/86400000); }
+
+/* ---------- 日付シードの決定的ハッシュ（乱数を使わない） ---------- */
+function hashStr(s){ var h=2166136261>>>0; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h>>>0; }
+function rngFrom(seed){ var a=seed>>>0; return function(){ a|=0; a=a+0x6D2B79F5|0;
+  var t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function shuffleDet(arr,seed){ var a=arr.slice(), r=rngFrom(seed);
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(r()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+/* ---------- 索引の構築 ---------- */
+var noteBy={}, conceptBy={}, followBy={}, entryBy={}, entityBy={}, mocBy={}, atlasBy={}, topicBy={};
+MN.notes.forEach(function(n){ noteBy[n.slug]=n; });
+MN.mocs.forEach(function(m){ mocBy[m.slug]=m; });
+MN.atlases.forEach(function(a){ atlasBy[a.slug]=a; });
+MN.logtopics.forEach(function(t){ topicBy[t.slug]=t; });
+MN.atlases.forEach(function(a){ a.concepts.forEach(function(c){ c._atlas=a; conceptBy[c.slug]=c; }); });
+MN.follows.forEach(function(f){ followBy[f.name]=f;
+  (f.entities||[]).forEach(function(e){ e._follow=f; entityBy[e.slug]=e; }); });
+MN.logtopics.forEach(function(t){ (t.entries||[]).forEach(function(e){ e._topic=t; entryBy[e.slug]=e; }); });
+
+function resolve(t){
+  if(!t) return null;
+  var base = String(t).split("|")[0].replace(/\.md$/,"").replace(/^.*\//,"");
+  var raw  = String(t).split("|")[0];
+  if(noteBy[base]) return {type:"note",id:base,title:title2(noteBy[base].title)};
+  if(conceptBy[base]) return {type:"concept",id:base,title:title2(conceptBy[base].title)};
+  if(entityBy[base]) return {type:"entity",id:base,title:title2(entityBy[base].title)};
+  if(entryBy[base]) return {type:"entry",id:base,title:title2(entryBy[base].title)};
+  var fname = raw.split("/")[0];
+  if(followBy[fname]) return {type:"follow",id:fname,title:title2(followBy[fname].title)};
+  if(followBy[base]) return {type:"follow",id:base,title:title2(followBy[base].title)};
+  if(atlasBy[base]) return {type:"atlas",id:base,title:title2(atlasBy[base].title)};
+  if(topicBy[base]) return {type:"topic",id:base,title:title2(topicBy[base].title)};
+  if(mocBy[base])   return {type:"moc",  id:base,title:mocTitle(mocBy[base])};
+  return null;   // 解決できない先は黙って捨てる（壊れリンクを紙面に出さない）
+}
+
+/* 被リンク索引（理由ごと逆流できる = この案の武器） */
+var BACK = {};
+function pushBack(target, rec){ var r=resolve(target); if(!r) return;
+  var k=r.type+":"+r.id; (BACK[k]=BACK[k]||[]).push(rec); }
+MN.notes.forEach(function(n){
+  (n.linkrefs||[]).forEach(function(lr){ pushBack(lr.t,{type:"note",id:n.slug,title:title2(n.title),reason:lr.r}); });
+  (n.links||[]).forEach(function(t){
+    var has=(n.linkrefs||[]).some(function(l){ return String(l.t).split("|")[0]===String(t).split("|")[0]; });
+    if(!has) pushBack(t,{type:"note",id:n.slug,title:title2(n.title),reason:null});
+  });
+});
+MN.mocs.forEach(function(m){ (m.sections||[]).forEach(function(s){ (s.items||[]).forEach(function(it){
+  pushBack(it.target,{type:"moc",id:m.slug,title:mocTitle(m)+"／"+deJargon(s.title),reason:it.reason}); }); }); });
+MN.atlases.forEach(function(a){ a.concepts.forEach(function(c){
+  (c.notes||[]).forEach(function(ns){ pushBack(ns,{type:"concept",id:c.slug,title:title2(c.title),reason:"この章から蒸留した知識"}); });
+  ["requires","contrasts","leadsTo","elaborates"].forEach(function(k){
+    var lab={requires:"前提として置いた",contrasts:"対比として置いた",leadsTo:"ここから発展する",elaborates:"深掘りとして書いた"}[k];
+    (c.edges[k]||[]).forEach(function(t){ pushBack(t,{type:"concept",id:c.slug,title:title2(c.title),reason:lab}); });
+  });
+}); });
+function backOf(type,id){ var a=BACK[type+":"+id]||[]; var seen={},out=[];
+  a.forEach(function(r){ var k=r.type+":"+r.id+":"+(r.reason||""); if(seen[k])return; seen[k]=1; out.push(r); });
+  return out; }
+
+/* ---------- 保存状態 ---------- */
+var LS = {
+  get:function(k,d){ try{ var v=localStorage.getItem("mnC-"+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set:function(k,v){ try{ localStorage.setItem("mnC-"+k,JSON.stringify(v)); }catch(e){} }
+};
+/* 刷り（朝刊＝紙 / 夜刊＝インク反転）。既定はOSの設定に従う */
+function inkMode(){
+  var v=LS.get("ink",null);
+  if(v) return v;
+  return (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "night" : "day";
+}
+function setInk(v){ LS.set("ink",v); document.documentElement.setAttribute("data-ink",v); }
+if(LS.get("ink",null)) document.documentElement.setAttribute("data-ink",LS.get("ink",null));
+
+var reviewLog = LS.get("log",[]);           // [{slug,date,ok}]
+var tickets   = LS.get("tickets",[]);       // [{text,at}]
+var quizState = LS.get("quiz-"+TODAY,{i:0,extra:0});
+
+/* ---------- 今日の紙面（閲覧日シード） ---------- */
+var SEED = hashStr("muninn/"+TODAY);
+/* 期限切れは59本すべて。総量は絶対に画面に出さず、今日の数枚に切り出す */
+var due = MN.notes.filter(function(n){ return n.kind==="knowledge" && n.recall && n.next && n.next<=TODAY; });
+var DECK_BASE = 5;
+function currentDeck(){ return shuffleDet(due,SEED).slice(0, DECK_BASE + (quizState.extra||0)); }
+
+var pickPool = shuffleDet(MN.notes, hashStr("pick/"+TODAY));
+function todayReads(){
+  var used={}; currentDeck().forEach(function(n){ used[n.slug]=1; });
+  return pickPool.filter(function(n){ return !used[n.slug]; });
+}
+
+/* ---------- markdown（ごく軽い組版） ---------- */
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function inline(s){
+  var h = esc(s);
+  h = h.replace(/`([^`]+)`/g,"<code>$1</code>");
+  h = h.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
+  h = h.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, function(m,t,a){
+    var r=resolve(t); if(!r) return a||t;
+    return '<button class="wl" data-go="'+r.type+':'+r.id+'">'+esc(a||r.title)+'</button>';
+  });
+  return h;
+}
+/* 組版前の下ごしらえ。
+   ① 正本の「## Links」節は本文に流さない（傍注として組み直すのがこの紙面の役目）
+   ② このモックが持つ本文は正本の冒頭240字の抄録なので、末尾で記法が切れている。
+      切れかけた見出し記号・強調・リンクの破片を、紙面に出す前に落とす。 */
+function tidyMd(src){
+  var lines=String(src||"").split("\n"), out=[];
+  for(var i=0;i<lines.length;i++){
+    var t=lines[i].trim();
+    if(/^#{1,6}\s*(links?|リンク|関連)\s*$/i.test(t)) break;   // Links節
+    if(/^#{1,6}$/.test(t)) break;                              // 抄録で切れた見出し記号
+    out.push(lines[i]);
+  }
+  while(out.length && /^[\s#*\-+|>`\[\]]*$/.test(out[out.length-1])) out.pop();
+  var s=out.join("\n");
+  // 閉じていない記法だけを落とす（数が奇数のときだけ＝対になっているものは触らない）
+  if(((s.match(/\*\*/g)||[]).length)%2) s=s.replace(/\*\*(?![\s\S]*\*\*)/,"");
+  if(((s.match(/`/g)||[]).length)%2)    s=s.replace(/`[^`]*$/,"");
+  s=s.replace(/\[\[[^\]]*$/,"");
+  return s.replace(/\n{3,}/g,"\n\n").replace(/[\s#*\-|>]+$/,"");
+}
+/* カードの1行見出し用。記法をすべて畳んで平文にする */
+function excerptLine(ex,n){
+  return tidyMd(ex)
+    .replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,"$2$1")
+    .replace(/^\s*[-*+]\s+/gm,"")
+    .replace(/[#*`|>]/g,"")
+    .replace(/\s*\n+\s*/g," ")
+    .replace(/\s{2,}/g," ").trim().slice(0,n);
+}
+function mdBlocks(src){
+  var lines = String(src||"").split("\n"), out=[], tbl=null;
+  function flushT(){ if(tbl && tbl.length){ out.push({t:"table",rows:tbl}); } tbl=null; }
+  for(var i=0;i<lines.length;i++){
+    var L = lines[i];
+    if(/^\s*\|/.test(L)){
+      if(/^\s*\|[\s\-:|]+\|\s*$/.test(L)) continue;
+      var cells = L.replace(/^\s*\|/,"").replace(/\|\s*$/,"").split("|").map(function(c){return c.trim();});
+      (tbl=tbl||[]).push(cells); continue;
+    }
+    flushT();
+    if(/^#{1,6}\s/.test(L)) out.push({t:"h",v:L.replace(/^#+\s*/,"")});
+    else if(/^\s*[-*]\s+/.test(L)) out.push({t:"li",v:L.replace(/^\s*[-*]\s+/,"")});
+    else if(L.trim()==="") out.push({t:"br"});
+    else out.push({t:"p",v:L});
+  }
+  flushT();
+  return out;
+}
+function renderBody(container, src, sidenotes){
+  var blocks = mdBlocks(tidyMd(src)), ul=null, snIdx=0, placed={};
+  function closeUl(){ ul=null; }
+  function maybeSidenotes(text){
+    if(!sidenotes) return;
+    sidenotes.forEach(function(sn,k){
+      if(placed[k]) return;
+      var key = String(sn.t).split("|")[0].replace(/^.*\//,"");
+      if(text.indexOf(key)>=0 || (sn._title && text.indexOf(sn._title.slice(0,6))>=0)){
+        placed[k]=1; container.appendChild(sidenoteEl(sn,++snIdx));
+      }
+    });
+  }
+  blocks.forEach(function(b){
+    if(b.t==="li"){
+      if(!ul){ ul=el("ul"); container.appendChild(ul); }
+      var li=el("li"); li.innerHTML=inline(b.v); ul.appendChild(li);
+      maybeSidenotes(b.v); return;
+    }
+    closeUl();
+    if(b.t==="h"){ var h=el("h3"); h.textContent=b.v; container.appendChild(h); }
+    else if(b.t==="p"){ var p=el("p"); p.innerHTML=inline(b.v); container.appendChild(p); maybeSidenotes(b.v); }
+    else if(b.t==="table"){
+      var tb=el("table");
+      b.rows.forEach(function(r,ri){ var tr=el("tr");
+        r.forEach(function(c){ var td=el(ri===0?"th":"td"); td.innerHTML=inline(c); tr.appendChild(td); });
+        tb.appendChild(tr); });
+      container.appendChild(tb);
+    }
+  });
+  // 本文中に受け皿がなかった傍注は「欄外」の柱にまとめて組む（狭い画面での marginalia）
+  if(sidenotes){
+    var left = sidenotes.filter(function(_,k){ return !placed[k]; });
+    if(left.length){
+      var mg=el("div","marginalia");
+      mg.appendChild(el("div","rail red","欄外"));
+      var mb=el("div","dan-body");
+      left.forEach(function(sn){ mb.appendChild(sidenoteEl(sn,++snIdx)); });
+      mg.appendChild(mb);
+      container.appendChild(mg);
+    }
+  }
+}
+function sidenoteEl(sn,no){
+  var r = resolve(sn.t); if(!r) return el("span");
+  var b = el("button","sidenote");
+  b.dataset.go = r.type+":"+r.id;
+  var n = el("div","sn-no","傍註 "+no);
+  var reason = el("div","sn-r", deJargonReason(sn.r) || "本文から参照している");
+  var t = el("div"); var s=el("span","sn-t", r.title); t.appendChild(s);
+  b.appendChild(n); b.appendChild(reason); b.appendChild(t);
+  return b;
+}
+
+/* ---------- スパークライン（行内・Tufte） ---------- */
+function spark(points, goal){
+  var W=64,H=15,vals=points.map(function(p){return p.value;});
+  var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), sp=(mx-mn)||1;
+  var svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("width",W); svg.setAttribute("height",H); svg.setAttribute("viewBox","0 0 "+W+" "+H);
+  var d="", n=points.length;
+  points.forEach(function(p,i){
+    var x=(n===1)?W/2:(i/(n-1))*(W-3)+1.5;
+    var y=H-2-((p.value-mn)/sp)*(H-5);
+    d += (i?"L":"M")+x.toFixed(1)+" "+y.toFixed(1);
+  });
+  var last=points[n-1], prev=points[n-2];
+  var color = "var(--ink-2)";
+  if(goal && prev){
+    var rising = last.value>prev.value;
+    var good = (goal==="up") ? rising : !rising;
+    color = good ? "var(--blue)" : "var(--red)";
+  }
+  var path=document.createElementNS("http://www.w3.org/2000/svg","path");
+  path.setAttribute("d",d); path.setAttribute("fill","none");
+  path.setAttribute("stroke",color); path.setAttribute("stroke-width","1.4");
+  svg.appendChild(path);
+  var dot=document.createElementNS("http://www.w3.org/2000/svg","circle");
+  dot.setAttribute("cx",((n===1)?W/2:(W-3)+1.5)); dot.setAttribute("cy",(H-2-((last.value-mn)/sp)*(H-5)));
+  dot.setAttribute("r","2"); dot.setAttribute("fill",color);
+  svg.appendChild(dot);
+  return {svg:svg,color:color};
+}
+
+/* ==========================================================================
+   一面
+   ========================================================================== */
+/* 題字の数字は「号数」ではない。
+   DESIGN.md §8 は号数・発行部数のような演出を禁じているが、その理由は
+   「中身がないのに様式だけ真似ない」ことにある。だからここには実体を入れる——
+   正本から機械的に数えられる、これまでの書き足しの回数（記事・章・観測・記録）。
+   減らない借金ではなく、増える一方の量なので原則3にも適合する。 */
+var FOUNDED = MN.notes.reduce(function(a,n){ return (!a || n.created<a)?n.created:a; }, null);
+function writeCount(){
+  var n = MN.notes.length;
+  MN.atlases.forEach(function(a){ n += a.concepts.length; });
+  MN.follows.forEach(function(f){ n += (f.sessions||[]).length; });
+  MN.logtopics.forEach(function(t){ n += t.entries.length; });
+  return n;
+}
+
+function renderToday(){
+  var s=$("#sheet-today"); s.innerHTML="";
+
+  /* 題字 */
+  var mh=el("div","masthead");
+  mh.appendChild(el("div","rule-double"));
+  var row=el("div","mh-row");
+  row.appendChild(el("div","mh-tate","日刊"));
+  var nm=el("div","mh-name misreg","muninn"); row.appendChild(nm);
+  var meta=el("div","mh-meta");
+  meta.innerHTML=NOW.getFullYear()+"年"+(NOW.getMonth()+1)+"月"+NOW.getDate()+"日（"+WD[NOW.getDay()]+"）<br>"
+               +"<span class='mh-count'>書き足し <b>"+writeCount()+"</b> 回</span>";
+  row.appendChild(meta);
+  mh.appendChild(row);
+  mh.appendChild(el("div","rule-double"));
+  s.appendChild(mh);
+
+  s.appendChild(danQuiz());
+  s.appendChild(danReads());
+  s.appendChild(danObs());
+
+  /* 奥付：物量を隠さない（増える事実だけ） */
+  var col=el("div","colophon");
+  var nk=MN.notes.length, cc=0, ss=0, ee=0;
+  MN.atlases.forEach(function(a){ cc+=a.concepts.length; });
+  MN.follows.forEach(function(f){ ss+=(f.sessions||[]).length; });
+  MN.logtopics.forEach(function(t){ ee+=t.entries.length; });
+  col.innerHTML = "奥付　題字の「書き足し "+writeCount()+" 回」の内訳 —— 記事 <b>"+nk+"</b> 本、章 <b>"+cc+"</b>、観測 <b>"+ss+"</b> 回、記録 <b>"+ee+"</b> 件。"
+    + "ほかに自分で編んだ索引が <b>"+MN.mocs.length+"</b> 綴。<br>初出 "+FOUNDED+"　発行 muninn 編輯部（書くのは端末、読むのは本紙）";
+  s.appendChild(col);
+}
+
+function weekCount(){
+  var lim = new Date(NOW.getTime()-6*86400000), l=ymd(lim);
+  return reviewLog.filter(function(r){ return r.date>=l; }).length;
+}
+
+/* 操作卓：面ごとの主操作を必ず下端に置く（＝親指ゾーン）。
+   紙面（上）は読むだけ、帯（下）は操作だけ、という上下分離を守るための装置 */
+var barFor=[null,null,null,null];
+function deckBar(children){ barFor[0]=children||null; syncBar(); }        // 一面用（互換）
+function setBar(sheetIndex, children){ barFor[sheetIndex]=children||null; syncBar(); }
+function syncBar(){
+  var bar=$("#deck-bar"), spec=barFor[cur];
+  bar.innerHTML="";
+  if(!spec || !spec.length){ bar.classList.remove("on"); $("#device").classList.remove("barred"); return; }
+  bar.classList.add("on"); $("#device").classList.add("barred");
+  spec.forEach(function(mk){ bar.appendChild(mk()); });
+}
+function dbtn(label, cls, fn){ return function(){ var b=el("button","db "+(cls||""), label); b.onclick=fn; return b; }; }
+
+function danQuiz(){
+  var dan=el("div","dan");
+  dan.appendChild(el("div","rail red","今日の一問"));
+  var b=el("div","dan-body"); dan.appendChild(b);
+
+  var dk = currentDeck();
+  var i  = quizState.i||0;
+
+  if(i>=dk.length){
+    var done=el("div","done-note");
+    var w=weekCount();
+    done.innerHTML = "本日分、<b>刷了</b>。<br><span style='font-size:12.5px;color:var(--ink-2)'>この7日で "+w+" 本を読み返した。</span>";
+    b.appendChild(done);
+    deckBar([ dbtn("もう一問 組ませる","", function(){
+      quizState.extra=(quizState.extra||0)+1; LS.set("quiz-"+TODAY,quizState); renderToday(); }) ]);
+    return dan;
+  }
+
+  var n = dk[i];
+  var card=el("div","card"); card.id="qcard";
+  var inner=el("div","card-inner");
+
+  var front=el("div","face front");
+  front.appendChild(el("span","q-mark","問"));
+  front.appendChild(el("div","q-text", n.recall));
+  inner.appendChild(front);
+
+  var back=el("div","face back");
+  back.appendChild(el("h3","a-title", n.title));
+  var ab=el("div","a-body"); ab.innerHTML = inline(tidyMd(n.ex).split("\n").filter(function(x){return x.trim();}).slice(0,5).join("<br>"));
+  back.appendChild(ab);
+  inner.appendChild(back);
+
+  card.appendChild(inner);
+  b.appendChild(card);
+
+  var pr=el("div","progress");
+  var pips=el("div","pips");
+  dk.forEach(function(_,k){ var p=el("span","pip"+(k<i?" on":k===i?" now":"")); pips.appendChild(p); });
+  pr.appendChild(pips);
+  pr.appendChild(el("span",null,"本日の組み付け "+(i+1)+" / "+dk.length));
+  b.appendChild(pr);
+
+  /* 操作はすべて下端の帯（＝親指ゾーン）に置く */
+  function toJudge(){
+    card.classList.add("flipped");
+    var h=front.offsetHeight;
+    back.style.position="relative"; back.style.inset="auto";
+    front.style.position="absolute"; front.style.inset="0";
+    inner.style.minHeight=Math.max(h, back.offsetHeight)+"px";
+    deckBar([
+      dbtn("あやしい","red",function(){ judge(n,false); }),
+      dbtn("わかった","solid",function(){ judge(n,true); }),
+      dbtn("全文","slim",function(){ openReader("note",n.slug); })
+    ]);
+  }
+  deckBar([ dbtn("め く る","solid",toJudge) ]);
+  return dan;
+}
+
+var lastJudge=null;
+function judge(n, ok){
+  reviewLog.push({slug:n.slug,date:TODAY,ok:ok});
+  lastJudge={slug:n.slug,i:quizState.i};
+  quizState.i=(quizState.i||0)+1;
+  LS.set("log",reviewLog); LS.set("quiz-"+TODAY,quizState);
+  renderToday();
+  showUndo();
+}
+/* 判定は取り消せる。時間で消さず、次の判定／面をめくる／記事を開くまで出したままにする
+   （不可逆な1操作で学習履歴を汚さない） */
+function showUndo(){
+  var u=$("#undo"); u.innerHTML="";
+  var b=el("button",null,"◀ 直前の判定を取り消す");
+  b.onclick=function(){
+    if(!lastJudge) return;
+    reviewLog.pop(); quizState.i=lastJudge.i; lastJudge=null;
+    LS.set("log",reviewLog); LS.set("quiz-"+TODAY,quizState);
+    u.innerHTML=""; renderToday();
+  };
+  u.appendChild(b);
+}
+function hideUndo(){ $("#undo").innerHTML=""; lastJudge=null; }
+
+function danReads(){
+  var dan=el("div","dan");
+  dan.appendChild(el("div","rail","拾い読み"));
+  var b=el("div","dan-body"); dan.appendChild(b);
+  var pool=todayReads();
+  var lead=pool[0], mids=pool.slice(1,3), mins=pool.slice(3,9);
+
+  var L=el("button","a-lead"); L.dataset.go="note:"+lead.slug;
+  var h=el("h3",null,lead.title); L.appendChild(h);
+  var p=el("p",null,excerptLine(lead.ex,120));
+  L.appendChild(p);
+  var tg=el("div"); tg.style.marginTop="6px";
+  (lead.tags||[]).forEach(function(t){ tg.appendChild(el("span","tagchip",tagJa(t))); });
+  L.appendChild(tg);
+  b.appendChild(L);
+
+  mids.forEach(function(n){
+    var M=el("button","a-mid"); M.dataset.go="note:"+n.slug;
+    M.appendChild(el("h4",null,n.title));
+    M.appendChild(el("p",null,excerptLine(n.ex,64)));
+    b.appendChild(M);
+  });
+
+  var min=el("div","a-min");
+  mins.forEach(function(n,k){
+    if(k) min.appendChild(el("span","sep","／"));
+    var s=el("button",null,"・"+(n.title.length>22?n.title.slice(0,22)+"…":n.title));
+    s.dataset.go="note:"+n.slug; min.appendChild(s);
+  });
+  b.appendChild(min);
+  return dan;
+}
+
+function danObs(){
+  var dan=el("div","dan");
+  dan.appendChild(el("div","rail","観測"));
+  var b=el("div","dan-body"); dan.appendChild(b);
+  MN.follows.forEach(function(f){
+    if(f.series && f.series.length){
+      var head=el("button","a-mid"); head.style.borderTop="none"; head.style.paddingTop="0";
+      head.dataset.go="follow:"+f.name;
+      head.appendChild(el("h4",null,title2(f.title)));
+      b.appendChild(head);
+      var shown=f.series.slice(0,4);
+      shown.forEach(function(sr){
+        var line=el("div","obs-line");
+        line.appendChild(el("span","k",sr.key));
+        var sp=spark(sr.points, sr.goal);
+        line.appendChild(sp.svg);
+        var last=sr.points[sr.points.length-1], prev=sr.points[sr.points.length-2];
+        var v=el("span","v", String(last.value));
+        if(sr.goal && prev){
+          var rising=last.value>prev.value;
+          var good=(sr.goal==="up")?rising:!rising;
+          v.className="v "+(good?"up":"down");
+          v.textContent = last.value+" "+(rising?"▲":"▼");
+        }else{
+          v.className="v neutral";
+          v.textContent = last.value+" －";
+        }
+        line.appendChild(v);
+        b.appendChild(line);
+      });
+      if(shown.some(function(sr){ return !sr.goal; }))
+        b.appendChild(el("div","obs-note","※「－」は良し悪しを宣言していない指標。上下を手柄とも失点とも読まない。"));
+    }else{
+      var hd=el("button","a-mid"); hd.dataset.go="follow:"+f.name;
+      hd.appendChild(el("h4",null,title2(f.title)));
+      hd.appendChild(el("p",null,(f.snapshot&&f.snapshot[0])||""));
+      b.appendChild(hd);
+    }
+  });
+  return dan;
+}
+
+/* ==========================================================================
+   棚（在庫を俯瞰する）
+   ========================================================================== */
+var themeOpen=null;
+function tagCounts(){
+  var c={}; MN.notes.forEach(function(n){ (n.tags||[]).forEach(function(t){ c[t]=(c[t]||0)+1; }); });
+  return Object.keys(c).map(function(k){ return {tag:k,n:c[k]}; })
+    .sort(function(a,b){ return b.n-a.n; });
+}
+function renderShelf(){
+  var s=$("#sheet-shelf"); s.innerHTML="";
+  if(themeOpen){ return renderTheme(s,themeOpen); }
+  setBar(1,null);
+
+  var hd=el("div","sheet-head");
+  hd.appendChild(el("div","rule-double"));
+  var r=el("div","sh-row");
+  r.appendChild(el("div","sh-title misreg","棚"));
+  var sub=el("div","sh-sub"); sub.innerHTML="在庫は均していない<br>大きい活字ほど厚い棚";
+  r.appendChild(sub); hd.appendChild(r);
+  hd.appendChild(el("div","rule-1"));
+  s.appendChild(hd);
+
+  /* 級数で物量を出す（均一グリッドを使わない） */
+  var dan=el("div","dan");
+  dan.appendChild(el("div","rail","棚おろし"));
+  var b=el("div","dan-body"); dan.appendChild(b);
+  var tc=tagCounts(), mx=tc[0].n;
+  var st=el("div","stock");
+  tc.forEach(function(t){
+    var sz = 12 + 30*Math.pow(t.n/mx,0.62);
+    var btn=el("button"); btn.style.fontSize=sz.toFixed(1)+"px";
+    btn.appendChild(document.createTextNode(tagJa(t.tag)));
+    var sup=el("sup",null,String(t.n)); btn.appendChild(sup);
+    if(sz>26) btn.className="misreg";
+    btn.onclick=function(){ themeOpen=t.tag; renderShelf(); $("#sheet-shelf").scrollTop=0; };
+    st.appendChild(btn);
+  });
+  b.appendChild(st);
+  var note=el("div","obs-note","ひとつの棚が全体の半分近くを占めている。均さずにそのまま組んでいる。");
+  b.appendChild(note);
+  s.appendChild(dan);
+
+  /* 連載 */
+  MN.atlases.forEach(function(a){
+    var d=el("div","dan"); d.appendChild(el("div","rail","連載"));
+    var bb=el("div","dan-body"); d.appendChild(bb);
+    var t=el("button","a-lead"); t.dataset.go="atlas:"+a.slug;
+    t.appendChild(el("h3",null,title2(a.title)));
+    t.appendChild(el("p",null,deJargon(excerptLine(a.ex,140)).slice(0,90)));
+    bb.appendChild(t);
+    a.routes.forEach(function(rt,ri){
+      var kk=el("div","dan-kicker","順路 "+(ri+1)+"　"+rt.label);
+      kk.style.marginTop="10px"; bb.appendChild(kk);
+      var list=el("div","route-list");
+      rt.order.slice(0,12).forEach(function(cs,k){
+        var c=conceptBy[cs]; if(!c) return;
+        var it=el("button","route-item"); it.dataset.go="concept:"+cs;
+        it.appendChild(el("div","route-no",("０１２３４５６７８９".charAt(k+1)||String(k+1))));
+        var tt=el("div","route-t");
+        tt.appendChild(document.createTextNode(title2(c.title)));
+        if(c.status==="stub"){ var sb=el("span","stub","未執筆"); sb.style.marginLeft="6px"; tt.appendChild(sb); }
+        var sm=el("small",null,c.gist||""); tt.appendChild(sm);
+        it.appendChild(tt);
+        list.appendChild(it);
+      });
+      bb.appendChild(list);
+    });
+    s.appendChild(d);
+  });
+
+  /* 定点 */
+  var d2=el("div","dan"); d2.appendChild(el("div","rail","観測欄"));
+  var b2=el("div","dan-body"); d2.appendChild(b2);
+  MN.follows.forEach(function(f){
+    var it=el("button","a-mid"); it.dataset.go="follow:"+f.name;
+    it.appendChild(el("h4",null,title2(f.title)));
+    var meta=(f.sessions&&f.sessions.length? f.sessions.length+"回の観測・最新 "+f.sessions[0].date : "観測はこれから");
+    it.appendChild(el("p",null,meta+"　"+((f.snapshot&&f.snapshot[0])||"")));
+    b2.appendChild(it);
+  });
+  s.appendChild(d2);
+
+  /* 記録帳（在庫が薄いので小さい扱い＝それも編集判断） */
+  var d3=el("div","dan"); d3.appendChild(el("div","rail","記録帳"));
+  var b3=el("div","dan-body"); d3.appendChild(b3);
+  MN.logtopics.forEach(function(t){
+    var hd=el("button","a-mid"); hd.dataset.go="topic:"+t.slug;
+    hd.style.borderTop="none"; hd.style.paddingTop="0";
+    hd.appendChild(el("h4",null,t.title));
+    hd.appendChild(el("p",null,t.entries.length+" 件・記録項目 "+t.fields.length));
+    b3.appendChild(hd);
+    var line=el("div","a-min");
+    t.entries.forEach(function(e){
+      var s2=el("button",null,"・"+e.title);
+      s2.dataset.go="entry:"+e.slug; line.appendChild(s2);
+    });
+    b3.appendChild(line);
+    var ask=el("button","btn sm","この帳面を増やす依頼を書く");
+    ask.style.marginTop="8px";
+    ask.onclick=function(){ openTicket("「"+t.title+"」に新しい記録を1件足したい。\n（写真とひと言を渡すので、いつもの記録項目に整形して）"); };
+    b3.appendChild(ask);
+  });
+  s.appendChild(d3);
+
+  /* 束（手書きの索引）— 自分で編んだ綴じ */
+  var d4=el("div","dan"); d4.appendChild(el("div","rail","綴"));
+  var b4=el("div","dan-body"); d4.appendChild(b4);
+  b4.appendChild(el("div","dan-kicker","自分で編んだ索引"));
+  var mm=el("div","a-min"); mm.style.borderTop="none"; mm.style.paddingTop="0"; mm.style.marginTop="0";
+  MN.mocs.slice().sort(function(a,b){ return a.slug==="home"?-1:b.slug==="home"?1:0; }).forEach(function(m){
+    var s2=el("button",null,"・"+mocTitle(m));
+    s2.dataset.go="moc:"+m.slug; mm.appendChild(s2);
+  });
+  b4.appendChild(mm);
+  s.appendChild(d4);
+}
+
+function renderTheme(s, tag){
+  var hd=el("div","sheet-head");
+  hd.appendChild(el("div","rule-double"));
+  var r=el("div","sh-row");
+  r.appendChild(el("div","sh-title misreg",tagJa(tag)));
+  var sub=el("div","sh-sub");
+  var list=MN.notes.filter(function(n){ return (n.tags||[]).indexOf(tag)>=0; })
+                   .sort(function(a,b){ return (b.updated||"")<(a.updated||"")?-1:1; });
+  sub.innerHTML=list.length+" 本<br>新しい順に大きく組む";
+  r.appendChild(sub); hd.appendChild(r);
+  hd.appendChild(el("div","rule-1"));
+  s.appendChild(hd);
+
+  setBar(1,[
+    dbtn("◀ 棚へもどる","",function(){ themeOpen=null; renderShelf(); s.scrollTop=0; }),
+    dbtn("この棚を増やす","slim2",function(){
+      openTicket("「"+tagJa(tag)+"」の棚をもう一段深めたい。\n・いま抜けている論点を洗い出して、記事にしてほしい"); })
+  ]);
+
+  var dan=el("div","dan"); dan.appendChild(el("div","rail","この棚"));
+  var b=el("div","dan-body"); dan.appendChild(b);
+
+  list.slice(0,2).forEach(function(n){
+    var L=el("button","a-lead"); L.dataset.go="note:"+n.slug; L.style.marginBottom="12px";
+    L.appendChild(el("h3",null,n.title));
+    L.appendChild(el("p",null,excerptLine(n.ex,100)));
+    b.appendChild(L);
+  });
+  list.slice(2,7).forEach(function(n){
+    var M=el("button","a-mid"); M.dataset.go="note:"+n.slug;
+    M.appendChild(el("h4",null,n.title));
+    M.appendChild(el("p",null,excerptLine(n.ex,58)));
+    b.appendChild(M);
+  });
+  if(list.length>7){
+    var min=el("div","a-min");
+    list.slice(7).forEach(function(n,k){
+      if(k) min.appendChild(el("span","sep","／"));
+      var s2=el("button",null,"・"+(n.title.length>22?n.title.slice(0,22)+"…":n.title));
+      s2.dataset.go="note:"+n.slug; min.appendChild(s2);
+    });
+    b.appendChild(min);
+  }
+  s.appendChild(dan);
+
+  /* 束（手書きの索引）も同じ棚に置く */
+  var rel=MN.mocs.filter(function(m){
+    return (m.sections||[]).some(function(sec){ return (sec.items||[]).some(function(it){
+      var rr=resolve(it.target); return rr && rr.type==="note" && (noteBy[rr.id].tags||[]).indexOf(tag)>=0; }); });
+  });
+  if(rel.length){
+    var d=el("div","dan"); d.appendChild(el("div","rail","綴じ込み"));
+    var bb=el("div","dan-body"); d.appendChild(bb);
+    rel.forEach(function(m){
+      (m.sections||[]).forEach(function(sec){
+        var k=el("div","dan-kicker",deJargon(sec.title)); bb.appendChild(k);
+        var mm=el("div","a-min"); mm.style.borderTop="none"; mm.style.paddingTop="0"; mm.style.marginTop="0";
+        sec.items.forEach(function(it,ix){
+          var rr=resolve(it.target); if(!rr) return;
+          if(ix) mm.appendChild(el("span","sep","／"));
+          var s2=el("button",null,"・"+(rr.title.length>20?rr.title.slice(0,20)+"…":rr.title));
+          s2.dataset.go=rr.type+":"+rr.id; mm.appendChild(s2);
+        });
+        bb.appendChild(mm);
+      });
+    });
+    s.appendChild(d);
+  }
+}
+
+/* ==========================================================================
+   索引（探す）
+   ========================================================================== */
+function plain(s){ return tidyMd(s).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,"$2$1").replace(/[#*`|>]/g," ").replace(/\s+/g," "); }
+var CORPUS = [];
+MN.notes.forEach(function(n){ CORPUS.push({type:"note",id:n.slug,title:title2(n.title),
+  text:(n.title+" "+(n.recall||"")+" "+plain(n.ex)+" "+(n.tags||[]).map(tagJa).join(" ")),
+  mark:(n.kind==="knowledge"?"記事":"手記")}); });
+MN.atlases.forEach(function(a){ a.concepts.forEach(function(c){
+  CORPUS.push({type:"concept",id:c.slug,title:title2(c.title),text:(c.title+" "+(c.gist||"")+" "+plain(c.ex)),mark:"章"}); }); });
+MN.follows.forEach(function(f){
+  CORPUS.push({type:"follow",id:f.name,title:title2(f.title),text:(f.title+" "+(f.goal||"")+" "+(f.snapshot||[]).join(" ")),mark:"定点"});
+  (f.entities||[]).forEach(function(e){
+    CORPUS.push({type:"entity",id:e.slug,title:title2(e.title),
+      text:(e.title+" "+(e.role||"")+" "+(e.club||"")+" "+(e.strengths||[]).join(" ")+" "+(e.changelog||[]).map(function(c){return c.note;}).join(" ")),mark:"人"});
+  });
+});
+MN.logtopics.forEach(function(t){ t.entries.forEach(function(e){
+  CORPUS.push({type:"entry",id:e.slug,title:title2(e.title),text:(e.title+" "+plain(e.ex)+" "+Object.keys(e.fields).map(function(k){return e.fields[k];}).join(" ")),mark:"帳"}); }); });
+MN.mocs.forEach(function(m){ CORPUS.push({type:"moc",id:m.slug,title:mocTitle(m),
+  text:(mocTitle(m)+" "+(m.sections||[]).map(function(s){return s.title+" "+s.items.map(function(i){return i.reason||"";}).join(" ");}).join(" ")),mark:"束"}); });
+
+function search(q){
+  q=q.trim(); if(!q) return [];
+  var lq=q.toLowerCase();
+  var out=[];
+  CORPUS.forEach(function(c){
+    var t=c.title.toLowerCase(), x=c.text.toLowerCase();
+    var sc=0;
+    if(t.indexOf(lq)>=0) sc+=100;
+    var i=x.indexOf(lq); if(i>=0) sc+=30;
+    if(!sc) return;
+    out.push({c:c,sc:sc,pos:i});
+  });
+  out.sort(function(a,b){ return b.sc-a.sc; });
+  return out.slice(0,24);
+}
+function renderIndex(q){
+  var box=$("#idx-scroll"); box.innerHTML="";
+  var hd=el("div","sheet-head");
+  hd.appendChild(el("div","rule-double"));
+  var r=el("div","sh-row");
+  r.appendChild(el("div","sh-title misreg","総索引"));
+  var sub=el("div","sh-sub"); sub.innerHTML="打つそばから絞る<br>無ければ依頼にする";
+  r.appendChild(sub); hd.appendChild(r);
+  hd.appendChild(el("div","rule-1"));
+  box.appendChild(hd);
+
+  /* 索引の面は絶対に白紙にしない。引き当てが無い時も「本紙の目の子」を出す */
+  function browseDan(railLabel){
+    var dan=el("div","dan"); dan.appendChild(el("div","rail",railLabel));
+    var b=el("div","dan-body"); dan.appendChild(b);
+    b.appendChild(el("div","dan-kicker","よく引く見出し"));
+    var tc=tagCounts().slice(0,10);
+    var min=el("div","a-min"); min.style.borderTop="none"; min.style.paddingTop="0"; min.style.marginTop="0";
+    tc.forEach(function(t,k){
+      if(k) min.appendChild(el("span","sep","／"));
+      var s2=el("button",null,tagJa(t.tag));
+      s2.onclick=function(){ $("#q").value=tagJa(t.tag); $("#q-clear").classList.add("on"); renderIndex(tagJa(t.tag)); };
+      min.appendChild(s2);
+    });
+    b.appendChild(min);
+    var recent=MN.notes.slice().sort(function(a,b){ return (b.updated||"")<(a.updated||"")?-1:1; }).slice(0,6);
+    b.appendChild(el("div","dan-kicker","直近に組んだもの"));
+    recent.forEach(function(n){
+      var M=el("button","a-mid"); M.dataset.go="note:"+n.slug;
+      M.appendChild(el("h4",null,n.title));
+      M.appendChild(el("p",null,excerptLine(n.ex,52)));
+      b.appendChild(M);
+    });
+    return dan;
+  }
+
+  if(!q || !q.trim()){
+    setBar(2,null);
+    box.appendChild(browseDan("目の子"));
+    return;
+  }
+
+  var res=search(q);
+  var dan2=el("div","dan"); dan2.appendChild(el("div","rail","引き当て"));
+  var b2=el("div","dan-body"); dan2.appendChild(b2);
+  if(!res.length){
+    var msg=el("div","done-note");
+    msg.innerHTML="「"+esc(q)+"」は本紙にまだ組まれていない。<br><span style='font-size:12.5px;color:var(--ink-2)'>無かったことを、次の一本の入口にする。</span>";
+    b2.appendChild(msg);
+    setBar(2,[ dbtn("この語で依頼を書く","solid",function(){
+      openTicket("「"+q+"」について調べて、記事にして保存しておいて。\n・既存の記事と関係があれば、なぜ関係するかを一言添えてリンクして"); }) ]);
+    box.appendChild(dan2);
+    box.appendChild(browseDan("かわりに"));
+    return;
+  }else{
+    setBar(2,null);
+    b2.appendChild(el("div","dan-kicker", res.length+" 件を引き当てた"));
+    res.forEach(function(o){
+      var h=el("button","hit"); h.dataset.go=o.c.type+":"+o.c.id;
+      var t=el("h4");
+      t.innerHTML='<span class="kind-mark">'+o.c.mark+'</span>'+hi(o.c.title,q);
+      h.appendChild(t);
+      var ctx = o.pos>=0 ? o.c.text.slice(Math.max(0,o.pos-24), o.pos+62) : o.c.text.slice(0,80);
+      var p=el("p"); p.innerHTML=hi(ctx.replace(/[#*`\n|]/g," "),q); h.appendChild(p);
+      b2.appendChild(h);
+    });
+    var mk2=el("button","btn sm","この語でさらに調べる依頼を書く"); mk2.style.marginTop="12px";
+    mk2.onclick=function(){ openTicket("「"+q+"」について、いまの記事に足りていない点を調べて追記して。"); };
+    b2.appendChild(mk2);
+  }
+  box.appendChild(dan2);
+}
+function hi(s,q){
+  var e=esc(s), lq=q.toLowerCase(), le=e.toLowerCase(), i=le.indexOf(lq);
+  if(i<0) return e;
+  return e.slice(0,i)+"<mark>"+e.slice(i,i+q.length)+"</mark>"+e.slice(i+q.length);
+}
+
+/* ==========================================================================
+   伝票（依頼を溜める）
+   ========================================================================== */
+function renderDesk(){
+  var s=$("#sheet-desk"); s.innerHTML="";
+  var hd=el("div","sheet-head");
+  hd.appendChild(el("div","rule-double"));
+  var r=el("div","sh-row");
+  r.appendChild(el("div","sh-title misreg","伝票"));
+  var sub=el("div","sh-sub"); sub.innerHTML="本紙は読む面<br>書くのは端末の側";
+  r.appendChild(sub); hd.appendChild(r);
+  hd.appendChild(el("div","rule-1"));
+  s.appendChild(hd);
+
+  var dan=el("div","dan"); dan.appendChild(el("div","rail","入稿伝票"));
+  var b=el("div","dan-body"); dan.appendChild(b);
+
+  if(!tickets.length){
+    var e0=el("div","slip-empty");
+    e0.innerHTML="伝票はまだ白紙。<br>読んでいて足りないと思ったところで［依頼を書く］を押すと、ここに綴じられる。";
+    b.appendChild(e0);
+    setBar(3,[ dbtn("いま1枚 書く","solid",function(){ openTicket(""); }) ]);
+  }else{
+    tickets.forEach(function(t,i){
+      var card=el("div","ticket");
+      card.appendChild(el("div","no","第 "+(i+1)+" 葉　"+t.at));
+      card.appendChild(el("p",null,t.text));
+      var del=el("button","del","×");
+      del.onclick=function(){ tickets.splice(i,1); LS.set("tickets",tickets); renderDesk(); };
+      card.appendChild(del);
+      b.appendChild(card);
+    });
+    var note=el("div","obs-note","写したものを端末の Claude にそのまま渡す。本紙からは書き込まない。");
+    b.appendChild(note);
+    setBar(3,[
+      dbtn("まとめて写す","solid",function(){ copyAll($("#deck-bar .db.solid")); }),
+      dbtn("足す","slim2",function(){ openTicket(""); })
+    ]);
+  }
+  s.appendChild(dan);
+
+  /* 刷了録：増えるカウンタだけを出す（未消化の借金は決して出さない） */
+  var d0=el("div","dan"); d0.appendChild(el("div","rail","刷了録"));
+  var b0=el("div","dan-body"); d0.appendChild(b0);
+  var rec=el("div","done-note");
+  rec.innerHTML = "この7日で <b>"+weekCount()+"</b> 本、通算 <b>"+reviewLog.length+"</b> 本を読み返した。";
+  b0.appendChild(rec);
+  b0.appendChild(el("div","obs-note","本紙は「あと何本残っているか」を数えない。読み返した分だけを数える。"));
+  s.appendChild(d0);
+
+  /* 台割：この面の下段に「本紙の作り」を出して行き止まりにしない */
+  var d2=el("div","dan"); d2.appendChild(el("div","rail","台割"));
+  var b2=el("div","dan-body"); d2.appendChild(b2);
+  var nav=[["一面","今日の一問と拾い読み",0],["棚","在庫を厚み順に組んだ面",1],["索引","打つそばから絞り込む面",2]];
+  nav.forEach(function(n){
+    var it=el("button","a-mid"); it.appendChild(el("h4",null,n[0])); it.appendChild(el("p",null,n[1]));
+    it.onclick=function(){ go(n[2]); };
+    b2.appendChild(it);
+  });
+  var ink=el("button","btn sm", inkMode()==="night" ? "朝刊の刷りに戻す" : "夜刊の刷りにする");
+  ink.style.marginTop="12px";
+  ink.onclick=function(){ setInk(inkMode()==="night" ? "day" : "night"); renderDesk(); };
+  b2.appendChild(ink);
+  s.appendChild(d2);
+}
+function copyAll(btn){
+  var txt = tickets.map(function(t,i){ return "["+(i+1)+"] "+t.text; }).join("\n\n");
+  var done=function(){ var o=btn.textContent; btn.textContent="写した"; setTimeout(function(){ btn.textContent=o; },1400); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done, function(){ fallbackCopy(txt,done); });
+  } else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){
+  var ta=document.createElement("textarea");
+  ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+/* ---------- 依頼モーダル ---------- */
+function openTicket(prefill){
+  $("#ticket-text").value = prefill||"";
+  $("#modal").hidden=false;
+  setTimeout(function(){ $("#ticket-text").focus(); },30);
+}
+$("#modal-cancel").onclick=function(){ $("#modal").hidden=true; };
+$("#modal-save").onclick=function(){
+  var v=$("#ticket-text").value.trim();
+  if(v){ tickets.push({text:v,at:TODAY}); LS.set("tickets",tickets); renderDesk(); }
+  $("#modal").hidden=true;
+  go(3);
+};
+$("#ticket-text").addEventListener("keydown",function(ev){
+  if(ev.isComposing || ev.keyCode===229) return;   // IME変換確定を送信にしない
+});
+
+/* ==========================================================================
+   別刷り（読む軸）
+   ========================================================================== */
+var rdStack=[];
+function openReader(type,id,push){
+  hideUndo();
+  if(push!==false && rdStack.length) rdStack.push(rdStack[rdStack.length-1]);
+  if(!rdStack.length) rdStack=[{type:type,id:id}];
+  else rdStack[rdStack.length-1]={type:type,id:id};
+  drawReader();
+  $("#reader").classList.add("open");
+  $("#knob").classList.add("reader");
+  $("#ka-back").hidden = rdStack.length<2;
+}
+function pushReader(type,id){
+  rdStack.push({type:type,id:id});
+  drawReader(); $("#ka-back").hidden = rdStack.length<2;
+  $("#rd-scroll").scrollTop=0;
+}
+function popReader(){
+  rdStack.pop();
+  if(!rdStack.length){ closeReader(); return; }
+  drawReader(); $("#ka-back").hidden = rdStack.length<2; $("#rd-scroll").scrollTop=0;
+}
+function closeReader(){
+  $("#reader").classList.remove("open");
+  $("#knob").classList.remove("reader");
+  rdStack=[];
+}
+$("#ka-close").onclick=closeReader;
+$("#ka-back").onclick=popReader;
+$("#ka-ticket").onclick=function(){
+  var cur=rdStack[rdStack.length-1]; if(!cur) return openTicket("");
+  var r=resolve(cur.id) || {title:cur.id};
+  openTicket("「"+(r.title||cur.id)+"」について、いま書いてあることに足りない点を調べて追記して。\n・関連する記事があれば、なぜ関係するかを一言添えてリンクして");
+};
+
+function drawReader(){
+  var cur=rdStack[rdStack.length-1];
+  var box=$("#rd-scroll"); box.innerHTML="";
+  if(!cur) return;
+  if(cur.type==="note") drawNote(box, noteBy[cur.id]);
+  else if(cur.type==="concept") drawConcept(box, conceptBy[cur.id]);
+  else if(cur.type==="follow") drawFollow(box, followBy[cur.id]);
+  else if(cur.type==="entity") drawEntity(box, entityBy[cur.id]);
+  else if(cur.type==="entry") drawEntry(box, entryBy[cur.id]);
+  else if(cur.type==="atlas") drawAtlas(box, atlasBy[cur.id]);
+  else if(cur.type==="topic") drawTopic(box, topicBy[cur.id]);
+  else if(cur.type==="moc") drawMoc(box, mocBy[cur.id]);
+}
+
+/* このモックが持つ本文は正本の冒頭抄録。切れているなら黙らず断る */
+function abstractMark(box, ex){
+  if(String(ex||"").length < 230) return;
+  box.appendChild(el("div","abstract-end","—— 抄録ここまで（続きは正本にある）"));
+}
+function kicker(box, label, right){
+  var k=el("div","rd-kicker");
+  k.appendChild(el("span",null,label));
+  if(right){ var r=el("span",null,right); r.style.marginLeft="auto"; k.appendChild(r); }
+  box.appendChild(k);
+}
+function inboundBlock(box, type, id){
+  var list=backOf(type,id);
+  var wrap=el("div","inbound");
+  wrap.appendChild(el("div","inbound-h","ここへ来る道"));
+  if(!list.length){
+    var e0=el("div","slip-empty");
+    e0.innerHTML="この記事へ通じる道は、まだ引かれていない。";
+    wrap.appendChild(e0);
+    var mk=el("button","btn sm","繋ぎ先を探す依頼を書く"); mk.style.marginTop="10px";
+    var r=resolve(id)||{}; var ttl=(r.title||id);
+    mk.onclick=function(){ openTicket("「"+ttl+"」と関係のある既存の記事を洗い出して、なぜ関係するかを一言添えて相互リンクして。"); };
+    wrap.appendChild(mk);
+  }else{
+    list.slice(0,10).forEach(function(rec){
+      var b=el("button","inb");
+      b.dataset.go=rec.type+":"+rec.id;
+      b.appendChild(el("q",null, deJargonReason(rec.reason) || "本文から参照している"));
+      b.appendChild(el("span","src", title2(rec.title)));
+      wrap.appendChild(b);
+    });
+  }
+  box.appendChild(wrap);
+}
+
+function drawNote(box,n){
+  if(!n) return;
+  kicker(box, n.kind==="knowledge"?"記事":"手記", (n.tags||[]).map(tagJa).join("・"));
+  box.appendChild(el("h1","rd-title misreg", title2(n.title)));
+  var meta=el("div","rd-meta","組版 "+n.created+"　改組 "+(n.updated||n.created));
+  box.appendChild(meta);
+  if(n.recall){
+    var q=el("div","sidenote"); q.style.background="transparent"; q.style.borderTop="2.5px solid var(--rule)";
+    q.appendChild(el("div","sn-no","この記事の問い"));
+    var rr=el("div","sn-r", n.recall); rr.style.fontFamily="var(--mincho)"; rr.style.fontSize="13px";
+    q.appendChild(rr);
+    box.appendChild(q);
+  }
+  var body=el("div","rd-body");
+  var sns=(n.linkrefs||[]).filter(function(l){ return !!resolve(l.t); });
+  sns.forEach(function(s){ var r=resolve(s.t); s._title = r?r.title:""; });
+  renderBody(body, n.ex, sns);
+  box.appendChild(body);
+  abstractMark(box, n.ex);
+  inboundBlock(box,"note",n.slug);
+}
+
+function drawConcept(box,c){
+  if(!c) return;
+  kicker(box, "連載　"+(c._atlas?title2(c._atlas.title):""), c.status==="stub"?"未執筆":"");
+  box.appendChild(el("h1","rd-title misreg", title2(c.title)));
+  box.appendChild(el("div","rd-meta","組版 "+c.created+"　改組 "+(c.updated||c.created)));
+  if(c.gist){
+    var g=el("div","sidenote"); g.style.background="transparent";
+    g.appendChild(el("div","sn-no","要旨"));
+    var rr=el("div","sn-r", c.gist); rr.style.fontFamily="var(--mincho)"; rr.style.fontSize="13px"; g.appendChild(rr);
+    box.appendChild(g);
+  }
+  var body=el("div","rd-body"); renderBody(body, c.ex, null); box.appendChild(body);
+  abstractMark(box, c.ex);
+
+  var eg=el("div","inbound");
+  eg.appendChild(el("div","inbound-h","この章の位置"));
+  var grid=el("div","edge-grid");
+  var labs={requires:"前提",contrasts:"対比",leadsTo:"発展",elaborates:"深掘り"};
+  ["requires","contrasts","leadsTo","elaborates"].forEach(function(k){
+    var arr=(c.edges[k]||[]).filter(function(t){ return !!resolve(t); });
+    if(!arr.length) return;
+    grid.appendChild(el("div","edge-k",labs[k]));
+    var v=el("div","edge-v");
+    arr.forEach(function(t,i){
+      var r=resolve(t);
+      if(i) v.appendChild(el("span","sep","、"));
+      var b=el("button",null,r.title); b.dataset.go=r.type+":"+r.id; v.appendChild(b);
+    });
+    grid.appendChild(v);
+  });
+  if((c.notes||[]).length){
+    grid.appendChild(el("div","edge-k","蒸留先"));
+    var v2=el("div","edge-v");
+    c.notes.forEach(function(ns,i){ var r=resolve(ns); if(!r) return;
+      if(i) v2.appendChild(el("span","sep","、"));
+      var b=el("button",null,r.title); b.dataset.go="note:"+r.id; v2.appendChild(b); });
+    grid.appendChild(v2);
+  }
+  eg.appendChild(grid);
+  box.appendChild(eg);
+  inboundBlock(box,"concept",c.slug);
+}
+
+function drawAtlas(box,a){
+  if(!a) return;
+  kicker(box,"連載","全 "+a.concepts.length+" 章");
+  box.appendChild(el("h1","rd-title misreg", title2(a.title)));
+  box.appendChild(el("div","rd-meta","順路 "+a.routes.length+" 本"));
+  /* この面の本文だけは仕組みそのものを説明しているので、語彙を組み替えてから流す */
+  var body=el("div","rd-body"); renderBody(body, deJargon(a.ex), null); box.appendChild(body);
+  a.routes.forEach(function(rt){
+    var h=el("h3"); h.textContent=rt.label; body.appendChild(h);
+    var p=el("p"); p.textContent=rt.desc; body.appendChild(p);
+    var list=el("div","route-list");
+    rt.order.slice(0,12).forEach(function(cs,k){
+      var c=conceptBy[cs]; if(!c) return;
+      var it=el("button","route-item"); it.dataset.go="concept:"+cs;
+      it.appendChild(el("div","route-no",String(k+1)));
+      var tt=el("div","route-t"); tt.appendChild(document.createTextNode(title2(c.title)));
+      if(c.status==="stub"){ var sb=el("span","stub","未執筆"); sb.style.marginLeft="6px"; tt.appendChild(sb); }
+      it.appendChild(tt); list.appendChild(it);
+    });
+    body.appendChild(list);
+  });
+  inboundBlock(box,"atlas",a.slug);
+}
+
+function drawTopic(box,t){
+  if(!t) return;
+  kicker(box,"記録帳", t.entries.length+" 件");
+  box.appendChild(el("h1","rd-title misreg", title2(t.title)));
+  box.appendChild(el("div","rd-meta","記録項目　"+t.fields.map(function(f){return f.label;}).join("・")));
+  var body=el("div","rd-body");
+  t.entries.forEach(function(e){
+    var b=el("button","a-mid"); b.dataset.go="entry:"+e.slug; b.style.borderTop="none";
+    b.appendChild(el("h4",null,e.title));
+    b.appendChild(el("p",null,e.created+"　"+excerptLine(e.ex,44)));
+    body.appendChild(b);
+  });
+  if(t.entries.length<3)
+    body.appendChild(el("p",null,"この帳面はまだ薄い。数が並んで初めて比べられるようになる。"));
+  box.appendChild(body);
+  inboundBlock(box,"topic",t.slug);
+}
+
+function drawFollow(box,f){
+  if(!f) return;
+  kicker(box,"定点", (f.sessions||[]).length+" 回の観測");
+  box.appendChild(el("h1","rd-title misreg", title2(f.title)));
+  box.appendChild(el("div","rd-meta", (f.followType==="goal"?"目標 ":"見どころ ")+(f.goal||"")));
+  var body=el("div","rd-body");
+  (f.snapshot||[]).forEach(function(s){ var p=el("p"); p.innerHTML=inline(s); body.appendChild(p); });
+  box.appendChild(body);
+
+  if(f.series && f.series.length){
+    var h=el("h3"); h.textContent="観測値"; body.appendChild(h);
+    f.series.forEach(function(sr){
+      var line=el("div","obs-line");
+      line.appendChild(el("span","k",sr.key));
+      line.appendChild(spark(sr.points,sr.goal).svg);
+      var last=sr.points[sr.points.length-1], prev=sr.points[sr.points.length-2];
+      var v=el("span","v");
+      if(sr.goal && prev){ var rising=last.value>prev.value, good=(sr.goal==="up")?rising:!rising;
+        v.className="v "+(good?"up":"down"); v.textContent=last.value+" "+(rising?"▲":"▼"); }
+      else { v.className="v neutral"; v.textContent=last.value+" －"; }
+      line.appendChild(v);
+      body.appendChild(line);
+    });
+    body.appendChild(el("div","obs-note","「－」の指標は良し悪しを宣言していない。上下を成果とも失点とも読まない。"));
+  }
+  if((f.focus||[]).length){
+    var h2=el("h3"); h2.textContent="重点"; body.appendChild(h2);
+    var ul=el("ul");
+    f.focus.forEach(function(x){ var li=el("li");
+      li.innerHTML=(x.priority?"<strong>"+esc(x.title)+"</strong>":esc(x.title))+"　<span style='font-size:12px;color:var(--ink-3)'>"+esc(x.note||"")+"</span>";
+      ul.appendChild(li); });
+    body.appendChild(ul);
+  }
+  if((f.entities||[]).length){
+    var h3=el("h3"); h3.textContent="顔ぶれ"; body.appendChild(h3);
+    var min=el("div","a-min");
+    f.entities.forEach(function(e,k){
+      if(k) min.appendChild(el("span","sep","／"));
+      var b=el("button",null,"・"+e.title.split("（")[0]); b.dataset.go="entity:"+e.slug; min.appendChild(b);
+    });
+    body.appendChild(min);
+  }
+  if((f.sessions||[]).length){
+    var h4=el("h3"); h4.textContent="観測の記録"; body.appendChild(h4);
+    f.sessions.slice(0,6).forEach(function(s){
+      var p=el("p");
+      p.innerHTML="<strong>"+esc(s.date)+"</strong>　"+esc(s.summary||"（所見なし）");
+      body.appendChild(p);
+    });
+  }
+  inboundBlock(box,"follow",f.name);
+}
+
+function drawEntity(box,e){
+  if(!e) return;
+  kicker(box,"定点　"+(e._follow?title2(e._follow.title):""), e.group||"");
+  box.appendChild(el("h1","rd-title misreg", title2(e.title)));
+  box.appendChild(el("div","rd-meta",(e.role||"")+"　"+(e.club||"")));
+  var body=el("div","rd-body");
+  if((e.strengths||[]).length){ var h=el("h3"); h.textContent="強み"; body.appendChild(h);
+    var ul=el("ul"); e.strengths.forEach(function(x){ ul.appendChild(el("li",null,x)); }); body.appendChild(ul); }
+  if((e.developing||[]).length){ var h2=el("h3"); h2.textContent="伸びしろ"; body.appendChild(h2);
+    var ul2=el("ul"); e.developing.forEach(function(x){ ul2.appendChild(el("li",null,x)); }); body.appendChild(ul2); }
+  if((e.changelog||[]).length){ var h3=el("h3"); h3.textContent="変遷"; body.appendChild(h3);
+    e.changelog.forEach(function(c){ var p=el("p"); p.innerHTML="<strong>"+esc(c.date)+"</strong>　"+esc(c.note); body.appendChild(p); }); }
+  box.appendChild(body);
+  if(e._follow){
+    var back=el("div","inbound");
+    back.appendChild(el("div","inbound-h","ここへ来る道"));
+    var b=el("button","inb"); b.dataset.go="follow:"+e._follow.name;
+    var q=el("q",null,"この定点の顔ぶれとして追っている"); b.appendChild(q);
+    b.appendChild(el("span","src", title2(e._follow.title)));
+    back.appendChild(b);
+    box.appendChild(back);
+  }
+}
+
+function drawEntry(box,e){
+  if(!e) return;
+  var t=e._topic;
+  kicker(box,"記録帳　"+t.title, e.created);
+  box.appendChild(el("h1","rd-title misreg", title2(e.title)));
+  var tb=el("table"); tb.style.width="100%"; tb.style.borderCollapse="collapse";
+  tb.style.fontFamily="var(--gothic)"; tb.style.fontSize="12px"; tb.style.margin="10px 0 14px";
+  t.fields.forEach(function(f){
+    var v=e.fields[f.key]; if(v==null||v==="") return;
+    var tr=el("tr");
+    var th=el("th",null,f.label); th.style.textAlign="left"; th.style.width="34%";
+    th.style.border="1px solid var(--rule-thin)"; th.style.padding="4px 7px"; th.style.color="var(--ink-3)";
+    var td=el("td"); td.style.border="1px solid var(--rule-thin)"; td.style.padding="4px 7px";
+    if(f.type==="rating") td.textContent="★".repeat(v)+"☆".repeat(Math.max(0,(f.max||5)-v));
+    else if(f.type==="bool") td.textContent=v?"はい":"いいえ";
+    else if(Array.isArray(v)) td.textContent=v.join("・");
+    else td.textContent=String(v)+(f.unit||"");
+    tr.appendChild(th); tr.appendChild(td); tb.appendChild(tr);
+  });
+  box.appendChild(tb);
+  var body=el("div","rd-body"); renderBody(body,e.ex,null); box.appendChild(body);
+  var wrap=el("div","inbound");
+  wrap.appendChild(el("div","inbound-h","ここへ来る道"));
+  var e0=el("div","slip-empty"); e0.innerHTML="この帳面はまだ1件。並べて比べるにはもう数件いる。";
+  wrap.appendChild(e0);
+  var mk=el("button","btn sm","記録を足す依頼を書く"); mk.style.marginTop="10px";
+  mk.onclick=function(){ openTicket("「"+t.title+"」に記録を足したい。写真とひと言を渡すので、いつもの項目に整形して。"); };
+  wrap.appendChild(mk);
+  box.appendChild(wrap);
+}
+
+function drawMoc(box,m){
+  if(!m) return;
+  kicker(box,"束", m.sections.length+" 綴");
+  box.appendChild(el("h1","rd-title misreg", mocTitle(m)));
+  var body=el("div","rd-body");
+  m.sections.forEach(function(sec){
+    var h=el("h3"); h.textContent=deJargon(sec.title); body.appendChild(h);
+    sec.items.forEach(function(it){
+      var r=resolve(it.target); if(!r) return;
+      var b=el("button","inb"); b.dataset.go=r.type+":"+r.id;
+      b.appendChild(el("q",null, deJargonReason(it.reason)||"この束に入れている"));
+      b.appendChild(el("span","src", r.title));
+      body.appendChild(b);
+    });
+  });
+  box.appendChild(body);
+  inboundBlock(box,"moc",m.slug);
+}
+
+/* ==========================================================================
+   めくり（面の横ページング）— 下端の帯だけが入力を取る
+   ========================================================================== */
+var SHEETS=["一面","棚","索引","伝票"];
+var cur=0;
+var track=$("#track"), knob=$("#knob");
+
+function buildKnob(){
+  var wrap=$("#knob-names"); wrap.innerHTML="";
+  var l=el("button","kn-edge","◀"); l.onclick=function(){ go(cur-1); }; wrap.appendChild(l);
+  SHEETS.forEach(function(nm,i){
+    var b=el("button","kn"+(i===cur?" on":""), nm);
+    b.dataset.sheet=i;
+    wrap.appendChild(b);
+  });
+  var r=el("button","kn-edge","▶"); r.onclick=function(){ go(cur+1); }; wrap.appendChild(r);
+}
+function setTrack(i,dx){
+  var base = -(i*100/SHEETS.length);
+  track.style.transform = dx ? "translateX(calc("+base+"% + "+dx+"px))" : "translateX("+base+"%)";
+}
+function go(i){
+  i=Math.max(0,Math.min(SHEETS.length-1,i));
+  if(i!==cur) hideUndo();
+  cur=i;
+  track.classList.add("anim");
+  setTrack(i,0);
+  buildKnob();
+  syncBar();
+}
+/* 帯の上のドラッグ＝めくる／名前のタップ＝直行
+   （速い経路と、目で見て辿れる経路を同じ帯に同居させる） */
+var dragging=false, sx=0, moved=0, startT=0, startTarget=null, justDragged=false;
+knob.addEventListener("pointerdown",function(ev){
+  if(knob.classList.contains("reader")) return;
+  if(ev.target.closest("#deck-bar")) return;   // 操作卓は独立（判定を誤発火させない）
+  if(ev.target.closest(".kn-edge")) return;    // ◀▶ は素のボタン
+  // 画面左右の端 24px は OS のエッジジェスチャ（iOSの戻る）の領域。自前のドラッグを始めない
+  var dr=$("#device").getBoundingClientRect();
+  if(ev.clientX - dr.left < 24 || dr.right - ev.clientX < 24) return;
+  dragging=true; sx=ev.clientX; moved=0; startT=Date.now(); startTarget=ev.target;
+  knob.classList.add("dragging");
+  track.classList.remove("anim");
+});
+window.addEventListener("pointermove",function(ev){
+  if(!dragging) return;
+  var dx=ev.clientX-sx; moved=Math.max(moved,Math.abs(dx));
+  var d=dx;
+  if((cur===0 && d>0) || (cur===SHEETS.length-1 && d<0)) d=d*0.32;   // 端の抵抗
+  setTrack(cur,d);
+});
+function endDrag(ev){
+  if(!dragging) return;
+  dragging=false; knob.classList.remove("dragging");
+  var dx=(ev.clientX!=null? ev.clientX-sx : 0);
+  var dt=Date.now()-startT;
+  track.classList.add("anim");
+  if(moved<9){ justDragged=false; setTrack(cur,0); return; }  // タップは click 側で処理
+  justDragged=true; setTimeout(function(){ justDragged=false; },350);
+  var fast = dt<260 && Math.abs(dx)>26;
+  if(dx<0 && (fast || dx<-52)) go(cur+1);
+  else if(dx>0 && (fast || dx>52)) go(cur-1);
+  else setTrack(cur,0);
+}
+window.addEventListener("pointerup",endDrag);
+/* 名前のタップ＝直行。click を使うのでキーボード/支援技術からも到達できる */
+knob.addEventListener("click",function(ev){
+  var t=ev.target.closest ? ev.target.closest(".kn") : null;
+  if(!t || t.dataset.sheet==null) return;
+  if(justDragged){ justDragged=false; return; }
+  go(+t.dataset.sheet);
+});
+window.addEventListener("pointercancel",function(){
+  if(dragging){ dragging=false; knob.classList.remove("dragging"); track.classList.add("anim"); setTrack(cur,0); }
+});
+
+/* キーボード（デスクトップ確認用の逃げ道） */
+window.addEventListener("keydown",function(ev){
+  if(ev.target && /input|textarea/i.test(ev.target.tagName)) return;
+  if(ev.key==="ArrowRight") go(cur+1);
+  if(ev.key==="ArrowLeft") go(cur-1);
+  if(ev.key==="Escape"){ if($("#reader").classList.contains("open")) closeReader(); }
+});
+
+/* ---------- 委譲: data-go ---------- */
+document.addEventListener("click",function(ev){
+  var b=ev.target.closest ? ev.target.closest("[data-go]") : null;
+  if(!b) return;
+  var p=b.dataset.go.split(":");
+  if($("#reader").classList.contains("open")) pushReader(p[0],p.slice(1).join(":"));
+  else openReader(p[0],p.slice(1).join(":"));
+});
+
+/* ---------- 索引の入力 ---------- */
+var qEl=$("#q");
+function syncClear(){ $("#q-clear").classList.toggle("on", !!qEl.value); }
+qEl.addEventListener("input",function(){ syncClear(); if(!qEl._c) renderIndex(qEl.value); });
+qEl.addEventListener("compositionstart",function(){ qEl._c=true; });      // IME変換中は絞り込まない
+qEl.addEventListener("compositionend",function(){ qEl._c=false; syncClear(); renderIndex(qEl.value); });
+qEl.addEventListener("keydown",function(ev){
+  if(ev.isComposing || ev.keyCode===229) return;   // 変換確定 Enter を送信として誤処理しない
+});
+$("#q-clear").onclick=function(){ qEl.value=""; syncClear(); renderIndex(""); qEl.focus(); };
+
+/* ---------- 起動 ---------- */
+$("#intro-close").onclick=function(){ $("#intro").hidden=true; LS.set("seen",1); };
+if(LS.get("seen",0)) $("#intro").hidden=true;
+
+renderToday(); renderShelf(); renderIndex(""); renderDesk();
+buildKnob(); setTrack(0,0);
+setTimeout(function(){ track.classList.add("anim"); },60);
+})();
+</script>
+</body>
+</html>

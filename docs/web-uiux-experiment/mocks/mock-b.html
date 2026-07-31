@@ -1,0 +1,1480 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>muninn — 一本の欄</title>
+<style>
+:root{
+  --bg:#0c0d0f; --bg2:#121418; --bg3:#171a1f;
+  --line:#23272d; --line2:#2e333a;
+  --fg:#ded9d0; --fg2:#b3aea6; --dim:#868c95; --dim2:#5c626b;
+  --amber:#f0b357; --amber2:#c98f3f; --amberbg:#2a2013;
+  --good:#7fd1a3; --warn:#e9736b; --cool:#8fb8d8;
+  --mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --jp: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
+  --dock: 86px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:#1a1b1d; color:var(--fg);
+  font-family:var(--mono),var(--jp);
+  font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+}
+button{font:inherit;color:inherit;background:none;border:none;padding:0;cursor:pointer}
+mark{background:var(--amberbg);color:var(--amber);padding:0 1px;border-radius:1px}
+
+/* ---------- stage / phone frame ---------- */
+#stage{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:18px 12px}
+#phone{
+  width:390px;height:844px;position:relative;overflow:hidden;
+  background:var(--bg); border:1px solid #2b2e33; border-radius:34px;
+  box-shadow:0 24px 70px rgba(0,0,0,.6);
+}
+#chrome{display:flex;gap:10px;align-items:center;color:#6e747c;font-size:12px}
+#chrome button{border:1px solid #33373d;border-radius:6px;padding:6px 10px;color:#a8aeb6;background:#202226}
+#chrome button.on{border-color:var(--amber2);color:var(--amber);background:#241d12}
+@media (max-width:480px){
+  #stage{padding:0;display:block}
+  #phone{width:100%;height:var(--vvh,100dvh);border:0;border-radius:0;box-shadow:none}
+  #chrome{display:none}
+}
+
+/* ---------- app ---------- */
+#app{position:absolute;inset:0;display:flex;flex-direction:column}
+#surface{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;position:relative}
+#flow{min-height:100%;display:flex;flex-direction:column;justify-content:flex-end;padding:14px 0 8px}
+#flow.reading{justify-content:flex-start}
+#app.toasting #flow{padding-bottom:66px}
+#topfade{position:absolute;top:0;left:0;right:0;height:26px;pointer-events:none;
+  background:linear-gradient(var(--bg),rgba(12,13,15,0));z-index:3}
+
+/* ---------- dock ---------- */
+#dock{flex:none;border-top:1px solid var(--line);background:var(--bg2);
+  padding:0 10px calc(6px + env(safe-area-inset-bottom)) 10px;z-index:6}
+#hint{display:flex;gap:14px;align-items:center;height:24px;font-size:11px;color:var(--dim2);letter-spacing:.02em}
+#hint b{color:var(--amber2);font-weight:700}
+#hint .sp{flex:1}
+#hint button{font-size:11px;color:var(--dim2)}
+#hint button:active{color:var(--amber)}
+#inputrow{display:flex;align-items:center;gap:8px;height:52px}
+#back{width:38px;height:44px;flex:none;color:var(--dim2);font-size:15px;text-align:left}
+#back.live{color:var(--amber)}
+#caret{color:var(--amber);font-size:16px;flex:none;width:12px}
+#field{
+  flex:1;min-width:0;background:transparent;border:none;outline:none;
+  color:var(--fg);font-family:var(--mono),var(--jp);font-size:17px;line-height:1.2;
+  padding:8px 0;caret-color:var(--amber);
+}
+#field::placeholder{color:var(--dim2);font-size:13px}
+#clear{width:40px;height:44px;flex:none;color:var(--dim2);font-size:15px}
+
+/* fake soft keyboard */
+#kb{flex:none;height:0;overflow:hidden;background:#191b1f;border-top:1px solid var(--line);
+  display:flex;flex-direction:column}
+#kb .rows{flex:1;padding:6px 6px 22px;display:flex;flex-direction:column;justify-content:space-around;gap:6px;opacity:.5}
+#kb .r{display:flex;gap:5px;justify-content:center}
+#kb .k{flex:1;max-width:34px;height:46px;background:#2b2f35;border-radius:5px}
+#kb .k.wide{max-width:120px}
+#kb .lbl{text-align:center;font-size:10px;color:#585d64;padding-bottom:6px}
+
+/* ---------- riser (道 / 覗く) ---------- */
+#riser{position:absolute;left:0;right:0;bottom:var(--dock);z-index:5;
+  background:var(--bg2);border-top:1px solid var(--line2);
+  max-height:62%;display:flex;flex-direction:column}
+#riser.hidden{display:none}
+#riser .rhead{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--line);
+  font-size:11px;color:var(--dim);letter-spacing:.06em}
+#riser .rhead .sp{flex:1}
+#riser .rbody{overflow-y:auto;padding:4px 0 8px}
+#riser.collapsed{background:var(--bg);border-top:1px solid var(--line)}
+#riser.collapsed .rbody{display:none}
+
+/* ---------- generic blocks ---------- */
+.sec{padding:0 14px}
+.rule{display:flex;align-items:center;gap:8px;color:var(--dim2);font-size:10px;letter-spacing:.14em;
+  padding:14px 14px 6px}
+.rule .ln{flex:1;height:1px;background:var(--line)}
+.k{color:var(--dim);font-size:11px;letter-spacing:.06em}
+.tiny{font-size:11px;color:var(--dim)}
+.jp{font-family:var(--jp)}
+
+/* rows (list) */
+.row{display:flex;align-items:flex-start;gap:9px;padding:9px 14px;min-height:44px;
+  border-bottom:1px solid rgba(35,39,45,.7);width:100%;text-align:left;cursor:pointer}
+.row:active{background:var(--bg3)}
+.row.sel{background:#1b1d22;box-shadow:inset 3px 0 0 var(--amber)}
+.row .tag{flex:none;font-size:10px;color:var(--dim2);border:1px solid var(--line2);border-radius:3px;
+  padding:1px 4px;margin-top:2px;letter-spacing:.04em}
+.row .body{flex:1;min-width:0}
+.row .ttl{font-family:var(--jp);font-size:13.5px;line-height:1.35;color:var(--fg);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.row .sub{font-size:10.5px;color:var(--dim2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* floor row = 依頼行 */
+.floor{border-top:1px solid var(--line2);border-bottom:none;background:#101216}
+.floor .ttl{color:var(--dim)}
+.floor.hot{background:#1d1710;box-shadow:inset 3px 0 0 var(--amber)}
+.floor.hot .ttl{color:var(--amber)}
+
+/* recall card */
+.card{margin:10px 12px 4px;border:1px solid var(--line2);background:var(--bg2);border-radius:3px;overflow:hidden}
+.card .ch{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line);
+  font-size:10px;letter-spacing:.14em;color:var(--amber2)}
+.card .ch .sp{flex:1}
+.card .q{font-family:var(--jp);font-size:15px;line-height:1.62;padding:14px 14px 12px;color:var(--fg)}
+.card .a{padding:0 14px 12px;border-top:1px dashed var(--line2);margin-top:2px;padding-top:12px}
+.card .a .at{font-family:var(--jp);font-size:14px;line-height:1.5;color:var(--amber)}
+.card .a .ax{font-family:var(--jp);font-size:12px;line-height:1.65;color:var(--fg2);margin-top:8px;
+  max-height:120px;overflow:hidden}
+.card .acts{display:flex;gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.card .acts button{flex:1;height:48px;background:var(--bg3);color:var(--fg2);font-size:13px;font-family:var(--jp)}
+.card .acts button:active{background:#22262c}
+.card .acts button.p{color:var(--amber)}
+.card .acts button.g{color:var(--good)}
+.card .acts button.w{color:var(--warn)}
+/* 直前の判定は、消えるトーストとは別に、カードの中に居座らせる（取り消せない操作を作らない） */
+.undoline{display:flex;align-items:center;gap:8px;padding:0 12px 0 14px;min-height:44px;
+  background:#191b1f;border-bottom:1px solid var(--line);font-family:var(--jp);font-size:11.5px;color:var(--dim)}
+.undoline .sp{flex:1}
+.undoline button{color:var(--amber);font-size:12.5px;font-family:var(--jp);min-height:44px;
+  display:flex;align-items:center;padding:0 4px}
+.took{font-family:var(--jp);font-size:11px;color:var(--dim2);padding:2px 14px 10px}
+.dots{display:flex;gap:4px}
+.dots i{width:5px;height:5px;border-radius:50%;background:var(--line2);display:block}
+.dots i.on{background:var(--amber)}
+
+/* today blocks */
+.blk{margin:0 12px;padding:11px 0;border-top:1px solid var(--line)}
+.blk .bh{font-size:10px;letter-spacing:.14em;color:var(--dim2);margin-bottom:6px}
+.blk .bt{font-family:var(--jp);font-size:13.5px;line-height:1.45;color:var(--fg)}
+.blk .bx{font-family:var(--jp);font-size:11.5px;line-height:1.6;color:var(--dim);margin-top:4px;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.blk.tap:active{background:var(--bg3)}
+
+/* metric line */
+.mline{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:12px}
+.mline .mk{flex:1;color:var(--dim);font-family:var(--jp);font-size:11.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.mline .mv{font-variant-numeric:tabular-nums;font-size:12.5px}
+.mv.good{color:var(--good)} .mv.warn{color:var(--warn)} .mv.neu{color:var(--fg2)}
+.mline svg{flex:none}
+
+/* bars (俯瞰) */
+.bar{display:flex;align-items:center;gap:9px;padding:8px 14px;min-height:44px;width:100%;text-align:left;
+  border-bottom:1px solid rgba(35,39,45,.6);cursor:pointer}
+.bar:active{background:var(--bg3)}
+.bar .bl{width:104px;flex:none;font-family:var(--jp);font-size:12px;color:var(--fg2);
+  overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.bar .bb{flex:1;height:12px;background:#16181c;position:relative}
+.bar .bb i{position:absolute;left:0;top:0;bottom:0;background:var(--amber2);display:block}
+.bar .bn{width:26px;text-align:right;font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+
+/* reading surface */
+.art{padding:16px 16px 58px}
+.art h1{font-family:var(--jp);font-size:18px;line-height:1.45;margin:0 0 8px;font-weight:600;letter-spacing:.01em}
+.art .meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:10px;color:var(--dim2);margin-bottom:14px}
+.art .meta .chip{border:1px solid var(--line2);border-radius:3px;padding:1px 5px}
+.art .bd{font-family:var(--jp);font-size:13.5px;line-height:1.85;color:var(--fg2)}
+.art .bd b{color:var(--fg);font-weight:600}
+.art .bd code{font-family:var(--mono);font-size:12px;color:var(--cool);background:#15181c;padding:1px 3px}
+.art .bd ul{margin:8px 0;padding-left:18px}
+.art .bd li{margin:3px 0}
+.art .bd p{margin:8px 0}
+.art .cont{color:var(--dim2);font-size:11px;margin-top:10px}
+.lk{display:inline-flex;align-items:center;gap:4px;font-family:var(--jp);font-size:12.5px;
+  color:var(--cool);border-bottom:1px dotted var(--cool);cursor:pointer;padding:0}
+.outs{margin-top:20px;border-top:1px solid var(--line);padding-top:10px}
+.outs .oh{font-size:10px;letter-spacing:.14em;color:var(--dim2);margin-bottom:6px}
+.out{display:block;width:100%;text-align:left;padding:8px 0;border-bottom:1px solid rgba(35,39,45,.6);cursor:pointer}
+.out:active{background:var(--bg3)}
+.out .ot{font-family:var(--jp);font-size:12.5px;color:var(--cool)}
+.out .orr{font-family:var(--jp);font-size:11px;color:var(--dim);line-height:1.5;margin-top:2px}
+
+/* peek */
+.peek{padding:12px 14px}
+.peek .pt{font-family:var(--jp);font-size:14px;line-height:1.45;color:var(--fg)}
+.peek .pr{font-family:var(--jp);font-size:11.5px;color:var(--amber2);line-height:1.55;margin-top:6px;
+  padding-left:9px;border-left:2px solid var(--amber2)}
+.peek .px{font-family:var(--jp);font-size:11.5px;color:var(--dim);line-height:1.65;margin-top:8px;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.peek .pa{display:flex;gap:8px;margin-top:12px}
+.peek .pa button{flex:1;height:44px;border:1px solid var(--line2);border-radius:3px;font-size:13px;font-family:var(--jp)}
+.peek .pa button.pri{border-color:var(--amber2);color:var(--amber);background:#1d1710}
+
+/* ask / desk */
+.pre{font-family:var(--mono),var(--jp);font-size:12.5px;line-height:1.7;color:var(--amber);
+  background:#131519;border:1px solid var(--line2);padding:11px 12px;margin:10px 12px;
+  white-space:pre-wrap;word-break:break-word;border-radius:2px}
+.acts2{display:flex;gap:8px;padding:0 12px 10px}
+.acts2 button{flex:1;height:46px;border:1px solid var(--line2);border-radius:3px;font-size:13px;font-family:var(--jp);color:var(--fg2)}
+.acts2 button.pri{border-color:var(--amber2);color:var(--amber);background:#1d1710}
+.slipn{display:flex;align-items:flex-start;gap:8px;padding:10px 14px;border-bottom:1px solid rgba(35,39,45,.7)}
+.slipn .st{flex:1;font-family:var(--jp);font-size:12.5px;line-height:1.5;color:var(--fg2);word-break:break-word}
+.slipn .sd{width:44px;height:44px;flex:none;color:var(--dim2);font-size:14px;cursor:pointer}
+
+/* toast */
+#toast{position:absolute;left:12px;right:12px;bottom:calc(var(--dock) + 12px);z-index:20;
+  background:#20242a;border:1px solid var(--line2);border-radius:3px;padding:11px 12px 13px;
+  font-family:var(--jp);font-size:12.5px;color:var(--fg);display:none;align-items:center;gap:10px;
+  overflow:hidden}
+#toast.on{display:flex}
+#toast button{color:var(--amber);font-size:13px;flex:none;font-family:var(--jp);
+  min-height:44px;display:flex;align-items:center;padding:0 4px}
+#toast .drain{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--amber2);
+  transform-origin:left center;transform:scaleX(1)}
+#toast.on .drain{transition:transform linear}
+@media (prefers-reduced-motion: reduce){ #toast.on .drain{transition:none} }
+
+/* intro */
+#intro{position:fixed;inset:0;z-index:100;background:rgba(6,7,8,.94);display:flex;
+  align-items:center;justify-content:center;padding:20px}
+#intro.hide{display:none}
+#introbox{max-width:430px;width:100%;border:1px solid var(--line2);background:var(--bg2);padding:20px 20px 16px;border-radius:4px}
+#introbox h2{font-family:var(--jp);font-size:15px;margin:0 0 12px;color:var(--amber);letter-spacing:.02em}
+#introbox p{font-family:var(--jp);font-size:12.5px;line-height:1.85;color:var(--fg2);margin:0 0 8px}
+#introbox .fig{display:flex;align-items:center;gap:10px;background:#101216;border:1px solid var(--line);
+  padding:12px 10px;margin:12px 0}
+#introbox .figside{flex:none;width:78px;font-family:var(--jp);font-size:9.5px;line-height:1.5;color:var(--dim2);text-align:right}
+#introbox .figside.r{text-align:left}
+#introbox .figside b{color:var(--amber2);font-weight:400}
+#introbox .figcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+#introbox .figrow{font-family:var(--jp);font-size:10px;padding:4px 8px;border:1px solid var(--line);color:var(--dim2)}
+#introbox .figrow.d2{color:var(--dim)}
+#introbox .figrow.d1{color:var(--fg2);border-color:var(--line2)}
+#introbox .figrow.d0{color:var(--fg);border-color:var(--amber2);background:#1b1610}
+#introbox .figfield{font-family:var(--jp);font-size:10px;padding:6px 8px;margin-top:5px;
+  border:1px solid var(--amber2);color:var(--amber);background:#171208}
+#introbox .figkb{font-family:var(--jp);font-size:9px;padding:9px 8px;color:#4a4f56;text-align:center;
+  background:repeating-linear-gradient(45deg,#16181c,#16181c 4px,#1c1f24 4px,#1c1f24 8px)}
+#introbox .kb{color:var(--amber)}
+#introbox button{width:100%;height:46px;margin-top:6px;border:1px solid var(--amber2);color:var(--amber);
+  background:#1d1710;border-radius:3px;font-size:13.5px;font-family:var(--jp)}
+
+@media (prefers-reduced-motion: no-preference){
+  .fadein{animation:fi .12s ease-out}
+  @keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="phone">
+    <div id="app">
+      <div id="surface"><div id="topfade"></div><div id="flow"></div></div>
+      <div id="riser" class="hidden"></div>
+      <div id="toast"></div>
+      <div id="dock">
+        <div id="hint">
+          <span><b>#</b> 束ねる</span>
+          <span><b>&gt;</b> 頼む</span>
+          <span><b>?</b> 使い方</span>
+          <span class="sp"></span>
+          <span id="hintstate"></span>
+        </div>
+        <div id="inputrow">
+          <button id="back" aria-label="前の面へ">◀</button>
+          <span id="caret">›</span>
+          <input id="field" type="text" autocomplete="off" autocorrect="off" autocapitalize="off"
+                 spellcheck="false" placeholder="打てば探す　#で束ねる　&gt;で頼む">
+          <button id="clear" aria-label="消す">✕</button>
+        </div>
+      </div>
+      <div id="kb"><div class="lbl">擬似ソフトキーボード（PC確認用・実キー入力はそのまま効きます）</div>
+        <div class="rows">
+          <div class="r"><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i></div>
+          <div class="r"><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i></div>
+          <div class="r"><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i><i class="k"></i></div>
+          <div class="r"><i class="k wide"></i><i class="k wide"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="chrome">
+    <button id="kbtoggle">ソフトキーボードを出す</button>
+    <button id="reintro">この案の核をもう一度</button>
+    <span id="chromenote"></span>
+  </div>
+</div>
+
+<div id="intro"><div id="introbox">
+  <h2>案B — 一本の欄</h2>
+  <p>この画面には<b>タブも、ページ遷移も、戻るボタンの階層もありません</b>。あるのは「一枚の面」と、下端に常駐する「一本の欄」だけです。</p>
+  <p>面の中身は、<b>欄に何が入っているかだけで決まります</b>。空なら今日差し出されるもの、打てば全部を横断して絞り込み、<span class="kb">#</span> なら在庫の偏りを束ねて、<span class="kb">&gt;</span> なら依頼になる。<b>欄を消せば必ず元の面に戻ります</b>（押している間だけのモード）。</p>
+  <p><b>並びの法則はひとつ。「欄に近いものほど強い」。</b>結果も今日の紙面も、欄の真上から上へ積まれます。上へ遡るほど弱く・古い。ソフトキーボードに隠れる場所には何も置きません。</p>
+  <p>そして——<b>打って何も見つからなければ、そのまま Claude への依頼になります</b>。muninn に無かったこと自体が、次の蓄積の入口です。</p>
+  <div class="fig">
+    <div class="figside">↑ 遡るほど<br>弱い・古い</div>
+    <div class="figcol">
+      <div class="figrow d3">束 ／ 記録帖</div>
+      <div class="figrow d2">連載のつづき</div>
+      <div class="figrow d2">定点のうごき</div>
+      <div class="figrow d1">きょうの一本</div>
+      <div class="figrow d0">おもいだすカード</div>
+      <div class="figfield">◀　›　打てば探す　　✕</div>
+      <div class="figkb">ソフトキーボード</div>
+    </div>
+    <div class="figside r">近いほど<br>強い<br><br><b>← ここが全部</b></div>
+  </div>
+  <button id="introclose">触ってみる</button>
+</div></div>
+
+<script src="mn-data.js"></script>
+<script>
+"use strict";
+(function(){
+
+/* ==========================================================
+   0. store
+   ========================================================== */
+const LS = "muninn_b_v2";
+let store = { log:[], slips:[], seen:[], introDone:false };
+try{ const r = localStorage.getItem(LS); if(r) store = Object.assign(store, JSON.parse(r)); }catch(e){}
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(store)); }catch(e){} }
+
+/* ==========================================================
+   1. index
+   ========================================================== */
+const MN = window.MN;
+const today = (function(){ const d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); })();
+
+const noteBy = new Map(); MN.notes.forEach(n=>noteBy.set(n.slug,n));
+const followBy = new Map(); MN.follows.forEach(f=>followBy.set(f.name,f));
+const mocBy = new Map(); MN.mocs.forEach(m=>mocBy.set(m.slug,m));
+const atlasBy = new Map(); MN.atlases.forEach(a=>atlasBy.set(a.slug,a));
+const logBy = new Map(); MN.logtopics.forEach(l=>logBy.set(l.slug,l));
+const conceptBy = new Map(); const conceptAtlas = new Map();
+MN.atlases.forEach(a=>a.concepts.forEach(c=>{conceptBy.set(c.slug,c);conceptAtlas.set(c.slug,a.slug)}));
+const entityBy = new Map(); const entityFollow = new Map();
+MN.follows.forEach(f=>(f.entities||[]).forEach(e=>{entityBy.set(e.slug,e);entityFollow.set(e.slug,f.name)}));
+
+// unified item space --------------------------------------------------------
+// id syntax: n:slug f:name e:slug c:slug m:slug a:slug l:slug le:topic/slug
+const items = [];
+function push(o){ items.push(o); }
+MN.notes.forEach(n=>push({
+  id:"n:"+n.slug, kind:"note", label:"記事", title:n.title,
+  sub:(n.tags||[]).map(tagLabel).join(" · "), text:(n.title+" "+(n.tags||[]).join(" ")+" "+(n.tags||[]).map(tagLabel).join(" ")+" "+n.slug+" "+(n.ex||"")),
+  ref:n }));
+MN.follows.forEach(f=>push({
+  id:"f:"+f.name, kind:"follow", label:"定点", title:f.title.replace(/\s*—.*$/,""),
+  sub:f.goal||"", text:f.title+" "+f.name+" "+(f.goal||"")+" "+(f.snapshot||[]).join(" "), ref:f }));
+MN.follows.forEach(f=>(f.entities||[]).forEach(e=>push({
+  id:"e:"+e.slug, kind:"entity", label:"人", title:e.title,
+  sub:[e.role,e.club].filter(Boolean).join(" · "),
+  text:e.title+" "+e.slug+" "+(e.role||"")+" "+(e.club||"")+" "+(e.strengths||[]).join(" "), ref:e, owner:f.name })));
+MN.atlases.forEach(a=>{
+  push({id:"a:"+a.slug, kind:"atlas", label:"連載", title:a.title.replace(/\s*—.*$/,""),
+    sub:(a.routes||[]).map(r=>r.label).join(" / "), text:a.title+" "+a.slug+" "+(a.ex||""), ref:a});
+  a.concepts.forEach(c=>push({id:"c:"+c.slug, kind:"concept", label:"章", title:c.title,
+    sub:c.status==="stub"?"（未執筆）":(c.gist||""), text:c.title+" "+c.slug+" "+(c.gist||"")+" "+(c.ex||""), ref:c, owner:a.slug}));
+});
+MN.logtopics.forEach(l=>{
+  push({id:"l:"+l.slug, kind:"logtopic", label:"記録帖", title:l.title, sub:(l.entries||[]).length+"件",
+    text:l.title+" "+l.slug, ref:l});
+  (l.entries||[]).forEach(e=>push({id:"le:"+l.slug+"/"+e.slug, kind:"logentry", label:"記録", title:e.title,
+    sub:Object.values(e.fields||{}).filter(v=>typeof v==="string").slice(0,2).join(" · "),
+    text:e.title+" "+e.slug+" "+(e.ex||"")+" "+JSON.stringify(e.fields||{}), ref:e, owner:l.slug}));
+});
+// 画面に内部語彙（notes/follows/atlas/logs/MOC）を一切出さないための言い換え
+function jp(s){
+  return String(s||"")
+    // 正本のパス表記（`follows/x/` `[follow/goal]` 等）はまるごと落とす
+    .replace(/`[^`]*`/g, m=>/(notes|follows|atlas|logs|moc|concepts?|follow|log)\//i.test(m)?"":m)
+    .replace(/（\s*(atlas|follows|logs|notes|moc|concepts?)\s*\/?\s*）/gi,"")
+    .replace(/[（(]\s*[）)]/g,"")
+    .replace(/学習アトラス/g,"連載").replace(/アトラス/g,"連載")
+    .replace(/MOC/gi,"束").replace(/フォロー/g,"定点").replace(/ログ/g,"記録帖")
+    .replace(/定点観測する定点/g,"定点観測").replace(/定点の正本/g,"この定点の正本")
+    .replace(/^[\s—–\-]+/,"").replace(/\s{2,}/g," ").trim();
+}
+// 束の見出しは正本の英字タイトルではなく、和名側を拾う
+function mocLabel(m){
+  const t=m.title;
+  let after=(t.split("—")[1]||"").replace(/\s*MOC\s*$/,"").replace(/の$/,"").trim();
+  if(!after){ const p=/（([^）]+)）/.exec(t.split("—")[0]||""); after = p? p[1] : (t.split("—")[0]||t).trim(); }
+  return jp(after);
+}
+// home は「全MOCの入口」＝この面そのものなので出さない
+MN.mocs.filter(m=>m.slug!=="home").forEach(m=>push({id:"m:"+m.slug, kind:"moc", label:"束", title:mocLabel(m),
+  sub:(m.sections||[]).map(s=>jp(s.title)).join(" · "), text:m.title+" "+m.slug+" "+(m.sections||[]).map(s=>s.title).join(" "), ref:m}));
+
+const itemById = new Map(); items.forEach(i=>itemById.set(i.id,i));
+
+function tagLeaf(t){ return t.split("/").slice(-1)[0]; }
+// 240字で切られた生 markdown を、見せられる形に整える
+function cleanEx(src){
+  let s=String(src||"").replace(/\r/g,"");
+  const cut=s.search(/\n#{1,6}\s/); if(cut>=0) s=s.slice(0,cut);
+  s=s.replace(/^#{1,6}\s+/,"");
+  // 240字で切れて閉じられなかった記号だけを落とす（対になっているものは消さない）
+  if(s.lastIndexOf("[[") > s.lastIndexOf("]]")) s=s.slice(0, s.lastIndexOf("[["));
+  if(((s.match(/\*\*/g)||[]).length % 2)===1) s=s.replace(/\*\*[^*]*$/,"");
+  if(((s.match(/`/g)||[]).length % 2)===1) s=s.replace(/`[^`]*$/,"");
+  s=s.replace(/\n[ \t]*[-*][ \t]*$/,"");
+  return s.replace(/\s+$/,"");
+}
+function plain(src, n){
+  const s=cleanEx(src).replace(/\[\[([^\]|]+)\|?([^\]]*)\]\]/g,(m,a,b)=>b||a)
+    .replace(/[*`>]/g,"").replace(/^\s*[-]\s*/gm,"").replace(/\s*\n+\s*/g,"　").trim();
+  return n? s.slice(0,n) : s;
+}
+function tagLabel(t){
+  const map={ "sports/golf":"ゴルフ","sports/football":"サッカー","health/skincare":"スキンケア",
+    "health/nutrition":"栄養","health/hair":"髪","health/sleep":"睡眠","health/stress":"ストレス",
+    "health/bathing":"入浴","science/cosmology":"宇宙論","geopolitics/middle-east":"中東",
+    "philosophy/ancient":"古代哲学","philosophy":"哲学","knowledge/zettelkasten":"知の整理",
+    "language/vocabulary":"ことば","log/coffee":"コーヒー" };
+  return map[t]||tagLeaf(t);
+}
+
+// resolve a raw wikilink target -> item id
+function resolve(t){
+  if(!t) return null;
+  if(noteBy.has(t)) return "n:"+t;
+  const m = /^(.+)\/profile$/.exec(t); if(m && followBy.has(m[1])) return "f:"+m[1];
+  if(followBy.has(t)) return "f:"+t;
+  if(conceptBy.has(t)) return "c:"+t;
+  if(entityBy.has(t)) return "e:"+t;
+  if(mocBy.has(t)) return "m:"+t;
+  if(atlasBy.has(t)) return "a:"+t;
+  if(logBy.has(t)) return "l:"+t;
+  return null;
+}
+
+// backlinks: id -> [{from,reason}]
+const back = new Map();
+function addBack(targetId, fromId, reason){
+  if(!targetId||!fromId||targetId===fromId) return;
+  if(!back.has(targetId)) back.set(targetId,[]);
+  if(back.get(targetId).some(x=>x.from===fromId)) return;
+  back.get(targetId).push({from:fromId, reason:reason? jp(reason) : null});
+}
+MN.notes.forEach(n=>{
+  const seen=new Set();
+  (n.linkrefs||[]).forEach(({t,r})=>{ const id=resolve(t); if(id){seen.add(t); addBack(id,"n:"+n.slug,r);} });
+  (n.links||[]).forEach(t=>{ if(seen.has(t))return; const id=resolve(t); if(id) addBack(id,"n:"+n.slug,null); });
+});
+MN.mocs.forEach(m=>(m.sections||[]).forEach(s=>s.items.forEach(it=>{
+  const id=resolve(it.target); if(id) addBack(id,"m:"+m.slug,it.reason);
+})));
+MN.atlases.forEach(a=>a.concepts.forEach(c=>{
+  const E=c.edges||{};
+  [["requires","前提として置いている"],["contrasts","対比している"],["leadsTo","ここから発展する"],["elaborates","深掘りしている"]]
+  .forEach(([k,label])=>(E[k]||[]).forEach(t=>{ const id=resolve(t); if(id) addBack(id,"c:"+c.slug,label); }));
+  (c.notes||[]).forEach(t=>{ const id=resolve(t); if(id) addBack(id,"c:"+c.slug,"この章から蒸留された"); });
+}));
+MN.follows.forEach(f=>(f.entities||[]).forEach(e=>addBack("e:"+e.slug,"f:"+f.name,"この定点で追っている")));
+
+// outbound of an item (with reasons)
+function outbound(it){
+  const out=[];
+  if(it.kind==="note"){
+    const n=it.ref, seen=new Set();
+    (n.linkrefs||[]).forEach(({t,r})=>{const id=resolve(t); if(id){seen.add(t);out.push({id,reason:r})}});
+    (n.links||[]).forEach(t=>{ if(seen.has(t))return; const id=resolve(t); if(id) out.push({id,reason:null}); });
+  } else if(it.kind==="concept"){
+    const E=it.ref.edges||{};
+    [["requires","前提"],["contrasts","対比"],["leadsTo","発展"],["elaborates","深掘り"]].forEach(([k,lb])=>
+      (E[k]||[]).forEach(t=>{const id=resolve(t); if(id) out.push({id,reason:lb})}));
+    (it.ref.notes||[]).forEach(t=>{const id=resolve(t); if(id) out.push({id,reason:"ここから覚える一片へ"})});
+  } else if(it.kind==="moc"){
+    (it.ref.sections||[]).forEach(s=>s.items.forEach(x=>{const id=resolve(x.target); if(id) out.push({id,reason:x.reason})}));
+  } else if(it.kind==="follow"){
+    (it.ref.entities||[]).forEach(e=>out.push({id:"e:"+e.slug, reason:[e.role,e.club].filter(Boolean).join(" · ")}));
+  } else if(it.kind==="atlas"){
+    it.ref.concepts.forEach(c=>out.push({id:"c:"+c.slug, reason:c.status==="stub"?"（未執筆）":c.gist}));
+  } else if(it.kind==="logtopic"){
+    (it.ref.entries||[]).forEach(e=>out.push({id:"le:"+it.ref.slug+"/"+e.slug, reason:null}));
+  }
+  const seen=new Set();
+  return out.filter(o=>{ if(seen.has(o.id))return false; seen.add(o.id); return itemById.has(o.id); })
+            .map(o=>({id:o.id, reason:o.reason? jp(o.reason) : null}));
+}
+
+/* ==========================================================
+   2. deterministic day seed
+   ========================================================== */
+function hash32(s){ let h=2166136261; for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);} return h>>>0; }
+function rng(seed){ let s=seed||1; return function(){ s^=s<<13;s>>>=0; s^=s>>>17; s^=s<<5;s>>>=0; return s/4294967296; }; }
+function shuffled(arr, seed){
+  const a=arr.slice(), r=rng(seed);
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); const t=a[i];a[i]=a[j];a[j]=t; }
+  return a;
+}
+const daySeed = hash32(today);
+const knowledge = MN.notes.filter(n=>n.kind==="knowledge" && n.recall);
+const todayCards = shuffled(knowledge, daySeed).slice(0,3);
+const extraCards = shuffled(knowledge, daySeed ^ 0x9e3779b9).filter(n=>!todayCards.includes(n));
+const todayRead  = shuffled(MN.notes, daySeed ^ 0x5bf03635)[0];
+
+/* ==========================================================
+   3. state
+   ========================================================== */
+let state = { trail:[], sel:0, cardIdx:0, flipped:false, extra:0, riser:null, pending:null };
+const surface=document.getElementById("surface"), flow=document.getElementById("flow");
+const field=document.getElementById("field"), riser=document.getElementById("riser");
+const backBtn=document.getElementById("back"), clearBtn=document.getElementById("clear");
+const hintState=document.getElementById("hintstate"), toast=document.getElementById("toast");
+let rows=[]; // current selectable rows [{el, act}]
+let composing=false;
+
+function q(){ return field.value; }
+function pinned(){ return state.trail.length? state.trail[state.trail.length-1] : null; }
+
+function open(id){
+  const it=itemById.get(id); if(!it) return;
+  state.trail.push(id);
+  if(store.seen[0]!==id){ store.seen.unshift(id); store.seen=store.seen.slice(0,8); save(); }
+  field.value=""; state.riser=null; render();
+}
+function goBack(){
+  if(q()){ field.value=""; render(); return; }
+  if(state.trail.length){ state.trail.pop(); state.riser=null; render(); }
+}
+
+/* ==========================================================
+   4. search
+   ========================================================== */
+function score(it, toks){
+  const T=it.title.toLowerCase(), X=it.text.toLowerCase();
+  let s=0;
+  for(const t of toks){
+    if(!t) continue;
+    const ti=T.indexOf(t);
+    if(ti===0) s+=100; else if(ti>0) s+=64;
+    else if((it.sub||"").toLowerCase().indexOf(t)>=0) s+=34;
+    else if(X.indexOf(t)>=0) s+=18;
+    else return -1;
+  }
+  if(it.kind==="note") s+=6;
+  if(it.kind==="entity"||it.kind==="concept") s+=3;
+  return s;
+}
+function search(str){
+  const toks=str.toLowerCase().split(/\s+/).filter(Boolean);
+  if(!toks.length) return [];
+  const out=[];
+  for(const it of items){ const s=score(it,toks); if(s>=0) out.push({it,s}); }
+  out.sort((a,b)=> b.s-a.s || a.it.title.length-b.it.title.length);
+  return out.slice(0,9).map(o=>o.it);
+}
+// ゼロヒットのときだけ回す、ゆるい2-gram一致。空白を「何もない」で終わらせないため
+function nearMiss(str){
+  const s=str.toLowerCase().replace(/\s+/g,"");
+  const g=[]; for(let i=0;i<s.length-1;i++) g.push(s.slice(i,i+2));
+  if(!g.length) return [];
+  const out=[];
+  for(const it of items){
+    const T=(it.title+" "+(it.sub||"")).toLowerCase(), X=it.text.toLowerCase();
+    let th=0, bh=0;
+    for(const x of g){ if(T.indexOf(x)>=0) th++; else if(X.indexOf(x)>=0) bh++; }
+    // 見出しに1つ当たるか、本文に2つ以上当たるものだけ。ノイズを出すくらいなら何も出さない
+    if(th>=1 || bh>=2) out.push({it,sc:th*3+bh});
+  }
+  out.sort((a,b)=>b.sc-a.sc);
+  return out.slice(0,4).map(o=>o.it);
+}
+
+/* ==========================================================
+   5. tiny helpers
+   ========================================================== */
+function el(tag, cls, txt){ const e=document.createElement(tag); if(cls)e.className=cls; if(txt!=null)e.textContent=txt; return e; }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function hl(s, toks){
+  let h=esc(s);
+  for(const t of toks){ if(t.length<1) continue;
+    const re=new RegExp("("+t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","ig");
+    h=h.replace(re,"<mark>$1</mark>");
+  }
+  return h;
+}
+function fmtDate(d){ if(!d) return ""; const p=d.split("-"); return p[1].replace(/^0/,"")+"/"+p[2].replace(/^0/,""); }
+function showToast(msg, undo){
+  const ms = undo? 6000 : 2200;
+  toast.innerHTML=""; toast.appendChild(el("span",null,msg));
+  const sp=el("span"); sp.style.flex="1"; toast.appendChild(sp);
+  if(undo){ const b=el("button",null,"↺ 取り消す"); b.onclick=()=>{ hideToast(); undo(); }; toast.appendChild(b); }
+  // 消えかけの帯（transform だけで描く）。猶予が目に見えること自体が安全装置
+  const dr=el("i","drain"); toast.appendChild(dr);
+  toast.classList.add("on");
+  // 面を押し上げて、伝えごとが次の一手を隠さないようにする
+  document.getElementById("app").classList.add("toasting");
+  if(!flow.classList.contains("reading")) surface.scrollTop=surface.scrollHeight;
+  requestAnimationFrame(()=>{ dr.style.transitionDuration=ms+"ms"; dr.style.transform="scaleX(0)"; });
+  clearTimeout(showToast._t); showToast._t=setTimeout(hideToast, ms);
+}
+function hideToast(){
+  toast.classList.remove("on");
+  document.getElementById("app").classList.remove("toasting");
+  if(!flow.classList.contains("reading")) surface.scrollTop=surface.scrollHeight;
+}
+
+function sparkline(points, goal){
+  const w=64,h=18,vals=points.map(p=>p.value);
+  if(vals.length<2) return "";
+  const mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), sp=(mx-mn)||1;
+  const pts=vals.map((v,i)=>[(i/(vals.length-1))*(w-2)+1, h-1-((v-mn)/sp)*(h-2)]);
+  const d=pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+  let col="#7b7f85";
+  if(goal==="up") col = vals[vals.length-1]>=vals[0] ? "#7fd1a3" : "#e9736b";
+  if(goal==="down") col = vals[vals.length-1]<=vals[0] ? "#7fd1a3" : "#e9736b";
+  const last=pts[pts.length-1];
+  return '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'+
+    '<polyline points="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.2"/>'+
+    '<circle cx="'+last[0].toFixed(1)+'" cy="'+last[1].toFixed(1)+'" r="1.9" fill="'+col+'"/></svg>';
+}
+function metricClass(points, goal){
+  if(!goal || points.length<2) return "neu";
+  const a=points[0].value, b=points[points.length-1].value;
+  if(goal==="up") return b>=a?"good":"warn";
+  return b<=a?"good":"warn";
+}
+// minimal markdown -> DOM (bold / bullets / inline code / wikilinks)
+function mdInto(host, src){
+  const lines=cleanEx(src).split("\n");
+  let ul=null;
+  const flushUl=()=>{ ul=null; };
+  lines.forEach(line=>{
+    if(!line.trim()){ flushUl(); return; }
+    const b=/^\s*[-*]\s+(.*)$/.exec(line);
+    if(b){ if(!ul){ ul=el("ul"); host.appendChild(ul);} const li=el("li"); inline(li,b[1]); ul.appendChild(li); return; }
+    flushUl();
+    const p=el("p"); inline(p,line); host.appendChild(p);
+  });
+}
+function inline(host, s){
+  const re=/(\*\*[^*]+\*\*|`[^`]+`|\[\[[^\]]+\]\])/g;
+  let last=0,m;
+  while((m=re.exec(s))){
+    if(m.index>last) host.appendChild(document.createTextNode(s.slice(last,m.index)));
+    const tok=m[0];
+    if(tok.startsWith("**")) host.appendChild(el("b",null,tok.slice(2,-2)));
+    else if(tok.startsWith("`")) host.appendChild(el("code",null,tok.slice(1,-1)));
+    else {
+      const raw=tok.slice(2,-2), parts=raw.split("|");
+      const id=resolve(parts[0].trim());
+      if(id){ const b=el("button","lk",(parts[1]||itemById.get(id).title)); b.onclick=(ev)=>{ev.stopPropagation();peek(id,null)}; host.appendChild(b); }
+      else host.appendChild(document.createTextNode(parts[1]||parts[0]));
+    }
+    last=m.index+tok.length;
+  }
+  if(last<s.length) host.appendChild(document.createTextNode(s.slice(last)));
+}
+
+/* ==========================================================
+   6. rows
+   ========================================================== */
+function addRow(host, {label, title, sub, act, cls, toks, pref}){
+  const b=el("button","row"+(cls?" "+cls:""));
+  if(label!==null && label!==undefined){ b.appendChild(el("span","tag",label)); }
+  const body=el("div","body");
+  const t=el("div","ttl"); if(toks) t.innerHTML=hl(title,toks); else t.textContent=title;
+  body.appendChild(t);
+  if(sub){ const s=el("div","sub"); s.textContent=sub; body.appendChild(s); }
+  b.appendChild(body);
+  b.onclick=act;
+  host.appendChild(b);
+  rows.push({el:b, act, pref:!!pref});
+  return b;
+}
+// 選択順は「画面の下から上」＝欄に近い順。DOMの実位置から決める（法則をコードにも通す）
+function orderRows(){ rows.sort((a,b)=> b.el.offsetTop - a.el.offsetTop); }
+
+/* ==========================================================
+   7. render
+   ========================================================== */
+function render(){
+  const s=q();
+  rows=[]; flow.innerHTML=""; flow.className="";
+  backBtn.classList.toggle("live", !!(s || state.trail.length));
+  clearBtn.style.visibility = s ? "visible" : "hidden";
+
+  if(s.startsWith("?")){ viewHelp(); }
+  else if(s.startsWith("#")){ viewShelf(s.slice(1).trim()); }
+  else if(s.startsWith(">")){ viewAsk(s.slice(1).trim()); }
+  else if(s.trim()){ viewFind(s.trim()); }
+  else if(pinned()){ viewDetail(pinned()); }
+  else { viewToday(); }
+
+  // selection: 既定は pref 行、無ければ「欄に一番近い行」
+  orderRows();
+  const pi=rows.findIndex(r=>r.pref);
+  state.sel = rows.length ? (pi>=0?pi:0) : -1;
+  applySel();
+  updateHintState();
+  renderRiser();
+
+  // scroll anchoring
+  if(flow.classList.contains("reading")) surface.scrollTop=0;
+  else surface.scrollTop=surface.scrollHeight;
+}
+function applySel(){
+  rows.forEach((r,i)=>r.el.classList.toggle("sel", i===state.sel));
+}
+function updateHintState(){
+  const s=q();
+  if(!s && !state.trail.length) hintState.textContent = today;
+  else if(!s) hintState.textContent = "消せば戻る";
+  else if(s.startsWith("#")) hintState.textContent="束ねている";
+  else if(s.startsWith(">")) hintState.textContent="頼んでいる";
+  else if(s.startsWith("?")) hintState.textContent="";
+  else hintState.textContent="↑↓で選ぶ · Enterで開く";
+}
+
+/* ---------- J1: 今日（空欄の面。ここが一番豊かであること） ---------- */
+function weekCount(){
+  const now=new Date(); const wk=new Date(now.getTime()-7*864e5).toISOString().slice(0,10);
+  return store.log.filter(l=>l.at>=wk).length;
+}
+function doneToday(){ return store.log.filter(l=>l.day===today).map(l=>l.slug); }
+
+function viewToday(){
+  const done=doneToday();
+  const wrap=el("div"); flow.appendChild(wrap);
+
+  // --- 最上段（遠い＝弱い）: 日付と増えるカウンタ
+  const head=el("div","rule");
+  head.appendChild(el("span",null, today.replace(/-/g,".")));
+  head.appendChild(el("span","ln"));
+  const wc=weekCount();
+  head.appendChild(el("span",null, wc>0 ? "今週 "+wc+"件 再読した" : "きょうから数える"));
+  wrap.appendChild(head);
+
+  // --- 束 / 記録帖（小さい扱い）
+  const stock=el("div","blk");
+  stock.appendChild(el("div","bh","たな"));
+  const line=el("div"); line.style.display="flex"; line.style.flexWrap="wrap"; line.style.gap="6px";
+  const mk=(txt,fn)=>{ const b=el("button","tiny",txt); b.style.cssText="border:1px solid var(--line2);border-radius:3px;padding:5px 10px;font-family:var(--jp);min-height:44px";
+    b.onclick=fn; line.appendChild(b); };
+  mk("ぜんぶ見わたす（# を打つ）",()=>{ field.value="#"; render(); field.focus(); });
+  MN.logtopics.forEach(l=>mk(l.title.replace(/の記録$/,""),()=>open("l:"+l.slug)));
+  MN.mocs.filter(m=>m.slug!=="home").slice(0,3).forEach(m=>mk(mocLabel(m),()=>open("m:"+m.slug)));
+  stock.appendChild(line);
+  wrap.appendChild(stock);
+
+  // --- 最近ひらいたもの
+  if(store.seen.length){
+    const rec=el("div","blk"); rec.appendChild(el("div","bh","ゆうべの続き"));
+    store.seen.slice(0,3).forEach(id=>{ const it=itemById.get(id); if(!it)return;
+      const b=el("button"); b.style.cssText="display:block;text-align:left;width:100%;padding:6px 0;min-height:44px";
+      const t=el("div","bt", it.title); t.style.fontSize="12px"; t.style.color="var(--dim)";
+      b.appendChild(t); b.onclick=()=>open(id); rec.appendChild(b);
+    });
+    wrap.appendChild(rec);
+  }
+
+  // --- 連載のつづき
+  const at=MN.atlases[0];
+  if(at){
+    const route=at.routes[daySeed % at.routes.length];
+    const nextSlug = route.order.find(sl=>!store.seen.includes("c:"+sl)) || route.order[0];
+    const c=conceptBy.get(nextSlug);
+    if(c){
+      const b=el("button","blk tap"); b.style.display="block"; b.style.width="calc(100% - 24px)"; b.style.textAlign="left";
+      b.appendChild(el("div","bh","つづきを読む　"+at.title.replace(/\s*—.*$/,"")+" / "+route.label));
+      b.appendChild(el("div","bt", c.title));
+      if(c.gist) b.appendChild(el("div","bx", c.gist));
+      b.onclick=()=>open("c:"+c.slug);
+      wrap.appendChild(b);
+    }
+  }
+
+  // --- 定点の動き
+  const fmov = MN.follows.filter(f=>(f.sessions||[]).length)
+    .sort((a,b)=> (b.sessions[0].date||"").localeCompare(a.sessions[0].date||""))[0];
+  if(fmov){
+    const b=el("button","blk tap"); b.style.display="block"; b.style.width="calc(100% - 24px)"; b.style.textAlign="left";
+    b.appendChild(el("div","bh","定点のうごき　"+fmov.sessions[0].date.replace(/-/g,".")));
+    b.appendChild(el("div","bt", fmov.title.replace(/\s*—.*$/,"")));
+    const ss=fmov.sessions[0];
+    if(ss.summary) b.appendChild(el("div","bx", ss.summary));
+    // 良い方に動いた一本と、宣言に反して悪い方に動いたものを必ず出す（数字に嘘をつかせない）
+    const S=fmov.series||[];
+    const bad=S.filter(sr=>sr.goal && metricClass(sr.points,sr.goal)==="warn");
+    const good=S.filter(sr=>sr.goal && metricClass(sr.points,sr.goal)==="good");
+    const show=good.slice(0,1).concat(bad.slice(0,2));
+    (show.length?show:S.slice(0,2)).forEach(sr=>{
+      const m=el("div","mline");
+      m.appendChild(el("span","mk", sr.key + (sr.goal? "" : "（良し悪しは決めていない）")));
+      const sv=el("span"); sv.innerHTML=sparkline(sr.points, sr.goal); m.appendChild(sv);
+      const v=el("span","mv "+metricClass(sr.points,sr.goal), String(sr.points[sr.points.length-1].value));
+      m.appendChild(v);
+      b.appendChild(m);
+    });
+    if(bad.length){
+      const w=el("div","bx"); w.style.color="var(--warn)"; w.style.webkitLineClamp="2";
+      w.textContent="↑ "+bad.map(x=>x.key+(x.goal==="down"?"（下げたいのに上がった）":"（上げたいのに下がった）")).join("　");
+      b.appendChild(w);
+    }
+    b.onclick=()=>open("f:"+fmov.name);
+    wrap.appendChild(b);
+  }
+
+  // --- 今日の一本
+  if(todayRead){
+    const b=el("button","blk tap"); b.style.display="block"; b.style.width="calc(100% - 24px)"; b.style.textAlign="left";
+    b.appendChild(el("div","bh","きょうの一本"));
+    b.appendChild(el("div","bt", todayRead.title));
+    b.appendChild(el("div","bx", plain(todayRead.ex,140)));
+    b.onclick=()=>open("n:"+todayRead.slug);
+    wrap.appendChild(b);
+  }
+
+  // --- 想起カード（欄の真上＝一番強い場所）
+  const pool = todayCards.concat(extraCards.slice(0, state.extra));
+  const remaining = pool.filter(n=>!done.includes(n.slug));
+  if(remaining.length){
+    wrap.appendChild(recallCard(remaining[0], todayCards, done));
+  } else {
+    const b=el("div","card"); const h=el("div","ch");
+    h.appendChild(el("span",null,"おもいだす"));
+    h.appendChild(el("span","sp"));
+    const dts=el("div","dots"); todayCards.forEach(()=>{const i=el("i");i.className="on";dts.appendChild(i)});
+    h.appendChild(dts); b.appendChild(h);
+    const us=undoStrip(); if(us) b.appendChild(us);
+    const qd=el("div","q"); qd.textContent="きょうの分はかたづいた。今週 "+weekCount()+"件。";
+    b.appendChild(qd);
+    const acts=el("div","acts");
+    const more=el("button","p","もう一枚ひく"); more.onclick=()=>{ state.extra++; state.flipped=false; render(); };
+    acts.appendChild(more); b.appendChild(acts);
+    wrap.appendChild(b);
+  }
+}
+
+// 直前の判定を取り消す帯。トーストが消えても、次の判定をするまでカードの中に残る
+function undoStrip(){
+  const L=state.lastJudge; if(!L) return null;
+  const s=el("div","undoline");
+  s.appendChild(el("span",null,"直前: "+L.label));
+  s.appendChild(el("span","sp"));
+  const b=el("button",null,"↺ 取り消す"); b.onclick=()=>undoJudge();
+  s.appendChild(b);
+  return s;
+}
+function recallCard(n, cards, done){
+  const c=el("div","card fadein");
+  const h=el("div","ch");
+  h.appendChild(el("span",null,"おもいだす"));
+  h.appendChild(el("span","sp"));
+  const dts=el("div","dots");
+  cards.forEach(cd=>{ const i=el("i"); if(done.includes(cd.slug)) i.className="on"; dts.appendChild(i); });
+  h.appendChild(dts); c.appendChild(h);
+  const us=undoStrip(); if(us) c.appendChild(us);
+
+  const qd=el("div","q"); qd.textContent=n.recall; c.appendChild(qd);
+
+  if(state.flipped){
+    const a=el("div","a");
+    a.appendChild(el("div","at", n.title));
+    const ax=el("div","ax"); mdInto(ax,(n.ex||"").slice(0,200)); a.appendChild(ax);
+    c.appendChild(a);
+    // 判定の精度は「めくるまでにどれだけ粘ったか」から推定する。隠さず見せる
+    const sec=(state.flipMs||0)/1000;
+    const tk=el("div","took", "◷ "+sec.toFixed(1)+"秒で めくった"+(sec<QUICK/1000?"（すぐ出た＝やさしい扱い）":"（粘った＝まだ危うい扱い）"));
+    c.appendChild(tk);
+    const acts=el("div","acts");
+    const g=el("button","g","わかった"); g.onclick=()=>judge(n,true);
+    const w=el("button","w","あやしい"); w.onclick=()=>judge(n,false);
+    const o=el("button",null,"ひらく"); o.onclick=()=>open("n:"+n.slug);
+    acts.appendChild(g); acts.appendChild(w); acts.appendChild(o);
+    c.appendChild(acts);
+  } else {
+    // このカードを見せ始めた時刻。粘った時間を測るため
+    const key=n.slug+"|q";
+    if(state.shownKey!==key){ state.shownKey=key; state.shownAt=Date.now(); }
+    const acts=el("div","acts");
+    const f=el("button","p","めくる"); f.onclick=()=>{
+      state.flipMs = Date.now() - (state.shownAt||Date.now());
+      state.flipped=true; render(); };
+    const sk=el("button",null,"あとで"); sk.onclick=()=>{ state.flipped=false;
+      store.log.push({slug:n.slug, day:today, at:today, ok:null, skip:true}); save(); render(); };
+    acts.appendChild(f); acts.appendChild(sk);
+    c.appendChild(acts);
+  }
+  return c;
+}
+const QUICK = 4000; // これより速くめくれたら「すぐ出た」
+function judge(n, ok){
+  const quick = (state.flipMs||0) < QUICK;
+  // 判断は2択のまま、精度は行動（粘った時間）から3段階に分岐させる
+  const q = ok ? (quick ? 5 : 4) : 2;
+  const label = ok ? (quick? "わかった（すぐ出た）" : "わかった（粘った）") : "あやしい";
+  const rec={slug:n.slug, day:today, at:today, ok:ok, q:q, ms:state.flipMs||0};
+  store.log.push(rec); save();
+  state.lastJudge={rec, label, slug:n.slug};
+  state.flipped=false; state.shownKey=null; render();
+  showToast(label+" を記録した", ()=>undoJudge());
+}
+function undoJudge(){
+  const L=state.lastJudge; if(!L) return;
+  const i=store.log.lastIndexOf(L.rec);
+  if(i>=0) store.log.splice(i,1);
+  else { const j=store.log.map(x=>x.slug).lastIndexOf(L.slug); if(j>=0) store.log.splice(j,1); }
+  save();
+  state.lastJudge=null; state.flipped=true; state.shownKey=null;
+  hideToast(); render();
+  showToast("取り消した");
+}
+
+/* ---------- J3: 打って絞り込む ---------- */
+function viewFind(str){
+  const toks=str.toLowerCase().split(/\s+/).filter(Boolean);
+  const res=search(str);
+  const wrap=el("div"); flow.appendChild(wrap);
+
+  if(res.length){
+    const r=el("div","rule");
+    r.appendChild(el("span",null,res.length>=9?"上位9件":res.length+"件"));
+    r.appendChild(el("span","ln"));
+    wrap.appendChild(r);
+  }
+  // 上へ積む＝配列を逆順に置く（先頭ほど欄に近い）
+  const listHost=el("div"); wrap.appendChild(listHost);
+  const built=[];
+  res.forEach((it,i)=>{
+    const holder=el("div");
+    built.push({it,holder});
+  });
+  built.slice().reverse().forEach(({it,holder})=>listHost.appendChild(holder));
+  // rows[] must be in selection order (0 = nearest field)
+  built.forEach(({it,holder},i)=>{
+    addRow(holder,{label:it.label,title:it.title,sub:it.sub,toks:toks,pref:(i===0),act:()=>open(it.id)});
+  });
+
+  const hot = res.length===0;
+  // ゼロヒットの空白を「何もない」で終わらせない（原則7）:
+  // ① ゆるい一致で近いものを出す ② 「どういう頼み方をするか」を並べる
+  if(hot){
+    const near=nearMiss(str);
+    if(near.length){
+      const r2=el("div","rule");
+      r2.appendChild(el("span",null,"ぴたりとは無い"));
+      r2.appendChild(el("span","ln"));
+      r2.appendChild(el("span",null,"近いのはこのあたり"));
+      wrap.appendChild(r2);
+      const nh=el("div"); wrap.appendChild(nh);
+      const nb=near.map(it=>({it,holder:el("div")}));
+      nb.slice().reverse().forEach(x=>nh.appendChild(x.holder));
+      nb.forEach(({it,holder})=>addRow(holder,{label:it.label,title:it.title,sub:it.sub,act:()=>open(it.id)}));
+    }
+    const r3=el("div","rule");
+    r3.appendChild(el("span",null,"ここから先は muninn の外"));
+    r3.appendChild(el("span","ln"));
+    wrap.appendChild(r3);
+    const th=el("div"); wrap.appendChild(th);
+    const tb=TEMPLATES.map(t=>({t,holder:el("div")}));
+    tb.slice().reverse().forEach(x=>th.appendChild(x.holder));
+    tb.forEach(({t,holder})=>addRow(holder,{
+      label:"たのむ", title:"「"+str+"」"+t.t, sub:t.d,
+      act:()=>{ field.value=">"+str+t.t; render(); }
+    }));
+  }
+
+  // floor = 依頼行（常に欄の真上・不動）
+  const floorHost=el("div"); wrap.appendChild(floorHost);
+  addRow(floorHost,{
+    label:"たのむ",
+    title: hot ? "muninn にはまだ無い。「"+str+"」を Claude に頼む" : "「"+str+"」を Claude に頼む",
+    sub: hot ? "見つからなかったことが、次の蓄積の入口になる" : "Enter で開く／ここを押せば依頼になる",
+    cls:"floor"+(hot?" hot":""),
+    pref: hot,
+    act:()=>{ field.value=">"+str; render(); }
+  });
+}
+
+/* ---------- J2: # 束ねる（在庫の俯瞰） ---------- */
+function tagCounts(){
+  const m=new Map();
+  MN.notes.forEach(n=>(n.tags||[]).forEach(t=>m.set(t,(m.get(t)||0)+1)));
+  return Array.from(m.entries()).map(([t,n])=>({t,n})).sort((a,b)=>b.n-a.n);
+}
+function viewShelf(rest){
+  const wrap=el("div"); flow.appendChild(wrap);
+  const all=tagCounts();
+  const hit = rest ? all.filter(x=> x.t.toLowerCase().includes(rest.toLowerCase()) || tagLabel(x.t).includes(rest)) : all;
+
+  // 単一タグに絞れたら、その中身（記事一覧）へ自然に降りる
+  if(rest && hit.length===1){
+    const tg=hit[0].t;
+    const list=MN.notes.filter(n=>(n.tags||[]).includes(tg))
+      .sort((a,b)=>(b.updated||"").localeCompare(a.updated||""));
+    const r=el("div","rule");
+    r.appendChild(el("span",null,tagLabel(tg)+" · "+list.length+"本"));
+    r.appendChild(el("span","ln"));
+    r.appendChild(el("span",null,"新しい順"));
+    wrap.appendChild(r);
+    const host=el("div"); wrap.appendChild(host);
+    const built=list.map(n=>({n,holder:el("div")}));
+    built.slice().reverse().forEach(b=>host.appendChild(b.holder));
+    built.forEach(({n,holder})=>addRow(holder,{label:null,title:n.title,sub:fmtDate(n.updated),act:()=>open("n:"+n.slug)}));
+    return;
+  }
+
+  // 俯瞰: 偏りをそのまま棒で描く。12点まで。
+  const top=hit.slice(0,10), restTags=hit.slice(10);
+  const max=Math.max.apply(null, all.map(x=>x.n));
+
+  const r=el("div","rule");
+  r.appendChild(el("span",null,"たな"));
+  r.appendChild(el("span","ln"));
+  r.appendChild(el("span",null,"記事 "+MN.notes.length+"　定点 "+MN.follows.length+"　連載 "+MN.atlases.length+"　束 "+(MN.mocs.length-1)));
+  wrap.appendChild(r);
+
+  // 上段（遠い）: 定点・連載・記録帖・束
+  const others=el("div"); wrap.appendChild(others);
+  const oitems=[]
+    .concat(MN.mocs.filter(m=>m.slug!=="home").map(m=>({id:"m:"+m.slug,label:"束",title:mocLabel(m),sub:(m.sections||[]).map(s=>jp(s.title)).join(" · ")})))
+    .concat(MN.logtopics.map(l=>({id:"l:"+l.slug,label:"記録帖",title:l.title,sub:(l.entries||[]).length+"件"})))
+    .concat(MN.atlases.map(a=>({id:"a:"+a.slug,label:"連載",title:a.title.replace(/\s*—.*$/,""),sub:a.concepts.length+"章 · 順路"+a.routes.length+"本"})))
+    .concat(MN.follows.map(f=>({id:"f:"+f.name,label:"定点",title:f.title.replace(/\s*—.*$/,""),sub:(f.sessions||[]).length+"回の観測"})));
+  oitems.forEach(o=>addRow(others,{label:o.label,title:o.title,sub:o.sub,act:()=>open(o.id)}));
+
+  // 下段（近い）: タグの棒。多い順に「欄へ近づく」よう逆順配置
+  const barHost=el("div"); wrap.appendChild(barHost);
+  const bl=[];
+  if(restTags.length){
+    bl.push({label:restTags.map(x=>tagLabel(x.t)).join("・"), n:restTags.reduce((a,b)=>a+b.n,0), t:null, small:true});
+  }
+  top.slice().reverse().forEach(x=>bl.push({label:tagLabel(x.t), n:x.n, t:x.t}));
+  // bl は上から順（小さいもの → 少ない → 多い）
+  bl.forEach(b=>{
+    const btn=el("button","bar");
+    btn.appendChild(el("span","bl", b.label));
+    const bb=el("div","bb"); const i=el("i"); i.style.width=Math.max(2,(b.n/max)*100)+"%";
+    if(b.small) i.style.background="var(--line2)";
+    bb.appendChild(i); btn.appendChild(bb);
+    btn.appendChild(el("span","bn", String(b.n)));
+    btn.onclick=()=>{ if(b.t){ field.value="#"+tagLabel(b.t); render(); } };
+    barHost.appendChild(btn);
+    if(b.t) rows.push({el:btn, act:btn.onclick, pref:false});
+  });
+}
+
+/* ---------- J4: > 頼む（伝票） ---------- */
+const TEMPLATES=[
+  {t:"を調べて記録して", d:"新しい客観知識を足す"},
+  {t:"の定点観測をはじめて", d:"追いたい対象ができたとき"},
+  {t:"を体系立てて学びたい", d:"分野ごと順路をひいてもらう"},
+  {t:"を記録帖につけて", d:"並べて比べたいものができたとき"}
+];
+function composeAsk(text){
+  const ctx = state.pending;
+  if(ctx){ return "/mn 「"+ctx+"」を読んでいて出た問い: "+text; }
+  return "/mn "+text;
+}
+function viewAsk(rest){
+  const wrap=el("div"); flow.appendChild(wrap);
+
+  if(!rest){
+    const r=el("div","rule"); r.appendChild(el("span",null,"でんぴょう"));
+    r.appendChild(el("span","ln"));
+    r.appendChild(el("span",null, store.slips.length? store.slips.length+"件たまっている":"打てばそのまま依頼になる"));
+    wrap.appendChild(r);
+
+    // 上（遠い）: 頼み方の見本。常時見せて「使いながら覚える」
+    const tp=el("div","blk"); tp.style.borderTop="none";
+    tp.appendChild(el("div","bh","こういう頼み方ができる"));
+    TEMPLATES.slice().reverse().forEach(t=>{
+      const line=el("div"); line.style.cssText="font-family:var(--jp);font-size:11.5px;color:var(--dim2);padding:3px 0";
+      line.textContent="＞ 〈…〉"+t.t+"　— "+t.d;
+      tp.appendChild(line);
+    });
+    wrap.appendChild(tp);
+
+    // 下（近い）: 伝票の中身
+    const sl=el("div"); wrap.appendChild(sl);
+    store.slips.slice().reverse().forEach((s,idx)=>{
+      const realIdx = store.slips.length-1-idx;
+      const row=el("div","slipn");
+      row.appendChild(el("div","st", s));
+      const d=el("button","sd","✕"); d.onclick=()=>{ store.slips.splice(realIdx,1); save(); render(); };
+      row.appendChild(d); sl.appendChild(row);
+    });
+
+    if(store.slips.length){
+      const acts=el("div","acts2");
+      const c=el("button","pri","ぜんぶコピー"); c.onclick=()=>copy(store.slips.join("\n"),"伝票 "+store.slips.length+"件をコピーした");
+      const x=el("button",null,"からにする"); x.onclick=()=>{ const old=store.slips.slice(); store.slips=[]; save(); render();
+        showToast("伝票をからにした",()=>{ store.slips=old; save(); render(); }); };
+      acts.appendChild(c); acts.appendChild(x); wrap.appendChild(acts);
+    }
+    return;
+  }
+
+  const text=composeAsk(rest);
+  const r=el("div","rule"); r.appendChild(el("span",null,"たのむ"));
+  r.appendChild(el("span","ln"));
+  if(state.pending) r.appendChild(el("span",null,"文脈つき"));
+  wrap.appendChild(r);
+
+  if(store.slips.length){
+    const sl=el("div"); wrap.appendChild(sl);
+    store.slips.slice(-2).forEach(s=>{ const row=el("div","slipn"); const t=el("div","st",s);
+      t.style.color="var(--dim2)"; row.appendChild(t); sl.appendChild(row); });
+  }
+
+  const pre=el("div","pre"); pre.textContent=text; wrap.appendChild(pre);
+
+  const acts=el("div","acts2");
+  const a=el("button","pri","伝票にためる");
+  a.onclick=()=>{ store.slips.push(text); save(); state.pending=null; field.value=">"; render();
+    showToast("伝票にためた（"+store.slips.length+"件）",()=>{ store.slips.pop(); save(); render(); }); };
+  const b=el("button",null,"コピー");
+  b.onclick=()=>copy(text,"依頼をコピーした");
+  acts.appendChild(a); acts.appendChild(b); wrap.appendChild(acts);
+  rows=[{el:a, act:a.onclick, pref:true}];
+}
+function copy(text,msg){
+  const done=()=>showToast(msg);
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, ()=>fallback());
+  } else fallback();
+  function fallback(){
+    const ta=document.createElement("textarea"); ta.value=text; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); done(); }catch(e){ showToast("コピーできなかった"); }
+    document.body.removeChild(ta);
+  }
+}
+
+/* ---------- ? 使い方 ---------- */
+function viewHelp(){
+  const wrap=el("div"); flow.appendChild(wrap);
+  const r=el("div","rule"); r.appendChild(el("span",null,"つかいかた")); r.appendChild(el("span","ln")); wrap.appendChild(r);
+  const box=el("div","sec"); box.style.fontFamily="var(--jp)"; box.style.fontSize="12.5px";
+  box.style.lineHeight="1.9"; box.style.color="var(--fg2)"; box.style.paddingBottom="12px";
+  [["（空）","きょう差し出されるもの。想起カードは欄の真上に来る"],
+   ["文字","記事・定点・人・章・記録・束を横断して絞り込む"],
+   ["#","在庫を束ねて見る。#ゴルフ のように続ければ降りる"],
+   [">","Claude への依頼をつくって伝票にためる"],
+   ["?","この一覧"],
+   ["◀","前の面へ。欄に文字があるときは、まず欄を消す"],
+   ["↑↓ / Enter","選ぶ／ひらく（変換中のEnterは効かない）"],
+   ["↺","判定はいつでも取り消せる。直前の一件はカードに残り続ける"],
+   ["◷","めくるまでに粘った時間で、わかった を2段階に分ける（すぐ出た／粘った）"]].forEach(([k,v])=>{
+    const line=el("div"); line.style.display="flex"; line.style.gap="10px"; line.style.padding="3px 0";
+    const kk=el("span",null,k); kk.style.cssText="color:var(--amber);min-width:64px;font-family:var(--mono)";
+    line.appendChild(kk); line.appendChild(el("span",null,v)); box.appendChild(line);
+  });
+  const p=el("p",null,"並びの法則はひとつ。欄に近いものほど強く、上へ遡るほど弱い。ソフトキーボードに隠れる場所には何も置かない。");
+  p.style.cssText="color:var(--dim);margin-top:10px;border-top:1px solid var(--line);padding-top:10px";
+  box.appendChild(p);
+  wrap.appendChild(box);
+  const acts=el("div","acts2");
+  const b=el("button",null,"この案の核をもう一度"); b.onclick=()=>{ document.getElementById("intro").classList.remove("hide"); };
+  acts.appendChild(b); wrap.appendChild(acts);
+}
+
+/* ---------- 詳細（読む面） ---------- */
+function viewDetail(id){
+  const it=itemById.get(id); if(!it){ viewToday(); return; }
+  flow.className="reading";
+  const art=el("div","art"); flow.appendChild(art);
+
+  const h=el("h1"); h.textContent=it.title; art.appendChild(h);
+  const meta=el("div","meta");
+  const addChip=(t)=>{ if(t) meta.appendChild(el("span","chip",t)); };
+  addChip(it.label);
+  if(it.kind==="note"){
+    (it.ref.tags||[]).forEach(t=>addChip(tagLabel(t)));
+    addChip(it.ref.updated ? "更新 "+it.ref.updated.replace(/-/g,".") : null);
+    if(it.ref.kind==="insight") addChip("じぶんの言葉");
+  }
+  art.appendChild(meta);
+
+  const bd=el("div","bd"); art.appendChild(bd);
+
+  if(it.kind==="note"){
+    mdInto(bd, it.ref.ex||"");
+    bd.appendChild(el("div","cont","… ここまでが冒頭。続きは正本にある"));
+  }
+  else if(it.kind==="follow") renderFollow(bd, it.ref);
+  else if(it.kind==="entity") renderEntity(bd, it.ref, it.owner);
+  else if(it.kind==="concept") renderConcept(bd, it.ref);
+  else if(it.kind==="atlas") renderAtlas(bd, it.ref);
+  else if(it.kind==="moc") renderMoc(bd, it.ref);
+  else if(it.kind==="logtopic") renderLogTopic(bd, it.ref);
+  else if(it.kind==="logentry") renderLogEntry(bd, it.ref, it.owner);
+
+  // 出ていく先（理由つき）
+  const outs=outbound(it);
+  if(outs.length){
+    const o=el("div","outs"); o.appendChild(el("div","oh","ここから出ていく道"));
+    outs.slice(0,12).forEach(x=>{
+      const t=itemById.get(x.id);
+      const b=el("button","out");
+      const ot=el("div","ot"); ot.textContent=(t.label==="記事"?"":"["+t.label+"] ")+t.title; b.appendChild(ot);
+      if(x.reason){ const rr=el("div","orr"); rr.textContent=x.reason; b.appendChild(rr); }
+      b.onclick=()=>peek(x.id, x.reason);
+      o.appendChild(b);
+    });
+    art.appendChild(o);
+  }
+
+  // この面から頼む
+  const acts=el("div","acts2"); acts.style.padding="16px 0 0";
+  const ask=el("button",null,"この面のことで頼む");
+  ask.onclick=()=>{ state.pending=it.title; field.value=">"; render(); field.focus(); };
+  acts.appendChild(ask); art.appendChild(acts);
+}
+
+function renderFollow(bd, f){
+  if(f.goal){ const p=el("p"); p.innerHTML="<b>ねらい</b> "+esc(f.goal); bd.appendChild(p); }
+  if((f.snapshot||[]).length){
+    const ul=el("ul"); f.snapshot.forEach(s=>{const li=el("li");inline(li,s);ul.appendChild(li)}); bd.appendChild(ul);
+  }
+  (f.series||[]).forEach(sr=>{
+    const m=el("div","mline");
+    m.appendChild(el("span","mk", sr.key + (sr.goal?"":"（良し悪しは決めていない）")));
+    const sv=el("span"); sv.innerHTML=sparkline(sr.points, sr.goal); m.appendChild(sv);
+    m.appendChild(el("span","mv "+metricClass(sr.points,sr.goal), String(sr.points[sr.points.length-1].value)));
+    bd.appendChild(m);
+  });
+  if((f.focus||[]).length){
+    const h=el("p"); h.innerHTML="<b>いま見ているところ</b>"; bd.appendChild(h);
+    const ul=el("ul"); f.focus.forEach(x=>{ const li=el("li");
+      li.innerHTML="<b>"+esc(x.title)+"</b>"+(x.priority?" ★":"")+(x.note?"<br>"+esc(x.note):""); ul.appendChild(li); });
+    bd.appendChild(ul);
+  }
+  if(f.coach||f.formation){
+    const p=el("p"); p.textContent=[f.coach&&("監督 "+f.coach), f.formation&&("並び "+f.formation)].filter(Boolean).join(" · ");
+    bd.appendChild(p);
+  }
+  if((f.rivals||[]).length){
+    const p=el("p"); p.innerHTML="<b>好敵手</b> "+f.rivals.map(r=>esc(r.name)+"（"+esc(r.note)+"）").join("、"); bd.appendChild(p);
+  }
+  if((f.sessions||[]).length){
+    const h=el("p"); h.innerHTML="<b>観測</b>"; bd.appendChild(h);
+    const ul=el("ul");
+    f.sessions.slice(0,6).forEach(s=>{ const li=el("li");
+      li.innerHTML="<b>"+s.date.replace(/-/g,".")+"</b> "+esc(s.summary||(s.ex||"").slice(0,70)); ul.appendChild(li); });
+    bd.appendChild(ul);
+  }
+}
+function renderEntity(bd, e, ownerName){
+  const p=el("p"); p.textContent=[e.role,e.club,e.status==="injured"?"離脱中":null].filter(Boolean).join(" · ");
+  bd.appendChild(p);
+  if((e.strengths||[]).length){ const h=el("p"); h.innerHTML="<b>強み</b>"; bd.appendChild(h);
+    const ul=el("ul"); e.strengths.forEach(s=>{const li=el("li");inline(li,s);ul.appendChild(li)}); bd.appendChild(ul); }
+  if((e.developing||[]).length){ const h=el("p"); h.innerHTML="<b>いま伸ばしているところ</b>"; bd.appendChild(h);
+    const ul=el("ul"); e.developing.forEach(s=>{const li=el("li");inline(li,s);ul.appendChild(li)}); bd.appendChild(ul); }
+  if((e.changelog||[]).length){ const h=el("p"); h.innerHTML="<b>うつりかわり</b>"; bd.appendChild(h);
+    const ul=el("ul"); e.changelog.slice(0,8).forEach(c=>{const li=el("li");
+      li.innerHTML="<b>"+c.date.replace(/-/g,".")+"</b> "+esc(c.note); ul.appendChild(li)}); bd.appendChild(ul); }
+}
+function renderConcept(bd, c){
+  if(c.gist){ const p=el("p"); p.innerHTML="<b>要旨</b> "+esc(c.gist); bd.appendChild(p); }
+  if(c.status==="stub"){ const p=el("p"); p.style.color="var(--dim)";
+    p.textContent="この章はまだ書かれていない。順路の上には置いてある。"; bd.appendChild(p); }
+  if(c.ex){ mdInto(bd, c.ex); bd.appendChild(el("div","cont","… ここまでが冒頭。続きは正本にある")); }
+}
+function renderAtlas(bd, a){
+  if(a.ex) mdInto(bd, jp(a.ex.slice(0,240)));
+  (a.routes||[]).forEach(r=>{
+    const p=el("p"); p.innerHTML="<b>"+esc(r.label)+"</b><br>"+esc(r.desc||""); bd.appendChild(p);
+    const ol=el("ul");
+    r.order.forEach((sl,i)=>{ const c=conceptBy.get(sl); if(!c)return;
+      const li=el("li"); const b=el("button","lk",(i+1)+". "+c.title+(c.status==="stub"?"（未執筆）":""));
+      b.onclick=()=>peek("c:"+sl, r.label+" の "+(i+1)+"番目"); li.appendChild(b); ol.appendChild(li); });
+    bd.appendChild(ol);
+  });
+}
+function renderMoc(bd, m){
+  (m.sections||[]).forEach(s=>{
+    const p=el("p"); p.innerHTML="<b>"+esc(jp(s.title))+"</b>"; bd.appendChild(p);
+    const ul=el("ul");
+    s.items.forEach(x=>{ const id=resolve(x.target); const li=el("li"); const rsn=jp(x.reason);
+      if(id){ const b=el("button","lk", itemById.get(id).title); b.onclick=()=>peek(id, rsn); li.appendChild(b); }
+      else li.appendChild(document.createTextNode(x.alias||x.target));
+      if(rsn){ const rr=el("div","orr"); inline(rr, rsn); li.appendChild(rr); }
+      ul.appendChild(li); });
+    bd.appendChild(ul);
+  });
+}
+function renderLogTopic(bd, l){
+  const p=el("p"); p.innerHTML="<b>記録している項目</b> "+l.fields.map(f=>esc(f.label)+(f.required?"*":"")).join(" / ");
+  bd.appendChild(p);
+  const ul=el("ul");
+  (l.entries||[]).forEach(e=>{ const li=el("li");
+    const b=el("button","lk", e.title); b.onclick=()=>peek("le:"+l.slug+"/"+e.slug,null); li.appendChild(b);
+    ul.appendChild(li); });
+  bd.appendChild(ul);
+  if((l.entries||[]).length<2){
+    const q=el("p"); q.style.color="var(--dim)"; q.textContent="並べて比べられるのは2件目から。次の1件を頼むなら下の欄へ。";
+    bd.appendChild(q);
+  }
+}
+function renderLogEntry(bd, e, topicSlug){
+  const l=logBy.get(topicSlug);
+  (l?l.fields:[]).forEach(f=>{
+    const v=(e.fields||{})[f.key]; if(v===undefined||v===null||v==="") return;
+    const m=el("div","mline");
+    m.appendChild(el("span","mk", f.label));
+    let disp = Array.isArray(v)? v.join("・") : (f.type==="rating" ? "★".repeat(v)+"☆".repeat(Math.max(0,(f.max||5)-v))
+      : (f.type==="bool" ? (v?"はい":"いいえ") : String(v)+(f.unit||"")));
+    m.appendChild(el("span","mv neu", disp));
+    bd.appendChild(m);
+  });
+  if(e.ex) mdInto(bd, e.ex);
+}
+
+/* ==========================================================
+   8. riser: 「ここへ来る道」/「覗く」— 欄の真上から生える
+   ========================================================== */
+function peek(id, reason){ state.riser={mode:"peek", id, reason}; renderRiser(); }
+function paths(){ state.riser={mode:"paths"}; renderRiser(); }
+function closeRiser(){ state.riser=null; renderRiser(); }
+
+function renderRiser(){
+  riser.className=""; riser.innerHTML="";
+  const cur=q()? null : pinned();
+  const st=state.riser;
+
+  if(st && st.mode==="peek"){
+    const it=itemById.get(st.id); if(!it){ riser.className="hidden"; return; }
+    const head=el("div","rhead");
+    head.appendChild(el("span",null,"のぞく"));
+    head.appendChild(el("span","sp"));
+    const x=el("button",null,"閉じる ✕"); x.style.color="var(--dim)"; x.onclick=closeRiser; head.appendChild(x);
+    riser.appendChild(head);
+    const body=el("div","rbody"); const pk=el("div","peek");
+    const pt=el("div","pt"); pt.textContent=(it.label==="記事"?"":"["+it.label+"] ")+it.title; pk.appendChild(pt);
+    if(st.reason){ const pr=el("div","pr"); pr.textContent=st.reason; pk.appendChild(pr); }
+    const src = it.kind==="note"? it.ref.ex : (it.ref.gist || it.ref.ex || it.sub || "");
+    if(src){ const px=el("div","px"); px.textContent=plain(src,180); pk.appendChild(px); }
+    const pa=el("div","pa");
+    const o=el("button","pri","ここへ移る"); o.onclick=()=>{ closeRiser(); open(st.id); };
+    const c=el("button",null,"やめる"); c.onclick=closeRiser;
+    pa.appendChild(o); pa.appendChild(c); pk.appendChild(pa);
+    body.appendChild(pk); riser.appendChild(body);
+    return;
+  }
+
+  if(!cur){ riser.className="hidden"; return; }
+  const bl = back.get(cur) || [];
+  if(st && st.mode==="paths" && bl.length){
+    const head=el("div","rhead");
+    head.appendChild(el("span",null,"ここへ来る道 "+bl.length));
+    head.appendChild(el("span","sp"));
+    const x=el("button",null,"閉じる ▼"); x.style.color="var(--dim)"; x.onclick=closeRiser; head.appendChild(x);
+    riser.appendChild(head);
+    const body=el("div","rbody");
+    bl.forEach(b=>{
+      const it=itemById.get(b.from); if(!it) return;
+      const btn=el("button","out"); btn.style.padding="10px 14px";
+      const ot=el("div","ot"); ot.textContent=(it.label==="記事"?"":"["+it.label+"] ")+it.title; btn.appendChild(ot);
+      const rr=el("div","orr"); rr.textContent = b.reason ? "「"+b.reason+"」と書いてこちらを指している" : "こちらを指している";
+      btn.appendChild(rr);
+      btn.onclick=()=>{ closeRiser(); open(b.from); };
+      body.appendChild(btn);
+    });
+    riser.appendChild(body);
+    return;
+  }
+
+  // collapsed handle（詳細面では常設＝行き止まりを作らない）
+  riser.className="collapsed";
+  const head=el("div","rhead");
+  if(bl.length){
+    head.appendChild(el("span",null,"ここへ来る道 "+bl.length));
+    head.appendChild(el("span","sp"));
+    head.appendChild(el("span",null,"▲ ひらく"));
+    head.style.cursor="pointer";
+    head.onclick=paths;
+  }else{
+    head.appendChild(el("span",null,"ここへ来る道はまだ無い"));
+    head.appendChild(el("span","sp"));
+    const b=el("button",null,"道をつくるよう頼む"); b.style.color="var(--amber2)";
+    b.onclick=()=>{ state.pending=itemById.get(cur).title; field.value=">"; render(); field.focus(); };
+    head.appendChild(b);
+  }
+  riser.appendChild(head);
+}
+
+/* ==========================================================
+   9. input wiring
+   ========================================================== */
+field.addEventListener("compositionstart",()=>{composing=true;});
+field.addEventListener("compositionend",()=>{composing=false; state.sel=0; render();});
+field.addEventListener("input",()=>{ if(composing) return; state.sel=0; state.riser=null; render(); });
+field.addEventListener("keydown",(e)=>{
+  if(e.isComposing || composing || e.keyCode===229) return;   // IME 変換確定の Enter を実行にしない
+  if(e.key==="Enter"){
+    e.preventDefault();
+    if(rows.length && state.sel>=0 && rows[state.sel]) rows[state.sel].act();
+    return;
+  }
+  if(e.key==="ArrowUp"){ e.preventDefault(); if(rows.length){ state.sel=Math.min(rows.length-1,state.sel+1); applySel(); scrollSel(); } return; }
+  if(e.key==="ArrowDown"){ e.preventDefault(); if(rows.length){ state.sel=Math.max(0,state.sel-1); applySel(); scrollSel(); } return; }
+  if(e.key==="Escape"){ e.preventDefault(); if(state.riser){closeRiser();return;} if(q()){ field.value=""; render(); } else goBack(); return; }
+});
+function scrollSel(){ const r=rows[state.sel]; if(r&&r.el.scrollIntoView) r.el.scrollIntoView({block:"nearest"}); }
+
+backBtn.onclick=()=>{ if(state.riser){closeRiser();return;} goBack(); };
+clearBtn.onclick=()=>{ field.value=""; state.sel=-1; render(); field.focus(); };
+
+// 打てばどこからでも欄に入る（PCの実キーボード用。iOSは自動フォーカスしない）
+document.addEventListener("keydown",(e)=>{
+  if(e.target===field) return;
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(e.key && e.key.length===1){ field.focus(); }
+  if(e.key==="Escape"){ if(state.riser) closeRiser(); }
+});
+
+/* ==========================================================
+   10. keyboard / viewport
+   ========================================================== */
+const kb=document.getElementById("kb"), kbtoggle=document.getElementById("kbtoggle");
+let kbOn=false;
+kbtoggle.onclick=()=>{
+  kbOn=!kbOn; kb.style.height = kbOn? "292px":"0";
+  kbtoggle.classList.toggle("on",kbOn);
+  kbtoggle.textContent = kbOn? "ソフトキーボードを隠す":"ソフトキーボードを出す";
+  setTimeout(()=>{ if(!flow.classList.contains("reading")) surface.scrollTop=surface.scrollHeight; },20);
+};
+document.getElementById("chromenote").textContent = "実データ "+MN.notes.length+"本 / 生成 "+MN.generatedAt;
+
+// 実機: visualViewport でソフトキーボードに追従（レイアウトビューポートは縮まない）
+if(window.visualViewport){
+  const vv=window.visualViewport;
+  const sync=()=>{
+    if(window.innerWidth>480){ document.documentElement.style.removeProperty("--vvh"); return; }
+    document.documentElement.style.setProperty("--vvh", vv.height+"px");
+    window.scrollTo(0,0);
+  };
+  vv.addEventListener("resize",sync); vv.addEventListener("scroll",sync);
+  window.addEventListener("resize",sync); sync();
+}
+// dock 高さを riser に伝える
+const dockEl=document.getElementById("dock");
+function syncDock(){ document.documentElement.style.setProperty("--dock", dockEl.offsetHeight+"px"); }
+if(window.ResizeObserver){ new ResizeObserver(syncDock).observe(dockEl); } else { window.addEventListener("resize",syncDock); }
+syncDock();
+
+/* ==========================================================
+   11. intro
+   ========================================================== */
+const intro=document.getElementById("intro");
+if(store.introDone) intro.classList.add("hide");
+document.getElementById("introclose").onclick=()=>{ intro.classList.add("hide"); store.introDone=true; save(); };
+document.getElementById("reintro").onclick=()=>intro.classList.remove("hide");
+
+/* ==========================================================
+   12. 起動時は必ず「空欄の面」から始める
+   ブラウザはリロード時に input の値を復元する（autocomplete=off でも起きる）。
+   この案の主役は空欄の面なので、クエリだけは毎回まっさらにする。
+   判定履歴・伝票・ゆうべの続きは残す。
+   ========================================================== */
+function bootFresh(){ field.value=""; state.trail=[]; state.riser=null; state.flipped=false; state.shownKey=null; render(); }
+bootFresh();
+window.addEventListener("pageshow", bootFresh);   // bfcache 復帰も同じ扱い
+window.__mnb={state,render,items,back};
+})();
+</script>
+</body>
+</html>

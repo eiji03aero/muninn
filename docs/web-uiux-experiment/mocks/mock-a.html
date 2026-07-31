@@ -1,0 +1,1796 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>muninn — 親指ひとつ</title>
+<style>
+/* ============================================================
+   案A「親指ひとつ」 — 操作原点はひとつ、方向が意味
+   上7割＝見る領域（操作要素ゼロ）／下3割＝原点と帯
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080a; --bg2:#0c0e12; --panel:#0f1217;
+  --line:rgba(255,255,255,.085); --line2:rgba(255,255,255,.16);
+  --ink:#e9ecf1; --dim:#98a2af; --dimmer:#616b78;
+  --hud:#ffc46b; --hud-d:rgba(255,196,107,.16);
+  --path:#7fd1e8; --path-d:rgba(127,209,232,.14);
+  --ok:#94e2a8; --fuzz:#93b2e8; --warn:#ff9a76;
+  --f-jp:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",system-ui,sans-serif;
+  --f-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ops:250px;
+}
+html,body{height:100%;overflow:hidden;background:#17181b}
+body{font-family:var(--f-jp);color:var(--ink);-webkit-font-smoothing:antialiased;
+  display:flex;align-items:center;justify-content:center}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+input,textarea{font-family:var(--f-jp);font-size:16px}
+/* 読み上げ専用（見えないが、支援技術には届く） */
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+:focus-visible{outline:2px solid var(--hud);outline-offset:2px;border-radius:6px}
+#origin .disc:focus-visible,#origin .lobe:focus-visible{outline-offset:4px}
+
+/* ---- stage / frame ---- */
+#stage{width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(120% 100% at 50% 0%,#232427 0%,#141517 55%,#0e0f11 100%)}
+#frame{position:relative;width:390px;height:844px;overflow:hidden;
+  background:var(--bg);border-radius:38px;box-shadow:0 0 0 1px rgba(255,255,255,.07),0 40px 90px rgba(0,0,0,.65);
+  isolation:isolate}
+@media (max-width:480px){
+  #stage{background:var(--bg)}
+  #frame{width:100%;height:100%;border-radius:0;box-shadow:none}
+}
+#frame::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:60;
+  background:radial-gradient(130% 78% at 50% 4%,rgba(255,255,255,.035) 0%,rgba(0,0,0,0) 60%)}
+
+/* ---- 見る領域 ---- */
+#view{position:absolute;left:0;right:0;top:0;bottom:var(--ops);overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  background:linear-gradient(180deg,#090a0d 0%,#07080a 68%,#050608 100%)}
+#viewIn{padding:26px 22px 28px}
+#view.haspeek #viewIn{padding-bottom:170px}
+#viewIn.fill{min-height:100%;display:flex;flex-direction:column}
+#viewIn.fill .card{flex:1;display:flex;flex-direction:column}
+#viewIn.fill .card > .qhint{margin-top:auto;padding-top:18px}
+
+/* HUD 見出し類 */
+.kick{font-size:10px;letter-spacing:.22em;color:var(--dimmer);text-transform:none;
+  display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.kick b{color:var(--hud);font-weight:600;letter-spacing:.16em}
+.kick i{flex:1;height:1px;background:var(--line);font-style:normal}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+h1.t{font-size:21px;line-height:1.5;font-weight:700;letter-spacing:.01em;margin-bottom:10px}
+h2.t2{font-size:17px;line-height:1.55;font-weight:700;margin-bottom:8px}
+.meta{font-size:11px;color:var(--dimmer);display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.meta .tag{color:var(--hud);border:1px solid var(--hud-d);border-radius:3px;padding:1px 6px;font-size:10px}
+.body{font-size:13.5px;line-height:1.95;color:#c9d0da}
+.body p{margin-bottom:.85em}
+.body strong{color:var(--ink);font-weight:700}
+.body h4{font-size:12px;color:var(--hud);margin:1em 0 .4em;letter-spacing:.04em}
+.body ul{margin:.2em 0 .9em 1.05em}
+.body li{margin-bottom:.35em}
+.body code{font-family:var(--f-mono);font-size:12px;color:var(--path)}
+.trunc{color:var(--dimmer);font-size:11px;margin-top:6px}
+
+/* 想起カード */
+.card{border:1px solid var(--line);border-radius:14px;padding:22px 20px 20px;background:
+  linear-gradient(180deg,rgba(255,196,107,.045),rgba(255,255,255,.008));position:relative;min-height:330px}
+.card::before,.card::after{content:"";position:absolute;width:14px;height:14px;border:1px solid var(--hud);opacity:.5}
+.card::before{left:-1px;top:-1px;border-right:0;border-bottom:0;border-radius:14px 0 0 0}
+.card::after{right:-1px;bottom:-1px;border-left:0;border-top:0;border-radius:0 0 14px 0}
+.q{font-size:19px;line-height:1.85;font-weight:600;letter-spacing:.005em}
+.qhint{margin-top:20px;font-size:11.5px;color:var(--dimmer);line-height:1.7}
+.ans{margin-top:16px;border-top:1px dashed var(--line2);padding-top:16px}
+.ans .t{color:var(--hud);font-size:16.5px;line-height:1.6;font-weight:700;margin-bottom:10px}
+.verdict{margin-top:14px;font-size:11.5px;letter-spacing:.06em}
+.verdict.ok{color:var(--ok)} .verdict.fz{color:var(--fuzz)}
+
+/* 偏りの棒 */
+.bars{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
+.bar{position:relative;height:30px;border-radius:3px;display:flex;align-items:center;
+  background:rgba(255,255,255,.028);overflow:hidden;padding:0 9px;gap:8px}
+.bar .fill{position:absolute;left:0;top:0;bottom:0;background:rgba(255,196,107,.15);border-right:1px solid rgba(255,196,107,.4)}
+.bar .nm{position:relative;font-size:12px;white-space:nowrap}
+.bar .ct{position:relative;margin-left:auto;font-size:11px;color:var(--dim)}
+.bar.on{background:rgba(255,196,107,.1);box-shadow:inset 0 0 0 1px var(--hud)}
+.bar.on .nm{color:var(--hud);font-weight:700}
+.bar.oth .fill{background:rgba(255,255,255,.06);border-right-color:var(--line2)}
+
+/* リスト（読むだけ） */
+.rows{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.row{background:#0a0c0f;padding:11px 12px;display:flex;gap:10px;align-items:flex-start}
+.row.on{background:rgba(255,196,107,.09);box-shadow:inset 2px 0 0 var(--hud)}
+.row .rt{font-size:12.5px;line-height:1.55;flex:1;min-width:0}
+.row .rr{font-size:10.5px;color:var(--dim);line-height:1.6;margin-top:3px}
+.row .rk{font-size:9px;color:var(--dimmer);letter-spacing:.1em;border:1px solid var(--line2);
+  border-radius:2px;padding:1px 4px;flex:none;margin-top:2px}
+.row.on .rk{color:var(--hud);border-color:var(--hud-d)}
+
+/* 道（理由つきリンク） */
+.pathgrp{margin-top:22px}
+.path{display:flex;gap:9px;padding:10px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.path:last-child{border-bottom:0}
+.path.on{background:linear-gradient(90deg,rgba(127,209,232,.1),rgba(127,209,232,0));
+  box-shadow:inset 2px 0 0 var(--path);margin:0 -8px;padding-left:8px;padding-right:8px}
+.path .why{font-size:11.5px;line-height:1.65;color:var(--path);flex:1}
+.path .to{font-size:12px;line-height:1.6;color:var(--ink);margin-top:4px}
+.path .ar{color:var(--dimmer);font-size:11px;flex:none;font-family:var(--f-mono)}
+
+/* 数値 */
+.mets{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.met{border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:#0a0c0f}
+.met .k{font-size:10px;color:var(--dimmer);margin-bottom:3px}
+.met .v{font-size:17px;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.met .d{font-size:10.5px;margin-top:2px;font-family:var(--f-mono)}
+.met .d.g{color:var(--ok)} .met .d.b{color:var(--warn)} .met .d.n{color:var(--dimmer)}
+.met svg{display:block;margin-top:6px;overflow:visible}
+
+.note-s{font-size:11.5px;color:var(--dim);line-height:1.8}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.chip{font-size:10.5px;border:1px solid var(--line2);border-radius:20px;padding:3px 9px;color:var(--dim)}
+
+/* ---- 覗き窓（選択中のものを、遷移せずに見る） ---- */
+#peek{position:absolute;left:0;right:0;bottom:var(--ops);height:152px;z-index:12;
+  background:#06070a;box-shadow:0 -14px 22px -8px #06070a;
+  border-top:1px solid rgba(127,209,232,.28);padding:11px 20px 12px;display:none;flex-direction:column;overflow:hidden}
+#peek.on{display:flex}
+#peek > *{flex:none}
+#peek .ph{font-size:9.5px;letter-spacing:.2em;color:var(--dimmer);display:flex;gap:7px;align-items:center;margin-bottom:7px}
+#peek .ph b{color:var(--path);font-weight:600}
+#peek .ph i{flex:1;height:1px;background:var(--line);font-style:normal}
+#peek .pwhy{font-size:12px;line-height:1.6;color:var(--path);margin-bottom:6px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#peek .ptt{font-size:13px;line-height:1.55;font-weight:700;margin-bottom:5px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#peek .pex{font-size:11px;line-height:1.65;color:var(--dim);overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+#peek .pq{font-size:11px;line-height:1.6;color:var(--hud);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---- 操作領域（下3割） ---- */
+#ops{position:absolute;left:0;right:0;bottom:0;height:var(--ops);z-index:20;
+  background:linear-gradient(180deg,#0b0d11 0%,#0a0c0f 40%,#08090c 100%);
+  border-top:1px solid var(--line2)}
+#ops::before{content:"";position:absolute;left:0;right:0;top:-1px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,196,107,.45),transparent)}
+
+/* 帯（候補） */
+/* 左端は iOS の戻るジェスチャ帯（20px）を避けて 28px から始める */
+#reelWrap{position:absolute;left:28px;right:0;top:8px;height:86px}
+#reel{position:absolute;inset:0;display:flex;gap:10px;align-items:center;
+  overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+  scrollbar-width:none;touch-action:pan-x;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+#reel::-webkit-scrollbar{display:none}
+.ri{flex:none;width:88px;height:64px;scroll-snap-align:center;border:1px solid var(--line2);
+  border-radius:9px;background:#0e1116;display:flex;flex-direction:column;justify-content:center;
+  gap:4px;padding:6px 7px;text-align:left;transition:border-color .12s,background .12s;will-change:transform}
+.ri .rk{font-size:8.5px;letter-spacing:.12em;color:var(--dimmer)}
+.ri .rl{font-size:10.5px;line-height:1.35;color:var(--dim);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ri.on{border-color:var(--hud);background:rgba(255,196,107,.1)}
+.ri.on .rk{color:var(--hud)} .ri.on .rl{color:var(--ink)}
+.ri.done{opacity:.42}
+.ri.act{border-color:var(--path);background:rgba(127,209,232,.09)}
+.ri.act .rk{color:var(--path)}
+#reelMark{position:absolute;top:2px;bottom:2px;left:50%;width:104px;transform:translateX(-50%);
+  pointer-events:none;border-left:1px solid rgba(255,196,107,.3);border-right:1px solid rgba(255,196,107,.3)}
+#reelMark::before{content:"";position:absolute;left:50%;top:-6px;width:6px;height:6px;
+  transform:translateX(-50%) rotate(45deg);background:var(--hud)}
+#reelEmpty{position:absolute;inset:0;display:none;align-items:center;padding-right:20px;
+  font-size:11.5px;color:var(--dimmer);line-height:1.6}
+
+/* 原点 */
+#origin{position:absolute;left:32px;bottom:54px;width:76px;height:76px;border-radius:50%;
+  touch-action:none;z-index:30;display:block}
+#origin .disc{position:absolute;inset:0;border-radius:50%;padding:0;display:block;
+  background:radial-gradient(circle at 50% 42%,#1d2129,#0e1116 72%);
+  border:1.5px solid var(--hud);box-shadow:0 0 0 5px rgba(255,196,107,.07),0 6px 22px rgba(0,0,0,.7)}
+#origin .verb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:12.5px;font-weight:700;color:var(--hud);letter-spacing:.04em;text-align:center;line-height:1.25}
+#origin .hint4{position:absolute;inset:-9px;pointer-events:none}
+#origin .hint4 s{position:absolute;width:3.5px;height:3.5px;border-radius:50%;background:var(--hud);opacity:.5;text-decoration:none}
+#origin .hint4 s:nth-child(1){left:90px;top:45px}
+#origin .hint4 s:nth-child(2){left:85px;top:22px}
+#origin .hint4 s:nth-child(3){left:68px;top:5px}
+#origin .hint4 s:nth-child(4){left:45px;top:-1px}
+#origin .hint4 s:nth-child(5){left:45px;top:91px;opacity:.3}
+#origin.rh .hint4{transform:scaleX(-1)}
+#origin.press .disc{background:radial-gradient(circle at 50% 42%,#2a3038,#12161c 72%);
+  box-shadow:0 0 0 9px rgba(255,196,107,.1)}
+/* 判定モード：原点が2つに割れる */
+#origin.split{width:136px;height:84px;bottom:52px}
+#origin.split .hint4,#origin.split .disc{display:none}
+#origin .lobe{position:absolute;top:0;bottom:0;width:50%;display:none;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;letter-spacing:0;box-shadow:0 6px 22px rgba(0,0,0,.7);padding:0}
+#origin.split .lobe{display:flex}
+#origin .lobe.l{left:0;border-radius:42px 0 0 42px;background:rgba(147,178,232,.16);
+  border:1.5px solid var(--fuzz);border-right:0;color:var(--fuzz)}
+#origin .lobe.r{right:0;border-radius:0 42px 42px 0;background:rgba(148,226,168,.16);
+  border:1.5px solid var(--ok);border-left:0;color:var(--ok)}
+
+/* 原点の右側：現在地・動詞・凡例 */
+#ctx{position:absolute;top:102px;left:124px;right:14px;pointer-events:none}
+#ctx .where{font-size:10px;letter-spacing:.1em;color:var(--dimmer);margin-bottom:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ctx .where b{color:var(--hud);font-weight:600}
+#ctx .act{font-size:13px;color:var(--ink);line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+#ctx .act em{font-style:normal;color:var(--hud);font-weight:700}
+/* 凡例＝行き先の常設ヒントであり、そのままボタンでもある（押すと扇が出る＝可視の代替経路） */
+#legend{position:absolute;top:142px;left:124px;right:108px;min-height:44px;
+  display:flex;flex-wrap:wrap;align-content:center;gap:2px 9px;text-align:left;
+  font-size:9.5px;line-height:1.5;color:var(--dimmer);letter-spacing:.02em;
+  border:1px solid transparent;border-radius:8px;padding:2px 4px}
+#legend:hover,#legend:focus-visible{border-color:var(--line2);background:rgba(255,255,255,.02)}
+#legend span{white-space:nowrap}
+#legend b{color:var(--dim);font-weight:400;font-family:var(--f-mono)}
+#legend .cur{color:var(--hud)}
+#counter{position:absolute;top:192px;left:124px;right:108px;font-size:10px;color:var(--dimmer);
+  font-family:var(--f-mono);letter-spacing:.06em;pointer-events:none}
+#undo{position:absolute;top:186px;left:124px;max-width:150px;display:none;align-items:center;gap:7px;
+  border:1px solid var(--fuzz);border-radius:20px;padding:7px 14px;font-size:11.5px;color:var(--fuzz);
+  background:rgba(147,178,232,.12);min-height:36px;z-index:32}
+#undo.on{display:flex}
+#tools{position:absolute;right:10px;top:146px;display:flex;gap:4px;z-index:31}
+#tools button{width:44px;height:44px;border:1px solid var(--line2);border-radius:10px;
+  font-size:14px;color:var(--dim);display:flex;align-items:center;justify-content:center;background:#0e1116}
+
+/* 検索欄（探すのときだけ原点の右に出る） */
+#find{position:absolute;top:104px;left:124px;right:14px;height:44px;display:none}
+#find.on{display:block}
+#find input{width:100%;height:44px;background:#0e1116;border:1px solid var(--hud);border-radius:10px;
+  color:var(--ink);padding:0 12px;font-size:16px;outline:none}
+#find input::placeholder{color:var(--dimmer);font-size:13px}
+
+/* ---- 扇（方向メニュー） ---- */
+/* 閉じているあいだは visibility:hidden にする。opacity:0 だけだと
+   見えないウェッジが Tab 順とアクセシビリティツリーに残ってしまう */
+#fan{position:absolute;inset:0;z-index:40;pointer-events:none;opacity:0;visibility:hidden;
+  transition:opacity .09s linear,visibility 0s linear .09s}
+#fan.on{opacity:1;visibility:visible;transition:opacity .09s linear,visibility 0s}
+#fan.latch{pointer-events:auto}
+#fan .scrim{position:absolute;inset:0;background:radial-gradient(120px 120px at var(--ox) var(--oy),rgba(0,0,0,.2),rgba(0,0,0,.72))}
+#fan .aim{position:absolute;height:2px;transform-origin:0 50%;
+  background:linear-gradient(90deg,rgba(255,196,107,.85),rgba(255,196,107,0))}
+.wedge{position:absolute;border:1px solid var(--line2);
+  background:#12161c;border-radius:22px;padding:9px 14px;min-height:44px;display:flex;align-items:center;
+  gap:7px;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.6)}
+.wedge .dir{font-family:var(--f-mono);font-size:13px;color:var(--dimmer)}
+.wedge .lb{font-size:13px;font-weight:700}
+.wedge.hot{border-color:var(--hud);background:rgba(255,196,107,.2);box-shadow:0 0 0 4px rgba(255,196,107,.14)}
+.wedge.hot .dir,.wedge.hot .lb{color:var(--hud)}
+.wedge.here{border-color:var(--hud-d)}
+.wedge.here .lb{color:var(--hud)}
+.wedge.back{padding:7px 12px;min-height:38px}
+
+/* ---- コンポーザ / トースト / イントロ ---- */
+#sheet{position:absolute;left:0;right:0;bottom:0;z-index:50;background:#0d1015;
+  border-top:1px solid var(--hud);padding:14px 18px 20px;display:none;flex-direction:column;gap:10px;
+  box-shadow:0 -20px 50px rgba(0,0,0,.7)}
+#sheet.on{display:flex}
+#sheet .sh{font-size:10px;letter-spacing:.2em;color:var(--hud)}
+#sheet textarea{width:100%;height:96px;background:#080a0d;border:1px solid var(--line2);border-radius:9px;
+  color:var(--ink);padding:10px;font-size:16px;line-height:1.6;resize:none;outline:none}
+#sheet .tpl{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+#sheet .tpl::-webkit-scrollbar{display:none}
+#sheet .tpl button{flex:none;font-size:11px;border:1px solid var(--line2);border-radius:18px;padding:8px 12px;
+  color:var(--dim);min-height:36px}
+#sheet .tpl button.on{border-color:var(--hud);color:var(--hud);background:rgba(255,196,107,.1)}
+#sheet .row2{display:flex;gap:8px}
+#sheet .row2 button{flex:1;min-height:48px;border-radius:10px;font-size:14px;font-weight:700;
+  border:1px solid var(--line2);color:var(--dim)}
+#sheet .row2 button.pri{border-color:var(--hud);color:#0b0d10;background:var(--hud)}
+
+#toast{position:absolute;left:50%;bottom:calc(var(--ops) + 16px);transform:translate(-50%,10px);
+  z-index:55;background:#151a21;border:1px solid var(--hud);color:var(--hud);font-size:12px;
+  padding:9px 16px;border-radius:20px;opacity:0;pointer-events:none;transition:opacity .14s,transform .14s;
+  max-width:330px;text-align:center;line-height:1.5}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+#intro{position:absolute;inset:0;z-index:70;background:rgba(4,5,7,.965);display:flex;flex-direction:column;
+  padding:34px 26px 26px;overflow-y:auto}
+#intro.off{display:none}
+#intro .ttl{font-size:24px;font-weight:800;letter-spacing:.04em;color:var(--hud);margin-bottom:4px}
+#intro .sub{font-size:11px;letter-spacing:.18em;color:var(--dimmer);margin-bottom:20px}
+#intro ul{list-style:none;display:flex;flex-direction:column;gap:11px;margin-bottom:18px}
+#intro li{font-size:12.5px;line-height:1.75;color:#cdd4de;padding-left:16px;position:relative}
+#intro li::before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:50%;background:var(--hud);opacity:.7}
+#intro li b{color:var(--hud);font-weight:700}
+#intro li i{font-style:normal;color:var(--fuzz)}
+#diag{position:relative;height:172px;border:1px solid var(--line);border-radius:12px;margin-bottom:16px;
+  background:#0a0c10;overflow:hidden}
+#diag .o{position:absolute;left:26px;bottom:24px;width:54px;height:54px;border-radius:50%;
+  border:1.5px solid var(--hud);display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--hud);font-weight:700}
+#diag .d{position:absolute;font-size:10.5px;color:var(--dim);white-space:nowrap}
+#diag .d b{color:var(--hud);font-family:var(--f-mono);font-weight:400}
+#diag .band{position:absolute;left:26px;right:14px;top:14px;height:26px;border:1px dashed var(--line2);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9.5px;color:var(--dimmer)}
+#intro .fine{font-size:10.5px;color:var(--dimmer);line-height:1.7;margin-bottom:16px}
+#intro .go{margin-top:auto;min-height:52px;border:1px solid var(--hud);border-radius:12px;background:var(--hud);
+  color:#0b0d10;font-size:15px;font-weight:800;letter-spacing:.1em}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<div id="stage"><div id="frame">
+
+  <div id="view" role="region" aria-label="読むところ" tabindex="0"><div id="viewIn"></div></div>
+  <div id="peek" aria-live="polite" aria-atomic="true"></div>
+
+  <div id="ops" role="group" aria-label="操作するところ">
+    <div id="reelWrap">
+      <div id="reel" role="listbox" aria-label="候補の帯"></div>
+      <div id="reelMark" aria-hidden="true"></div>
+      <div id="reelEmpty" role="note"></div>
+    </div>
+    <div id="tools">
+      <button id="btnHand" aria-label="原点を左右どちらに置くか入れ替える"><span aria-hidden="true">⇄</span></button>
+      <button id="btnHelp" aria-label="この画面の使い方をもう一度読む"><span aria-hidden="true">?</span></button>
+    </div>
+    <div id="ctx">
+      <div class="where"></div>
+      <div class="act"></div>
+    </div>
+    <div id="find">
+      <label class="sr" for="findInput">ことばで探す</label>
+      <input id="findInput" type="search" placeholder="ことばを打つ（例: 毛穴 / メッシ / イデア）" autocomplete="off" enterkeyhint="search">
+    </div>
+    <button id="legend" aria-haspopup="menu" aria-expanded="false"></button>
+    <div id="counter" role="status"></div>
+    <button id="undo"></button>
+    <p id="originHelp" class="sr">原点。叩くと、いま選んでいるものに対する操作を実行する。押したまま方向へ引くと行き先を選べる。同じ行き先は下の「行き先を選ぶ」からも選べる。</p>
+    <div id="origin" role="group" aria-label="原点">
+      <button class="disc" id="originBtn" aria-describedby="originHelp"><span class="verb">めくる</span></button>
+      <div class="hint4" aria-hidden="true"><s></s><s></s><s></s><s></s><s></s></div>
+      <button class="lobe l" id="lobeL">あやしい</button>
+      <button class="lobe r" id="lobeR">わかった</button>
+    </div>
+  </div>
+
+  <div id="fan" role="menu" aria-label="行き先"><div class="scrim" aria-hidden="true"></div><div class="aim" aria-hidden="true"></div></div>
+
+  <div id="sheet" role="dialog" aria-modal="true" aria-label="Claude への依頼を書く">
+    <div class="sh">CLAUDE への依頼を書く</div>
+    <div class="tpl" role="group" aria-label="依頼のひな形"></div>
+    <label class="sr" for="composer">依頼の文</label>
+    <textarea id="composer"></textarea>
+    <div class="row2">
+      <button id="cCancel">やめる</button>
+      <button id="cAdd" class="pri">伝票に足す</button>
+    </div>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <div id="intro" role="dialog" aria-modal="true" aria-labelledby="introTtl">
+    <div class="ttl" id="introTtl">親指ひとつ</div>
+    <div class="sub">A — 操作原点はひとつ、方向が意味</div>
+    <ul>
+      <li>画面の<b>上7割は読むためだけの場所</b>。ボタンも、戻るも、見出し棒も置かない。</li>
+      <li>操作は左下の丸＝<b>原点</b>ひとつ。<b>ぽんと叩けば「実行」</b>、<b>押したまま引けば「移動」</b>。</li>
+      <li>方向の意味は永久に固定。<b>→今日 ／ ↗見渡す ／ ↗探す ／ ↑頼む ／ ↓戻す</b>。忘れても、押しっぱなしにすれば扇が<i>目に見えて</i>開く。</li>
+      <li>原点の上の<b>帯</b>が候補。指ではじいて選び、選んだものは上に大きく映る。決めるのは原点。</li>
+      <li>想起では原点が<b>2つに割れる</b>。左＝あやしい／右＝わかった。指は原点から一歩も動かない。</li>
+    </ul>
+    <div id="diag">
+      <div class="band">帯 — 候補をはじいて選ぶ</div>
+      <div class="o">原点</div>
+      <div class="d" style="left:96px;bottom:44px"><b>→</b> 今日</div>
+      <div class="d" style="left:104px;bottom:76px"><b>↗</b> 見渡す</div>
+      <div class="d" style="left:92px;bottom:104px"><b>↗</b> 探す</div>
+      <div class="d" style="left:66px;bottom:128px"><b>↑</b> 頼む</div>
+      <div class="d" style="left:96px;bottom:12px"><b>↓</b> 戻す</div>
+    </div>
+    <div class="fine">PCで見る方へ： 原点はマウスでも押して引けます。キーボードは ← → で帯、Enter で原点、1〜4 で行き先、Esc で戻す、H で利き手の左右入れ替え。<br>
+    スクリーンリーダーでご覧の方へ： ドラッグを使わずに、Tab だけで全部操作できます。原点・帯の候補・「行き先を選ぶ」はすべてボタンです。行き先は「行き先を選ぶ」を押すと一覧で出ます。</div>
+    <button class="go" id="introGo">はじめる</button>
+  </div>
+
+</div></div>
+
+<script src="mn-data.js"></script>
+<script>
+(function(){
+'use strict';
+var D = window.MN;
+var $  = function(s){return document.querySelector(s);};
+var $$ = function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+var esc = function(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+
+/* ============================ 語彙（内部語彙は画面に出さない） ============================ */
+var TAGJP = {
+  'sports/golf':'ゴルフ','health/skincare':'スキンケア','science/cosmology':'宇宙論',
+  'sports/football':'サッカー','geopolitics/middle-east':'中東情勢','health/nutrition':'栄養',
+  'health/hair':'髪','philosophy/ancient':'古代哲学','health/bathing':'入浴',
+  'health/stress':'ストレス','health/sleep':'睡眠','philosophy':'哲学',
+  'knowledge/zettelkasten':'ノート術','language/vocabulary':'ことば'
+};
+var MOCJP = {home:'全体',golf:'ゴルフ',football:'サッカー',health:'健康・栄養','middle-east':'中東情勢',science:'科学・宇宙論'};
+function tagJP(t){ return TAGJP[t] || (t||'').split('/').pop(); }
+function mocJP(s){ return (MOCJP[s]||s) + 'の見取り図'; }
+function clean(t){ return String(t||'').split('—')[0].split('|')[0].trim(); }
+// 内部語彙（notes/ follows/ atlas/ logs/ MOC / mn-xxx）を画面から締め出す
+function deint(s){
+  var t = String(s||'');
+  if(t.indexOf('`')<0 && t.indexOf('MOC')<0 && t.indexOf('mn-')<0 && t.indexOf('アトラス')<0
+     && t.indexOf('follows/')<0 && t.indexOf('logs/')<0) return t;
+  t = t.replace(/`\[goal\]`/g,'［よくなりたい］').replace(/`\[interest\]`/g,'［もっと楽しみたい］');
+  t = t.replace(/[（(]\s*`[^`]*\/`\s*[）)]/g,'').replace(/`[^`]*\/`/g,'');
+  t = t.replace(/\s*[（(]\s*\/?mn-[a-z-]+\s*[）)]/g,'').replace(/\/?mn-[a-z-]+/g,'');
+  t = t.replace(/学習アトラス（atlas\/）/g,'連載')
+       .replace(/フォロー（follows\/）/g,'定点')
+       .replace(/フォロー（時系列で追う側）/g,'定点（時系列で追う側）')
+       .replace(/ログ（logs\/）/g,'記録帖')
+       .replace(/知識アトラス/g,'連載').replace(/アトラス/g,'連載')
+       .replace(/MOC一覧/g,'見取り図の一覧').replace(/MOC/g,'見取り図');
+  return t.replace(/[ \t]{2,}/g,' ').replace(/^\s+|\s+$/g,'');
+}
+function cleanSec(t){ return deint(t); }
+// 読み込み時に一度だけ、表示に使う文字列を全部くぐらせる（slug・タグ等の鍵は触らない）
+(function scrubAll(o){
+  var SKIP = {slug:1,name:1,target:1,t:1,key:1,id:1,kind:1,status:1,followType:1,
+              tags:1,links:1,notes:1,edges:1,order:1,image:1,generatedAt:1,next:1,last:1,
+              created:1,updated:1,date:1,type:1,options:1,cardFields:1,filters:1,sort:1,by:1};
+  if(Array.isArray(o)){
+    for(var i=0;i<o.length;i++){
+      if(typeof o[i]==='string') o[i]=deint(o[i]);
+      else if(o[i] && typeof o[i]==='object') scrubAll(o[i]);
+    }
+    return;
+  }
+  for(var k in o){
+    if(!Object.prototype.hasOwnProperty.call(o,k) || SKIP[k]) continue;
+    if(typeof o[k]==='string') o[k]=deint(o[k]);
+    else if(o[k] && typeof o[k]==='object') scrubAll(o[k]);
+  }
+})(D);
+// markdown を落としてプレビュー用の素の文にする
+function plain(s){
+  return String(s||'').replace(/```[\s\S]*?```/g,'')
+    .replace(/^\s*[-*>#]+\s*/gm,'').replace(/[*`_]/g,'')
+    .replace(/\s*\n+\s*/g,' ／ ').replace(/\s{2,}/g,' ').trim();
+}
+
+/* ============================ 索引 ============================ */
+var notes = D.notes, mocs = D.mocs, follows = D.follows, atlases = D.atlases, logs = D.logtopics;
+var noteBy = {}, conceptBy = {}, entityBy = {}, followBy = {}, logBy = {}, mocBy = {};
+notes.forEach(function(n){ noteBy[n.slug] = n; });
+atlases.forEach(function(a){ a.concepts.forEach(function(c){ c._atlas = a.slug; conceptBy[c.slug] = c; }); });
+follows.forEach(function(f){ followBy[f.name] = f; (f.entities||[]).forEach(function(e){ e._follow = f.name; entityBy[e.slug] = e; }); });
+logs.forEach(function(t){ logBy[t.slug] = t; });
+mocs.forEach(function(m){ mocBy[m.slug] = m; });
+
+// 何でも解決する（解けないものは黙って捨てる = 壊れリンクを画面に出さない）
+function resolve(t){
+  if(!t) return null;
+  if(noteBy[t])    return {t:'note',    slug:t, title:noteBy[t].title, kind:noteBy[t].kind==='insight'?'気づき':'記事'};
+  if(conceptBy[t]) return {t:'concept', slug:t, title:conceptBy[t].title, kind:'章'};
+  if(entityBy[t])  return {t:'entity',  slug:t, follow:entityBy[t]._follow, title:entityBy[t].title, kind:'人物'};
+  if(mocBy[t])     return {t:'moc',     slug:t, title:mocJP(t), kind:'見取り図'};
+  var m = /^([a-z0-9-]+)\/profile$/.exec(t);
+  if(m && followBy[m[1]]) return {t:'follow', slug:m[1], title:clean(followBy[m[1]].title), kind:'定点'};
+  if(followBy[t])  return {t:'follow', slug:t, title:clean(followBy[t].title), kind:'定点'};
+  if(logBy[t])     return {t:'log',    slug:t, title:logs.filter(function(x){return x.slug===t;})[0].title, kind:'記録帖'};
+  return null;
+}
+
+// 被リンク索引（相手が書いた理由ごと逆流する）
+var BACK = {};
+function pushBack(target, obj){ (BACK[target] = BACK[target] || []).push(obj); }
+notes.forEach(function(n){
+  (n.linkrefs||[]).forEach(function(lr){
+    if(!resolve(lr.t)) return;
+    pushBack(lr.t, {from:{t:'note',slug:n.slug}, title:n.title, kind:n.kind==='insight'?'気づき':'記事', why:lr.r});
+  });
+});
+atlases.forEach(function(a){
+  a.concepts.forEach(function(c){
+    (c.notes||[]).forEach(function(ns){
+      if(!noteBy[ns]) return;
+      pushBack(ns, {from:{t:'concept',slug:c.slug}, title:c.title, kind:'章',
+        why:'連載「'+clean(a.title)+'」のこの章から蒸留された知識'});
+    });
+    ['requires','contrasts','leadsTo','elaborates'].forEach(function(k){
+      (c.edges[k]||[]).forEach(function(tg){
+        if(!conceptBy[tg]) return;
+        pushBack(tg, {from:{t:'concept',slug:c.slug}, title:c.title, kind:'章',
+          why:({requires:'この章を前提にしている',contrasts:'この章と対比される',
+                leadsTo:'この章から発展した先',elaborates:'この章を深掘りしている'})[k]});
+      });
+    });
+  });
+});
+mocs.forEach(function(m){
+  m.sections.forEach(function(sec){
+    sec.items.forEach(function(it){
+      if(!resolve(it.target)) return;
+      pushBack(it.target, {from:{t:'moc',slug:m.slug}, title:mocJP(m.slug), kind:'見取り図',
+        why:(cleanSec(sec.title)+'として並べている — '+(it.reason||''))});
+    });
+  });
+});
+function backOf(t){ return BACK[t] || []; }
+function outOf(n){
+  var seen = {}, out = [];
+  (n.linkrefs||[]).forEach(function(lr){
+    var r = resolve(lr.t); if(!r || seen[lr.t]) return; seen[lr.t]=1;
+    out.push({ref:r, why:lr.r});
+  });
+  (n.links||[]).forEach(function(t){
+    var r = resolve(t); if(!r || seen[t]) return; seen[t]=1;
+    out.push({ref:r, why:null});
+  });
+  return out;
+}
+
+/* ============================ 日付シード ============================ */
+function hash32(s){ var h=2166136261>>>0; for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;} return h>>>0; }
+function todayKey(){ var d=new Date(); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+var TODAY = todayKey();
+function seededOrder(arr, keyfn){
+  return arr.slice().sort(function(a,b){
+    var ha=hash32(TODAY+'|'+keyfn(a)), hb=hash32(TODAY+'|'+keyfn(b));
+    return ha-hb || (keyfn(a)<keyfn(b)?-1:1);
+  });
+}
+function daysBetween(a,b){ return Math.round((new Date(b)-new Date(a))/86400000); }
+function agoJP(d){
+  if(!d) return null;
+  var n = daysBetween(d, TODAY);
+  if(n<=0) return '今日';
+  if(n===1) return 'きのう';
+  if(n<7) return n+'日ぶり';
+  if(n<31) return Math.floor(n/7)+'週間ぶり';
+  return Math.floor(n/30)+'か月ぶり';
+}
+
+/* ============================ 保存 ============================ */
+var LS = {
+  get:function(k,d){ try{ var v=localStorage.getItem('mnA.'+k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+  set:function(k,v){ try{ localStorage.setItem('mnA.'+k, JSON.stringify(v)); }catch(e){} }
+};
+var judged = LS.get('judged',{});           // {date:{slug:'ok'|'fz'}}
+var flipLog = LS.get('flipLog',[]);          // [{d,slug,v}]
+var docket  = LS.get('docket',[]);           // [string]
+function saveAll(){ LS.set('judged',judged); LS.set('flipLog',flipLog); LS.set('docket',docket); }
+function weekCount(){
+  var n=0; flipLog.forEach(function(e){ if(daysBetween(e.d,TODAY)<7) n++; }); return n;
+}
+
+/* ============================ 今日の数枚 ============================ */
+var dueAll = notes.filter(function(n){ return n.kind==='knowledge' && n.recall && n.next && n.next<=TODAY; });
+var dueOrder = seededOrder(dueAll, function(n){return n.slug;});
+function dayCards(extra){
+  return dueOrder.slice(0, 5 + (extra||0));
+}
+var extraCards = 0;
+
+/* ============================ 状態 ============================ */
+var state = {
+  hand: LS.get('hand','L'),
+  face: 'today',
+  stack: [],
+  q: '',
+  flipped: false,
+  fanOpen: false, fanLatch: false, hot: null
+};
+function cur(){ return state.stack.length ? state.stack[state.stack.length-1] : {t:state.face}; }
+function push(s){ s.idx = s.idx||0; state.stack.push(s); state.flipped=false; render(true); }
+function pop(){
+  if(state.stack.length){ state.stack.pop(); }
+  else if(state.face!=='today'){ state.face='today'; }
+  else { toast('ここが根。原点を引けば他の3つへ行ける'); return; }
+  state.flipped=false; render(true);
+}
+function goFace(f){
+  state.stack=[]; state.face=f; state.flipped=false;
+  if(f!=='search') state.q='';
+  render(true);
+  if(f==='search') setTimeout(function(){ $('#findInput').focus(); },60);
+}
+
+/* ============================ 帯（候補）の組み立て ============================ */
+var REEL = {};
+var idxMem = {};
+function memKey(s){ return s.t + ':' + (s.slug||'') + ':' + (s.follow||'') + ':' + (s.tag||''); }
+
+REEL.today = function(){
+  var items = [];
+  dayCards(extraCards).forEach(function(n,i){
+    var v = (judged[TODAY]||{})[n.slug];
+    items.push({k:'問い', l:tagJP(n.tags[0])+' '+(i+1), card:n.slug, done:!!v, act:{t:'flip'}});
+  });
+  // 読み物（想起のあとに残る「今日の余白」）
+  var a = atlases[0];
+  if(a){
+    var written = a.concepts.filter(function(c){return c.status==='written';});
+    var c = seededOrder(written,function(x){return x.slug;})[0];
+    if(c) items.push({k:'章', l:clean(c.title), act:{t:'go', s:{t:'concept',slug:c.slug}}});
+  }
+  var recent = follows.slice().sort(function(x,y){
+    var dx=(x.sessions[0]||{}).date||'', dy=(y.sessions[0]||{}).date||''; return dx<dy?1:-1; })[0];
+  if(recent) items.push({k:'定点', l:clean(recent.title), act:{t:'go', s:{t:'follow',slug:recent.name}}});
+  var ins = notes.filter(function(n){return n.kind==='insight';});
+  var pick = seededOrder(ins,function(n){return n.slug;})[0];
+  if(pick) items.push({k:'気づき', l:pick.title.slice(0,26), act:{t:'go', s:{t:'note',slug:pick.slug}}});
+  items.push({k:'もう少し', l:'あと5枚 出す', act:{t:'more'}});
+  return items;
+};
+
+function themeStats(){
+  var m = {};
+  notes.forEach(function(n){ (n.tags||[]).forEach(function(t){ m[t]=(m[t]||0)+1; }); });
+  return Object.keys(m).map(function(t){return {tag:t,n:m[t]};}).sort(function(a,b){return b.n-a.n;});
+}
+REEL.shelf = function(){
+  var items = themeStats().map(function(s){
+    return {k:'テーマ', l:tagJP(s.tag)+' '+s.n, tag:s.tag, act:{t:'go', s:{t:'theme',tag:s.tag}}};
+  });
+  atlases.forEach(function(a){ items.push({k:'連載', l:clean(a.title), act:{t:'go', s:{t:'atlas',slug:a.slug}}}); });
+  follows.forEach(function(f){ items.push({k:'定点', l:clean(f.title), act:{t:'go', s:{t:'follow',slug:f.name}}}); });
+  logs.forEach(function(t){ items.push({k:'記録帖', l:t.title, act:{t:'go', s:{t:'log',slug:t.slug}}}); });
+  mocs.forEach(function(m){ items.push({k:'見取り図', l:mocJP(m.slug), act:{t:'go', s:{t:'moc',slug:m.slug}}}); });
+  return items;
+};
+
+function searchAll(q){
+  q = (q||'').trim().toLowerCase();
+  if(!q) return [];
+  var out = [];
+  function score(hay, w){ return hay && hay.toLowerCase().indexOf(q)>=0 ? w : 0; }
+  notes.forEach(function(n){
+    var s = score(n.title,10) + score((n.tags||[]).map(tagJP).join(' '),6) + score(n.recall,4) + score(n.ex,2);
+    if(s) out.push({s:s, ref:{t:'note',slug:n.slug}, title:n.title,
+      kind:n.kind==='insight'?'気づき':'記事', sub:(n.tags||[]).map(tagJP).join('・'), ex:n.ex, q:n.recall});
+  });
+  atlases.forEach(function(a){ a.concepts.forEach(function(c){
+    var s = score(c.title,9)+score(c.gist,4)+score(c.ex,2);
+    if(s) out.push({s:s, ref:{t:'concept',slug:c.slug}, title:c.title, kind:'章', sub:'連載「'+clean(a.title)+'」', ex:c.gist});
+  });});
+  follows.forEach(function(f){
+    var s = score(f.title,9)+score(f.goal,4);
+    if(s) out.push({s:s, ref:{t:'follow',slug:f.name}, title:clean(f.title), kind:'定点', sub:'', ex:f.goal});
+    (f.entities||[]).forEach(function(e){
+      var s2 = score(e.title,9)+score(e.role,4)+score(e.club,4);
+      if(s2) out.push({s:s2, ref:{t:'entity',slug:e.slug,follow:f.name}, title:e.title, kind:'人物',
+        sub:clean(f.title), ex:(e.role||'')+(e.club?' / '+e.club:'')});
+    });
+  });
+  logs.forEach(function(t){ (t.entries||[]).forEach(function(en){
+    var s = score(en.title,9)+score(en.ex,3);
+    if(s) out.push({s:s, ref:{t:'logentry',slug:en.slug,topic:t.slug}, title:en.title, kind:'記録', sub:t.title, ex:en.ex});
+  });});
+  mocs.forEach(function(m){
+    var s = score(mocJP(m.slug),8);
+    if(s) out.push({s:s, ref:{t:'moc',slug:m.slug}, title:mocJP(m.slug), kind:'見取り図', sub:'', ex:''});
+  });
+  return out.sort(function(a,b){return b.s-a.s;}).slice(0,40);
+}
+REEL.search = function(){
+  var res = searchAll(state.q);
+  if(!state.q.trim()) return [];
+  if(!res.length) return [{k:'依頼', l:'「'+state.q.trim()+'」を調べてもらう', act:{t:'ask', text:'「'+state.q.trim()+'」について調べて、記事にして'}}];
+  return res.map(function(r){ return {k:r.kind, l:r.title.slice(0,28), res:r, act:{t:'go', s:r.ref}}; });
+};
+
+REEL.ask = function(){
+  var items = [{k:'書く', l:'新しく頼む', act:{t:'write'}}];
+  if(docket.length){
+    items.push({k:'渡す', l:'伝票をコピー '+docket.length+'件', act:{t:'copy'}});
+    docket.forEach(function(d,i){ items.push({k:'依頼'+(i+1), l:d.slice(0,26), row:i, act:{t:'del', i:i}}); });
+  }
+  return items;
+};
+
+REEL.note = function(s){
+  var n = noteBy[s.slug]; if(!n) return [];
+  var items = [];
+  backOf(s.slug).forEach(function(b){
+    items.push({k:'来る道', l:b.title.slice(0,26), path:{dir:'in', why:b.why, ref:b.from, title:b.title, kind:b.kind},
+      act:{t:'go', s:b.from}});
+  });
+  outOf(n).forEach(function(o){
+    items.push({k:'伸びる道', l:o.ref.title.slice(0,26), path:{dir:'out', why:o.why, ref:o.ref, title:o.ref.title, kind:o.ref.kind},
+      act:{t:'go', s:o.ref}});
+  });
+  items.push({k:'依頼', l:'この記事について頼む', act:{t:'ask', text:'「'+n.title+'」について、'}});
+  return items;
+};
+REEL.concept = function(s){
+  var c = conceptBy[s.slug]; if(!c) return [];
+  var items = [], L = {requires:'前提',contrasts:'対比',leadsTo:'発展',elaborates:'深掘り'};
+  ['requires','contrasts','leadsTo','elaborates'].forEach(function(k){
+    (c.edges[k]||[]).forEach(function(t){
+      var r = resolve(t); if(!r) return;
+      items.push({k:L[k], l:r.title.slice(0,26), path:{dir:'out', why:({requires:'これを先に読むと分かる',contrasts:'これと対比すると輪郭が出る',leadsTo:'ここから発展した',elaborates:'ここを深掘りしている'})[k], ref:r, title:r.title, kind:r.kind}, act:{t:'go', s:r}});
+    });
+  });
+  (c.notes||[]).forEach(function(ns){
+    var r = resolve(ns); if(!r) return;
+    items.push({k:'蒸留', l:r.title.slice(0,26), path:{dir:'out', why:'この章から覚える価値のある知識として切り出した', ref:r, title:r.title, kind:r.kind}, act:{t:'go', s:r}});
+  });
+  backOf(s.slug).forEach(function(b){
+    items.push({k:'来る道', l:b.title.slice(0,26), path:{dir:'in', why:b.why, ref:b.from, title:b.title, kind:b.kind}, act:{t:'go', s:b.from}});
+  });
+  if(c.status==='stub') items.push({k:'依頼', l:'この章を書いてもらう', act:{t:'ask', text:'連載「哲学」の章「'+clean(c.title)+'」はまだ書かれていない。読み物として書いて'}});
+  return items;
+};
+REEL.atlas = function(s){
+  var a = atlases.filter(function(x){return x.slug===s.slug;})[0]; if(!a) return [];
+  var items = [];
+  a.routes.forEach(function(r){ items.push({k:'順路', l:r.label, route:r.id, act:{t:'go', s:{t:'concept',slug:r.order[0]}}}); });
+  a.concepts.forEach(function(c){
+    items.push({k:c.status==='written'?'章':'未執筆', l:clean(c.title), concept:c.slug, act:{t:'go', s:{t:'concept',slug:c.slug}}});
+  });
+  return items;
+};
+REEL.theme = function(s){
+  var list = notes.filter(function(n){ return (n.tags||[]).indexOf(s.tag)>=0; });
+  list.sort(function(a,b){ return a.updated<b.updated?1:-1; });
+  var items = list.map(function(n){
+    return {k:n.kind==='insight'?'気づき':'記事', l:n.title.slice(0,28), res:{title:n.title,kind:n.kind==='insight'?'気づき':'記事',sub:agoJP(n.updated)+'に更新',ex:n.ex,q:n.recall}, act:{t:'go', s:{t:'note',slug:n.slug}}};
+  });
+  var mo = mocs.filter(function(m){ return m.sections.some(function(sec){ return sec.items.some(function(it){ return list.some(function(n){return n.slug===it.target;}); }); }); })[0];
+  if(mo) items.unshift({k:'見取り図', l:mocJP(mo.slug), moc:mo.slug, act:{t:'go', s:{t:'moc',slug:mo.slug}}});
+  items.push({k:'依頼', l:'このテーマを増やしてもらう', act:{t:'ask', text:'「'+tagJP(s.tag)+'」について、まだ無いところを調べて記事にして'}});
+  return items;
+};
+REEL.follow = function(s){
+  var f = followBy[s.slug]; if(!f) return [];
+  var items = [];
+  (f.sessions||[]).forEach(function(se){
+    items.push({k:'観測', l:se.date, sess:se, act:{t:'go', s:{t:'session',slug:s.slug,date:se.date}}});
+  });
+  (f.entities||[]).forEach(function(e){
+    items.push({k:e.deepDive?'深掘り':'人物', l:clean(e.title), ent:e, act:{t:'go', s:{t:'entity',slug:e.slug,follow:f.name}}});
+  });
+  backOf(f.name+'/profile').concat(backOf(f.name)).forEach(function(b){
+    items.push({k:'来る道', l:b.title.slice(0,26), path:{dir:'in', why:b.why, ref:b.from, title:b.title, kind:b.kind}, act:{t:'go', s:b.from}});
+  });
+  items.push({k:'依頼', l:'次の観測を頼む', act:{t:'ask', text:'「'+clean(f.title)+'」の次の観測を記録したい。'}});
+  return items;
+};
+REEL.session = function(s){
+  var f = followBy[s.slug]; if(!f) return [];
+  return (f.sessions||[]).map(function(se){
+    return {k:'観測', l:se.date, sess:se, act:{t:'go', s:{t:'session',slug:s.slug,date:se.date}}};
+  });
+};
+REEL.entity = function(s){
+  var f = followBy[s.follow]; if(!f) return [];
+  var items = f.entities.map(function(e){
+    return {k:e.slug===s.slug?'いま':'人物', l:clean(e.title), ent:e, act:{t:'go', s:{t:'entity',slug:e.slug,follow:f.name}}};
+  });
+  backOf(s.slug).forEach(function(b){
+    items.push({k:'来る道', l:b.title.slice(0,26), path:{dir:'in', why:b.why, ref:b.from, title:b.title, kind:b.kind}, act:{t:'go', s:b.from}});
+  });
+  return items;
+};
+REEL.log = function(s){
+  var t = logBy[s.slug]; if(!t) return [];
+  var items = (t.entries||[]).map(function(en){
+    return {k:'記録', l:en.title.slice(0,26), entry:en, act:{t:'go', s:{t:'logentry',slug:en.slug,topic:t.slug}}};
+  });
+  items.push({k:'依頼', l:'記録を足してもらう', act:{t:'ask', text:'「'+t.title+'」に新しい記録を足したい。'}});
+  return items;
+};
+REEL.logentry = function(s){ return REEL.log({t:'log',slug:s.topic}); };
+REEL.moc = function(s){
+  var m = mocBy[s.slug]; if(!m) return [];
+  var items = [];
+  m.sections.forEach(function(sec){
+    sec.items.forEach(function(it){
+      var r = resolve(it.target); if(!r) return;
+      items.push({k:'道', l:(it.alias||r.title).slice(0,26),
+        path:{dir:'out', why:it.reason, ref:r, title:r.title, kind:r.kind}, act:{t:'go', s:r}});
+    });
+  });
+  return items;
+};
+
+/* ============================ 面（見る領域）の描画 ============================ */
+function md(x){
+  if(!x) return '';
+  var lines = String(x).split('\n'), out=[], ul=false;
+  function inl(s){
+    return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`(.+?)`/g,'<code>$1</code>');
+  }
+  lines.forEach(function(L){
+    var t=L.trim();
+    if(!t){ if(ul){out.push('</ul>');ul=false;} return; }
+    if(/^#{2,4}\s/.test(t)){ if(ul){out.push('</ul>');ul=false;} out.push('<h4>'+inl(t.replace(/^#+\s*/,''))+'</h4>'); return; }
+    if(/^[-*]\s/.test(t)){ if(!ul){out.push('<ul>');ul=true;} out.push('<li>'+inl(t.replace(/^[-*]\s*/,''))+'</li>'); return; }
+    if(ul){out.push('</ul>');ul=false;}
+    out.push('<p>'+inl(t)+'</p>');
+  });
+  if(ul) out.push('</ul>');
+  return out.join('');
+}
+function kick(a,b){ return '<div class="kick"><b>'+esc(a)+'</b><i></i>'+(b?'<span>'+esc(b)+'</span>':'')+'</div>'; }
+
+var VIEW = {};
+
+VIEW.today = function(s, item){
+  var cards = dayCards(extraCards);
+  if(item && item.card){
+    var n = noteBy[item.card];
+    var i = cards.map(function(x){return x.slug;}).indexOf(n.slug);
+    var v = (judged[TODAY]||{})[n.slug];
+    var h = kick('今日', (i+1)+' / '+cards.length+' 枚目');
+    h += '<div class="card">';
+    h += '<div class="meta"><span class="tag">'+esc(tagJP(n.tags[0]))+'</span><span>'+esc(agoJP(n.last||n.created)||'はじめて')+'</span></div>';
+    h += '<div class="q">'+esc(n.recall)+'</div>';
+    if(!state.flipped && !v){
+      h += '<div class="qhint">頭の中で答えてから、'+(state.hand==='L'?'左下':'右下')+'の原点をぽんと叩く。<br>答えが出たら原点が2つに割れる。左＝あやしい／右＝わかった。</div>';
+    } else {
+      h += '<div class="ans"><div class="t">'+esc(n.title)+'</div><div class="body">'+md(n.ex)+'</div>';
+      h += '<div class="trunc">— ここから先は正本（手元のリポジトリ）に続く</div>';
+      var paths = backOf(n.slug).length + outOf(n).length;
+      if(v) h += '<div class="verdict '+(v==='ok'?'ok':'fz')+'">✓ '+(v==='ok'?'「わかった」として記録した。間隔が伸びる':'「あやしい」として記録した。近いうちにまた出る')+'</div>';
+      else h += '<div class="qhint">この記事には道が <span class="num">'+paths+'</span> 本ある。判定してから、あらためて開けばたどれる。</div>';
+      h += '</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+  if(item && item.act && item.act.t==='more'){
+    return kick('今日','おかわり')+'<h1 class="t">今日の分は、ここまでで足りている。</h1>'+
+      '<div class="note-s">それでも続けたいときだけ、原点を叩くと同じ日付の並びから次の5枚が出る。<br>並び順は日付から決まっているので、何度開いても今日は同じ順番。引き直しはできない。</div>';
+  }
+  var pv = item && item.act && item.act.t==='go' ? previewOf(item.act.s) : null;
+  var head = kick('今日','余白');
+  if(pv) return head + '<h1 class="t">'+esc(pv.title)+'</h1><div class="meta"><span class="tag">'+esc(pv.kind)+'</span><span>'+esc(pv.sub||'')+'</span></div><div class="body">'+md(pv.ex)+'</div>';
+  return head;
+};
+
+VIEW.shelf = function(s, item){
+  var st = themeStats();
+  var top = st.slice(0,11), rest = st.slice(11);
+  var restN = rest.reduce(function(a,b){return a+b.n;},0);
+  var max = st[0].n, total = notes.length;
+  var h = kick('見渡す','いま手元にあるもの');
+  h += '<div class="bars">';
+  top.forEach(function(t){
+    var on = item && item.tag===t.tag;
+    h += '<div class="bar'+(on?' on':'')+'"><span class="fill" style="width:'+(t.n/max*100)+'%"></span>'+
+         '<span class="nm">'+esc(tagJP(t.tag))+'</span><span class="ct num">'+t.n+'</span></div>';
+  });
+  if(rest.length) h += '<div class="bar oth"><span class="fill" style="width:'+(restN/max*100)+'%"></span><span class="nm">その他 '+rest.length+'テーマ</span><span class="ct num">'+restN+'</span></div>';
+  h += '</div>';
+  h += '<div class="note-s" style="margin-bottom:18px">記事は全部で <span class="num">'+total+'</span> 本。うち <span class="num">'+Math.round(st[0].n/total*100)+'%</span> がゴルフ。<br>この偏りは事実なので、均等には並べない。</div>';
+  h += kick('ほかの棚');
+  h += '<div class="rows">';
+  [['連載', atlases.length+'本 — 順路つきの読み物'],
+   ['定点', follows.length+'つ — 同じ条件で見つづける'],
+   ['記録帖', logs.length+'冊 — 同じ項目で並べて比べる'],
+   ['見取り図', mocs.length+'枚 — 手で並べた索引']].forEach(function(r){
+    var on = item && item.k===r[0];
+    h += '<div class="row'+(on?' on':'')+'"><span class="rk">'+esc(r[0])+'</span><div class="rt">'+esc(r[1])+'</div></div>';
+  });
+  h += '</div>';
+  return h;
+};
+
+VIEW.search = function(s, item, items){
+  var q = state.q.trim();
+  if(!q){
+    var h = kick('探す','あれ何だっけ');
+    h += '<h1 class="t">思い出したい語を、下に打つ。</h1>';
+    h += '<div class="note-s">打つそばから、記事・章・定点・人物・記録の全部から絞り込む。<br>' +
+         '全部が手元にあるので、待ち時間は無い。<br><br>' +
+         '<b style="color:var(--hud)">見つからなかったときが本番。</b><br>' +
+         'その語は「muninn にまだ無い」ということ。そのまま Claude への依頼に変わる。</div>';
+    h += '<div class="chips">'+['毛穴','メッシ','イデア','ミート率','セラミド','ダークマター'].map(function(x){
+      return '<span class="chip">'+x+'</span>';}).join('')+'</div>';
+    return h;
+  }
+  var hits = (items||[]).filter(function(x){return x.res;});
+  var h = kick('探す','「'+q+'」 '+hits.length+'件');
+  if(!hits.length){
+    h += '<h1 class="t">「'+esc(q)+'」は、まだ手元に無い。</h1>';
+    h += '<div class="note-s">無いという事実が、次に貯めるものを決める。<br>原点を叩くと、この語を調べてもらう依頼が伝票に乗る。</div>';
+    return h;
+  }
+  h += '<div class="rows">';
+  hits.slice(0,20).forEach(function(x){
+    var r = x.res, on = item===x;
+    h += '<div class="row'+(on?' on':'')+'"><span class="rk">'+esc(r.kind)+'</span><div class="rt">'+esc(r.title)+
+         (r.sub?'<div class="rr">'+esc(r.sub)+'</div>':'')+'</div></div>';
+  });
+  h += '</div>';
+  if(hits.length>20) h += '<div class="trunc">ほか '+(hits.length-20)+'件</div>';
+  return h;
+};
+
+VIEW.ask = function(s, item){
+  var h = kick('頼む','Claude に渡す伝票');
+  if(!docket.length){
+    h += '<h1 class="t">伝票は、まだ空。</h1>';
+    h += '<div class="note-s">ここは書き込む場所ではない。書くのは手元の Claude Code で、ここは<b style="color:var(--hud)">頼みごとを溜めておく紙</b>。<br>' +
+         '読んでいて足りないと思ったところで、原点を <b style="color:var(--hud)">↑ 頼む</b> に引けば、いま見ているものが依頼に付いてくる。<br>' +
+         '溜まったらコピーして、Mac の前で貼る。</div>';
+    return h;
+  }
+  h += '<h1 class="t">依頼 <span class="num">'+docket.length+'</span> 件</h1>';
+  h += '<div class="rows">';
+  docket.forEach(function(d,i){
+    var on = item && item.row===i;
+    h += '<div class="row'+(on?' on':'')+'"><span class="rk num">'+(i+1)+'</span><div class="rt">'+esc(d)+'</div></div>';
+  });
+  h += '</div>';
+  h += '<div class="pathgrp">'+kick('コピーされる文')+'<div class="body" style="font-family:var(--f-mono);font-size:11px;white-space:pre-wrap;color:var(--dim)">'+esc(docketText())+'</div></div>';
+  return h;
+};
+
+function pathsBlock(items, item){
+  var ins = items.filter(function(x){return x.path && x.path.dir==='in';});
+  var outs= items.filter(function(x){return x.path && x.path.dir==='out';});
+  var h='';
+  function grp(title, arr, sub){
+    if(!arr.length) return '';
+    var s = '<div class="pathgrp">'+kick(title, sub||'')+'';
+    arr.forEach(function(x){
+      var on = item===x;
+      s += '<div class="path'+(on?' on':'')+'"><span class="ar">'+(x.path.dir==='in'?'←':'→')+'</span><div style="flex:1">'+
+           '<div class="why">'+esc(x.path.why||'（理由は書かれていない）')+'</div>'+
+           '<div class="to">'+esc(x.path.title)+' <span style="color:var(--dimmer);font-size:10px">'+esc(x.path.kind)+'</span></div>'+
+           '</div></div>';
+    });
+    return s+'</div>';
+  }
+  h += grp('ここへ来る道', ins, ins.length+'本 — 向こうが書いた理由');
+  h += grp('ここから伸びる道', outs, outs.length+'本');
+  return h;
+}
+
+VIEW.note = function(s, item, items){
+  var n = noteBy[s.slug]; if(!n) return '';
+  var h = kick(n.kind==='insight'?'気づき':'記事', agoJP(n.updated)+'に更新');
+  h += '<h1 class="t">'+esc(n.title)+'</h1>';
+  h += '<div class="meta">'+(n.tags||[]).map(function(t){return '<span class="tag">'+esc(tagJP(t))+'</span>';}).join('')+
+       '<span>書いた日 '+esc(n.created)+'</span></div>';
+  if(n.recall) h += '<div class="note-s" style="border-left:2px solid var(--hud);padding-left:10px;margin-bottom:14px">問い： '+esc(n.recall)+'</div>';
+  h += '<div class="body">'+md(n.ex)+'</div><div class="trunc">— ここから先は正本に続く</div>';
+  var pb = pathsBlock(items||[], item);
+  if(pb) h += pb;
+  else h += '<div class="pathgrp">'+kick('道')+'<div class="note-s">この記事には、まだ来る道も伸びる道も無い。<br>原点を叩けば「道を引いてほしい」と伝票に頼める。</div></div>';
+  return h;
+};
+
+VIEW.concept = function(s, item, items){
+  var c = conceptBy[s.slug]; if(!c) return '';
+  var a = atlases.filter(function(x){return x.slug===c._atlas;})[0];
+  var h = kick('連載「'+clean(a.title)+'」', c.status==='written'?'この章は書けている':'この章はまだ書かれていない');
+  h += '<h1 class="t">'+esc(c.title)+'</h1>';
+  h += '<div class="note-s" style="margin-bottom:14px">'+esc(c.gist)+'</div>';
+  // ルート上の位置（決定的な並び）
+  a.routes.forEach(function(r){
+    var i = r.order.indexOf(c.slug); if(i<0) return;
+    h += '<div class="pathgrp" style="margin-top:14px">'+kick(r.label, (i+1)+' / '+r.order.length);
+    h += '<div class="rows">';
+    r.order.forEach(function(cs,j){
+      var cc = conceptBy[cs]; if(!cc) return;
+      h += '<div class="row'+(j===i?' on':'')+'"><span class="rk num">'+(j+1)+'</span><div class="rt">'+esc(clean(cc.title))+
+           (cc.status==='stub'?'<div class="rr">まだ書かれていない</div>':'')+'</div></div>';
+    });
+    h += '</div></div>';
+  });
+  if(c.status==='written' && c.ex) h += '<div class="pathgrp">'+kick('本文')+'<div class="body">'+md(c.ex)+'</div><div class="trunc">— ここから先は正本に続く</div></div>';
+  h += pathsBlock(items||[], item);
+  return h;
+};
+
+VIEW.atlas = function(s, item){
+  var a = atlases.filter(function(x){return x.slug===s.slug;})[0]; if(!a) return '';
+  var h = kick('連載', a.concepts.length+'章 / 順路'+a.routes.length+'本');
+  h += '<h1 class="t">'+esc(clean(a.title))+'</h1>';
+  h += '<div class="note-s" style="margin-bottom:16px">'+esc(plain(a.ex).slice(0,150))+'</div>';
+  a.routes.forEach(function(r){
+    var on = item && item.route===r.id;
+    h += '<div class="pathgrp">'+kick(r.label, on?'いま選んでいる順路':'');
+    h += '<div class="note-s" style="margin-bottom:8px">'+esc(r.desc)+'</div><div class="rows">';
+    r.order.forEach(function(cs,j){
+      var cc = conceptBy[cs]; if(!cc) return;
+      var sel = item && item.concept===cs;
+      h += '<div class="row'+(sel?' on':'')+'"><span class="rk num">'+(j+1)+'</span><div class="rt">'+esc(clean(cc.title))+
+           (cc.status==='stub'?'<div class="rr">まだ書かれていない</div>':'')+'</div></div>';
+    });
+    h += '</div></div>';
+  });
+  return h;
+};
+
+VIEW.theme = function(s, item, items){
+  var list = notes.filter(function(n){ return (n.tags||[]).indexOf(s.tag)>=0; });
+  list.sort(function(a,b){ return a.updated<b.updated?1:-1; });
+  var h = kick(tagJP(s.tag), list.length+'本');
+  h += '<div class="rows">';
+  var mo0 = (items||[]).filter(function(x){return x.moc;})[0];
+  if(mo0){
+    var onm = item===mo0;
+    h += '<div class="row'+(onm?' on':'')+'"><span class="rk">見取り図</span><div class="rt">'+esc(mocJP(mo0.moc))+
+         '<div class="rr">手で並べた索引。ここに並べた理由も書いてある</div></div></div>';
+  }
+  list.forEach(function(n){
+    var on = item && item.act && item.act.s && item.act.s.slug===n.slug;
+    h += '<div class="row'+(on?' on':'')+'"><span class="rk">'+(n.kind==='insight'?'気づき':'記事')+'</span><div class="rt">'+esc(n.title)+
+         '<div class="rr">'+esc(agoJP(n.updated))+'に更新</div></div></div>';
+  });
+  h += '</div>';
+  return h;
+};
+
+function sparkline(pts, goal){
+  var w=132,h=30, vals=pts.map(function(p){return p.value;});
+  var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals), r=(mx-mn)||1;
+  var d = pts.map(function(p,i){ return (i/(pts.length-1||1))*w+','+(h-((p.value-mn)/r)*h); }).join(' ');
+  var col = goal==null ? 'var(--dimmer)' : 'var(--hud)';
+  return '<svg width="'+w+'" height="'+h+'"><polyline points="'+d+'" fill="none" stroke="'+col+'" stroke-width="1.5" stroke-linejoin="round"/>'+
+         '<circle cx="'+w+'" cy="'+(h-((vals[vals.length-1]-mn)/r)*h)+'" r="2.5" fill="'+col+'"/></svg>';
+}
+VIEW.follow = function(s, item, items){
+  var f = followBy[s.slug]; if(!f) return '';
+  var h = kick('定点', f.followType==='goal'?'よくなりたい':'もっと楽しみたい');
+  h += '<h1 class="t">'+esc(clean(f.title))+'</h1>';
+  h += '<div class="note-s" style="margin-bottom:14px">'+esc(f.goal)+'</div>';
+  if(f.snapshot && f.snapshot.length){
+    h += '<div class="pathgrp" style="margin-top:0">'+kick('いまの姿')+'<div class="body"><ul>'+
+      f.snapshot.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div></div>';
+  }
+  if(f.series && f.series.length){
+    h += '<div class="pathgrp">'+kick('数字','良し悪しは正本の宣言に従う')+'<div class="mets">';
+    f.series.forEach(function(se){
+      var p = se.points, last=p[p.length-1], prev=p[p.length-2];
+      var d = prev ? (last.value - prev.value) : 0;
+      var cls = 'n', tail = '良し悪しは決めていない';
+      if(se.goal==='up'){ cls = d>0?'g':(d<0?'b':'n'); tail = '大きいほど良い'; }
+      if(se.goal==='down'){ cls = d<0?'g':(d>0?'b':'n'); tail = '小さいほど良い'; }
+      h += '<div class="met"><div class="k">'+esc(se.key)+'</div><div class="v">'+last.value+'</div>'+
+           '<div class="d '+cls+'">'+(d>0?'+':'')+(Math.round(d*100)/100)+' ／ '+tail+'</div>'+
+           sparkline(p, se.goal)+'</div>';
+    });
+    h += '</div></div>';
+  }
+  if(f.focus && f.focus.length){
+    h += '<div class="pathgrp">'+kick('重点')+'<div class="rows">'+f.focus.map(function(x){
+      return '<div class="row"><span class="rk">'+(x.priority?'最優先':'')+'</span><div class="rt">'+esc(x.title)+
+        '<div class="rr">'+esc(x.note||'')+'</div></div></div>';}).join('')+'</div></div>';
+  }
+  if(f.entities && f.entities.length){
+    h += '<div class="pathgrp">'+kick('顔ぶれ', f.entities.length+'人')+'<div class="rows">'+
+      f.entities.map(function(e){
+        var on = item && item.ent===e;
+        return '<div class="row'+(on?' on':'')+'"><span class="rk">'+esc(e.group)+'</span><div class="rt">'+esc(clean(e.title))+
+          '<div class="rr">'+esc(e.role)+' / '+esc(e.club)+(e.status==='injured'?' — いま離脱中':'')+'</div></div></div>';
+      }).join('')+'</div></div>';
+  }
+  if(f.rivals && f.rivals.length){
+    h += '<div class="pathgrp">'+kick('相手')+'<div class="rows">'+f.rivals.map(function(r){
+      return '<div class="row"><span class="rk">相手</span><div class="rt">'+esc(r.name)+'<div class="rr">'+esc(r.note)+'</div></div></div>';
+    }).join('')+'</div></div>';
+  }
+  h += pathsBlock(items||[], item);
+  return h;
+};
+VIEW.session = function(s, item){
+  var f = followBy[s.slug]; if(!f) return '';
+  var se = (f.sessions||[]).filter(function(x){return x.date===s.date;})[0]; if(!se) return '';
+  var i = f.sessions.indexOf(se), prev = f.sessions[i+1];
+  var h = kick('観測', esc(clean(f.title)));
+  h += '<h1 class="t">'+esc(se.date)+'</h1>';
+  h += '<div class="note-s" style="margin-bottom:14px">'+esc(se.summary)+'</div>';
+  if(se.metrics){
+    h += '<div class="mets">';
+    Object.keys(se.metrics).forEach(function(k){
+      var ser = (f.series||[]).filter(function(x){return x.key===k;})[0];
+      var goal = ser ? ser.goal : null;
+      var d = prev && prev.metrics && prev.metrics[k]!=null ? (se.metrics[k]-prev.metrics[k]) : null;
+      var cls='n', tail='良し悪しは決めていない';
+      if(goal==='up'){ cls = d>0?'g':(d<0?'b':'n'); tail='大きいほど良い'; }
+      if(goal==='down'){ cls = d<0?'g':(d>0?'b':'n'); tail='小さいほど良い'; }
+      h += '<div class="met"><div class="k">'+esc(k)+'</div><div class="v">'+se.metrics[k]+'</div>'+
+        '<div class="d '+cls+'">'+(d==null?'—':((d>0?'+':'')+(Math.round(d*100)/100)))+' ／ '+tail+'</div></div>';
+    });
+    h += '</div>';
+  }
+  if(se.ex) h += '<div class="body">'+md(se.ex)+'</div><div class="trunc">— ここから先は正本に続く</div>';
+  return h;
+};
+VIEW.entity = function(s, item, items){
+  var e = entityBy[s.slug]; if(!e) return '';
+  var f = followBy[s.follow];
+  var h = kick(clean(f.title), e.group);
+  h += '<h1 class="t">'+esc(clean(e.title))+'</h1>';
+  h += '<div class="meta"><span class="tag">'+esc(e.role)+'</span><span>'+esc(e.club)+'</span>'+
+       (e.status==='injured'?'<span style="color:var(--warn)">いま離脱中</span>':'')+'</div>';
+  if(e.strengths && e.strengths.length) h += '<div class="pathgrp" style="margin-top:0">'+kick('強み')+'<div class="body"><ul>'+
+    e.strengths.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div></div>';
+  if(e.developing && e.developing.length) h += '<div class="pathgrp">'+kick('伸ばしている点')+'<div class="body"><ul>'+
+    e.developing.map(function(x){return '<li>'+esc(x)+'</li>';}).join('')+'</ul></div></div>';
+  if(e.changelog && e.changelog.length) h += '<div class="pathgrp">'+kick('移り変わり')+'<div class="rows">'+
+    e.changelog.map(function(c){return '<div class="row"><span class="rk num">'+esc(c.date)+'</span><div class="rt">'+esc(c.note)+'</div></div>';}).join('')+'</div></div>';
+  h += pathsBlock(items||[], item);
+  return h;
+};
+VIEW.log = function(s, item){
+  var t = logBy[s.slug]; if(!t) return '';
+  var h = kick('記録帖', t.entries.length+'件');
+  h += '<h1 class="t">'+esc(t.title)+'</h1>';
+  h += '<div class="note-s" style="margin-bottom:14px">記録する項目は最初に決めてある： '+
+       t.fields.map(function(f){return esc(f.label);}).join('・')+'。<br>同じ項目で貯めるから、あとで並べて比べられる。</div>';
+  h += '<div class="rows">';
+  t.entries.forEach(function(en){
+    var on = item && item.entry===en;
+    h += '<div class="row'+(on?' on':'')+'"><span class="rk num">'+'★'+(en.fields.rating||'')+'</span><div class="rt">'+esc(en.title)+
+      '<div class="rr">'+esc([en.fields.origin,en.fields.roast,(en.fields.flavor||[]).join('・')].filter(Boolean).join(' / '))+'</div></div></div>';
+  });
+  h += '</div>';
+  if(t.entries.length<3) h += '<div class="pathgrp">'+kick('比べるにはまだ薄い')+
+    '<div class="note-s">記録が'+t.entries.length+'件では、並べても比べられない。<br>原点を叩けば「次の一杯も記録して」と伝票に頼める。</div></div>';
+  return h;
+};
+VIEW.logentry = function(s, item){
+  var t = logBy[s.topic]; if(!t) return '';
+  var en = t.entries.filter(function(x){return x.slug===s.slug;})[0]; if(!en) return '';
+  var h = kick(t.title, en.created);
+  h += '<h1 class="t">'+esc(en.title)+'</h1>';
+  h += '<div class="mets">';
+  t.fields.forEach(function(f){
+    var v = en.fields[f.key]; if(v==null||v==='') return;
+    if(Array.isArray(v)) v = v.join('・');
+    if(typeof v==='boolean') v = v?'はい':'いいえ';
+    if(f.type==='rating') v = '★'.repeat(v)+'☆'.repeat((f.max||5)-v);
+    h += '<div class="met"><div class="k">'+esc(f.label)+'</div><div class="v" style="font-size:14px">'+esc(v)+(f.unit?' '+esc(f.unit):'')+'</div></div>';
+  });
+  h += '</div>';
+  if(en.ex) h += '<div class="body">'+md(en.ex)+'</div>';
+  return h;
+};
+VIEW.moc = function(s, item, items){
+  var m = mocBy[s.slug]; if(!m) return '';
+  var h = kick('見取り図','手で並べた索引');
+  h += '<h1 class="t">'+esc(mocJP(m.slug))+'</h1>';
+  m.sections.forEach(function(sec){
+    h += '<div class="pathgrp">'+kick(cleanSec(sec.title))+'<div class="rows">';
+    sec.items.forEach(function(it){
+      var r = resolve(it.target); if(!r) return;
+      var on = item && item.path && item.path.ref && item.path.ref.slug===r.slug;
+      h += '<div class="row'+(on?' on':'')+'"><span class="rk">'+esc(r.kind)+'</span><div class="rt">'+esc(it.alias||r.title)+
+           (it.reason?'<div class="rr">'+esc(it.reason)+'</div>':'')+'</div></div>';
+    });
+    h += '</div></div>';
+  });
+  return h;
+};
+
+/* ============================ 覗き窓 ============================ */
+function previewOf(ref){
+  if(!ref) return null;
+  if(ref.t==='note'){ var n=noteBy[ref.slug]; if(!n) return null;
+    return {title:n.title, kind:n.kind==='insight'?'気づき':'記事', sub:(n.tags||[]).map(tagJP).join('・'), ex:n.ex, q:n.recall}; }
+  if(ref.t==='concept'){ var c=conceptBy[ref.slug]; if(!c) return null;
+    return {title:c.title, kind:'章', sub:c.status==='written'?'書けている':'まだ書かれていない', ex:c.gist}; }
+  if(ref.t==='entity'){ var e=entityBy[ref.slug]; if(!e) return null;
+    return {title:clean(e.title), kind:'人物', sub:e.role+' / '+e.club, ex:(e.strengths||[]).join(' / ')}; }
+  if(ref.t==='follow'){ var f=followBy[ref.slug]; if(!f) return null;
+    return {title:clean(f.title), kind:'定点', sub:f.followType==='goal'?'よくなりたい':'もっと楽しみたい', ex:f.goal}; }
+  if(ref.t==='moc'){ var m=mocBy[ref.slug]; if(!m) return null;
+    return {title:mocJP(ref.slug), kind:'見取り図', sub:m.sections.length+'つの束', ex:m.sections.map(function(s){return cleanSec(s.title);}).join('・')}; }
+  if(ref.t==='log'){ var t=logBy[ref.slug]; if(!t) return null;
+    return {title:t.title, kind:'記録帖', sub:t.entries.length+'件', ex:''}; }
+  if(ref.t==='logentry'){ var tt=logBy[ref.topic]; if(!tt) return null;
+    var en=tt.entries.filter(function(x){return x.slug===ref.slug;})[0]; if(!en) return null;
+    return {title:en.title, kind:'記録', sub:tt.title, ex:en.ex}; }
+  if(ref.t==='theme') return {title:tagJP(ref.tag), kind:'テーマ', sub:'', ex:''};
+  return null;
+}
+function renderPeek(sc, item){
+  var el = $('#peek');
+  if(!item){ el.className=''; $('#view').classList.remove('haspeek'); return; }
+  var h='';
+  if(item.path){
+    var pv = previewOf(item.path.ref) || {title:item.path.title, kind:item.path.kind, ex:''};
+    h += '<div class="ph"><b>覗いている</b><i></i><span>'+(item.path.dir==='in'?'ここへ来る道':'ここから伸びる道')+' ／ 原点で移る</span></div>';
+    h += '<div class="pwhy">'+esc(item.path.why||'（理由は書かれていない）')+'</div>';
+    h += '<div class="ptt">'+esc(pv.title)+' <span style="color:var(--dimmer);font-size:10px;font-weight:400">'+esc(pv.kind)+'</span></div>';
+    if(pv.q) h += '<div class="pq">問い： '+esc(pv.q)+'</div>';
+    else h += '<div class="pex">'+esc(plain(pv.ex).slice(0,120))+'…</div>';
+  } else if(item.res){
+    var r = item.res;
+    h += '<div class="ph"><b>覗いている</b><i></i><span>原点で開く</span></div>';
+    h += '<div class="ptt">'+esc(r.title)+' <span style="color:var(--dimmer);font-size:10px;font-weight:400">'+esc(r.kind)+'</span></div>';
+    if(r.sub) h += '<div class="pwhy">'+esc(r.sub)+'</div>';
+    h += '<div class="pex">'+esc(plain(r.ex).slice(0,120))+'…</div>';
+  } else if(item.tag){
+    var list = notes.filter(function(n){return (n.tags||[]).indexOf(item.tag)>=0;})
+                    .sort(function(a,b){return a.updated<b.updated?1:-1;});
+    h += '<div class="ph"><b>覗いている</b><i></i><span>原点で降りる</span></div>';
+    h += '<div class="ptt">'+esc(tagJP(item.tag))+' <span style="color:var(--dimmer);font-size:10px;font-weight:400">'+list.length+'本</span></div>';
+    h += '<div class="pex">'+list.slice(0,3).map(function(n){return '・'+esc(n.title.slice(0,34));}).join('<br>')+'</div>';
+  } else if(item.sess){
+    h += '<div class="ph"><b>覗いている</b><i></i><span>原点で開く</span></div>';
+    h += '<div class="ptt">'+esc(item.sess.date)+' の観測</div>';
+    h += '<div class="pex">'+esc(item.sess.summary)+'</div>';
+  } else if(item.ent){
+    h += '<div class="ph"><b>覗いている</b><i></i><span>原点で開く</span></div>';
+    h += '<div class="ptt">'+esc(clean(item.ent.title))+' <span style="color:var(--dimmer);font-size:10px;font-weight:400">'+esc(item.ent.group)+'</span></div>';
+    h += '<div class="pwhy">'+esc(item.ent.role+' / '+item.ent.club)+'</div>';
+    h += '<div class="pex">'+esc((item.ent.strengths||[]).join(' / ').slice(0,110))+'</div>';
+  } else if(item.entry){
+    h += '<div class="ph"><b>覗いている</b><i></i><span>原点で開く</span></div>';
+    h += '<div class="ptt">'+esc(item.entry.title)+'</div>';
+    h += '<div class="pex">'+esc(plain(item.entry.ex).slice(0,120))+'</div>';
+  } else if(item.act && item.act.t==='ask'){
+    h += '<div class="ph"><b>覗いている</b><i></i><span>原点で伝票に足す</span></div>';
+    h += '<div class="ptt">Claude への依頼</div>';
+    h += '<div class="pwhy">'+esc(item.act.text)+'</div>';
+  } else if(item.act && (item.act.t==='copy'||item.act.t==='write'||item.act.t==='del'||item.act.t==='more')){
+    var A = {copy:['伝票をまるごとクリップボードへ','番号つきの1本のテキストになる。Mac の Claude Code にそのまま貼れば、上から順に処理してもらえる。'],
+             write:['新しい依頼を書く','ひな形（調べて記事に／更新して／深掘りして／道を引いて）から選ぶか、自由に書く。書いても muninn は変わらない——変えるのは手元の Claude。'],
+             del:['この依頼を伝票から外す','外したあとも数秒は戻せる。'],
+             more:['今日の並びから、次の5枚','順番は日付から決まっているので、引き直しにはならない。']}[item.act.t];
+    h += '<div class="ph"><b>覗いている</b><i></i><span>原点で実行</span></div>';
+    h += '<div class="ptt">'+esc(A[0])+'</div>';
+    h += '<div class="pex">'+esc(item.act.t==='del' ? (docket[item.act.i]||'') : A[1])+'</div>';
+  } else if(item.route){
+    var a = atlases[0], r2 = a.routes.filter(function(x){return x.id===item.route;})[0];
+    h += '<div class="ph"><b>覗いている</b><i></i><span>原点で1章目から読む</span></div>';
+    h += '<div class="ptt">'+esc(r2.label)+' <span style="color:var(--dimmer);font-size:10px;font-weight:400">'+r2.order.length+'章</span></div>';
+    h += '<div class="pex">'+esc(r2.desc)+'</div>';
+  } else if(item.concept){
+    var cc = conceptBy[item.concept];
+    h += '<div class="ph"><b>覗いている</b><i></i><span>原点で開く</span></div>';
+    h += '<div class="ptt">'+esc(cc.title)+' <span style="color:var(--dimmer);font-size:10px;font-weight:400">'+(cc.status==='written'?'書けている':'まだ書かれていない')+'</span></div>';
+    h += '<div class="pex">'+esc(cc.gist)+'</div>';
+  } else if(item.act && item.act.t==='go'){
+    var pv2 = previewOf(item.act.s);
+    if(pv2){
+      h += '<div class="ph"><b>覗いている</b><i></i><span>原点で開く</span></div>';
+      h += '<div class="ptt">'+esc(pv2.title)+' <span style="color:var(--dimmer);font-size:10px;font-weight:400">'+esc(pv2.kind)+'</span></div>';
+      if(pv2.sub) h += '<div class="pwhy">'+esc(pv2.sub)+'</div>';
+      h += '<div class="pex">'+esc(plain(pv2.ex).slice(0,120))+'…</div>';
+    }
+  }
+  if(!h){ el.className=''; $('#view').classList.remove('haspeek'); return; }
+  el.innerHTML = h; el.className='on'; $('#view').classList.add('haspeek');
+}
+
+/* ============================ 原点が何をするか ============================ */
+function primaryOf(sc, item){
+  if(sc.t==='today' && item && item.card){
+    var v = (judged[TODAY]||{})[item.card];
+    if(v) return {short:'次へ', label:'次の1枚へ', run:function(){ nextCard(); }};
+    if(!state.flipped) return {short:'めくる', label:'めくる', run:function(){ state.flipped=true; render(); }};
+    return {short:'判定', label:'判定', run:null, split:true};
+  }
+  if(!item) return {short:'—', label:'—', run:null};
+  var a = item.act;
+  if(!a) return {short:'—', label:'—', run:null};
+  if(a.t==='go')   return {short:item.path?'移る':'開く', label:item.path?'この道へ移る':'開く',
+                           run:function(){ push(Object.assign({}, a.s)); }};
+  if(a.t==='ask')  return {short:'頼む', label:'この依頼を書く', run:function(){ openSheet(a.text); }};
+  if(a.t==='write')return {short:'書く', label:'新しい依頼を書く', run:function(){ openSheet(''); }};
+  if(a.t==='copy') return {short:'写す', label:'伝票をコピー', run:function(){ copyDocket(); }};
+  if(a.t==='del')  return {short:'外す', label:'この依頼を伝票から外す', run:function(){ var d=docket[a.i]; docket.splice(a.i,1); saveAll(); render(true);
+      showUndo('依頼を戻す', function(){ docket.splice(a.i,0,d); saveAll(); render(true); }); }};
+  if(a.t==='more') return {short:'5枚', label:'あと5枚 出す', run:function(){ extraCards+=5; render(true); toast('今日の並びから、次の5枚を出した'); }};
+  if(a.t==='flip') return {short:'めくる', label:'めくる', run:function(){ state.flipped=true; render(); }};
+  return {short:'—', label:'—', run:null};
+}
+function nextCard(){
+  var items = curItems, i = curIdx;
+  for(var j=i+1;j<items.length;j++){
+    if(!items[j].card || !(judged[TODAY]||{})[items[j].card]){ scrollToIndex(j,true); return; }
+  }
+  scrollToIndex(Math.min(i+1, items.length-1), true);
+}
+function judge(v){
+  var it = curItems[curIdx]; if(!it || !it.card) return;
+  var slug = it.card;
+  judged[TODAY] = judged[TODAY] || {};
+  var before = judged[TODAY][slug];
+  judged[TODAY][slug] = v;
+  flipLog.push({d:TODAY, slug:slug, v:v});
+  saveAll();
+  state.flipped = true;
+  render('keep');
+  showUndo('取り消す', function(){
+    if(before) judged[TODAY][slug]=before; else delete judged[TODAY][slug];
+    for(var i=flipLog.length-1;i>=0;i--){ if(flipLog[i].slug===slug && flipLog[i].d===TODAY){ flipLog.splice(i,1); break; } }
+    saveAll(); state.flipped=true; render('keep');
+  });
+  setTimeout(function(){ nextCard(); }, 340);
+}
+
+/* ============================ 帯の描画・スクロール ============================ */
+var ITEM_W = 88, GAP = 10, STEP = ITEM_W + GAP;
+var reelEl = $('#reel'), curItems = [], curIdx = 0, suppressScroll = false;
+
+function setReel(items, idx){
+  curItems = items;
+  var hadFocus = reelEl.contains(document.activeElement);
+  var pad = (reelEl.clientWidth - ITEM_W)/2;
+  if(!items.length){
+    reelEl.innerHTML=''; curIdx=0;
+    return;
+  }
+  reelEl.innerHTML = items.map(function(it,i){
+    var cls = 'ri' + (it.done?' done':'') + (it.act && (it.act.t==='ask'||it.act.t==='write'||it.act.t==='copy'||it.act.t==='del'||it.act.t==='more')?' act':'');
+    return '<button class="'+cls+'" role="option" aria-selected="false" tabindex="-1" data-i="'+i+'"'+
+           ' aria-label="'+esc(it.k+'：'+it.l+(it.done?'（判定ずみ）':''))+'">'+
+           '<span class="rk" aria-hidden="true">'+esc(it.k)+'</span><span class="rl" aria-hidden="true">'+esc(it.l)+'</span></button>';
+  }).join('');
+  reelEl.style.paddingLeft = pad+'px';
+  reelEl.style.paddingRight = pad+'px';
+  curIdx = Math.max(0, Math.min(idx||0, items.length-1));
+  suppressScroll = true;
+  reelEl.scrollLeft = curIdx*STEP;
+  requestAnimationFrame(function(){ suppressScroll=false; fisheye(); markSel();
+    if(hadFocus && reelEl.children[curIdx]) reelEl.children[curIdx].focus({preventScroll:true}); });
+}
+function fisheye(){
+  var sl = reelEl.scrollLeft, kids = reelEl.children;
+  for(var i=0;i<kids.length;i++){
+    var d = Math.abs(i*STEP - sl);
+    var s = 1 + 0.40*Math.max(0, 1 - d/130);
+    var o = 0.4 + 0.6*Math.max(0, 1 - d/200);
+    kids[i].style.transform = 'scale('+s.toFixed(3)+')';
+    kids[i].style.opacity = o.toFixed(2);
+  }
+}
+function markSel(){
+  var kids = reelEl.children;
+  for(var i=0;i<kids.length;i++){
+    var on = (i===curIdx);
+    kids[i].classList.toggle('on', on);
+    kids[i].setAttribute('aria-selected', on ? 'true' : 'false');
+    kids[i].tabIndex = on ? 0 : -1;   // ローミング tabindex：帯は Tab 1回で入り、←→ で動く
+  }
+  reelEl.setAttribute('aria-activedescendant','');
+}
+function scrollToIndex(i, smooth){
+  i = Math.max(0, Math.min(i, curItems.length-1));
+  if(smooth && !matchMedia('(prefers-reduced-motion: reduce)').matches){
+    reelEl.scrollTo({left:i*STEP, behavior:'smooth'});
+  } else { reelEl.scrollLeft = i*STEP; }
+}
+var scrollRaf = null, settleT = null;
+reelEl.addEventListener('scroll', function(){
+  if(suppressScroll) return;
+  if(scrollRaf) return;
+  scrollRaf = requestAnimationFrame(function(){ scrollRaf=null; fisheye();
+    var i = Math.round(reelEl.scrollLeft/STEP);
+    i = Math.max(0, Math.min(i, curItems.length-1));
+    if(i!==curIdx){ curIdx=i; markSel(); state.flipped=false; clearTimeout(settleT);
+      settleT = setTimeout(function(){ render(); }, 40); }
+  });
+}, {passive:true});
+reelEl.addEventListener('wheel', function(e){
+  if(Math.abs(e.deltaY) > Math.abs(e.deltaX)){ reelEl.scrollLeft += e.deltaY; e.preventDefault(); }
+}, {passive:false});
+reelEl.addEventListener('click', function(e){
+  var b = e.target.closest('.ri'); if(!b) return;
+  var i = +b.dataset.i;
+  if(i===curIdx){ var p = primaryOf(cur(), curItems[i]); if(p.run) p.run(); }
+  else { scrollToIndex(i, true); }
+});
+// 帯のキーボード操作（← → で候補、Enter/Space で決定）。ドラッグを使わずに完走できる
+reelEl.addEventListener('keydown', function(e){
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){ scrollToIndex(curIdx+1,true); focusSel(); e.preventDefault(); }
+  else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){ scrollToIndex(curIdx-1,true); focusSel(); e.preventDefault(); }
+  else if(e.key==='Home'){ scrollToIndex(0,true); focusSel(); e.preventDefault(); }
+  else if(e.key==='End'){ scrollToIndex(curItems.length-1,true); focusSel(); e.preventDefault(); }
+});
+function focusSel(){ setTimeout(function(){ var el=reelEl.children[curIdx]; if(el) el.focus({preventScroll:true}); },60); }
+
+/* ============================ 扇（方向メニュー） ============================ */
+var FACES = [
+  {id:'today', label:'今日', deg:0,  R:130, dir:'→', dirName:'横'},
+  {id:'shelf', label:'見渡す', deg:30, R:130, dir:'↗', dirName:'斜め上'},
+  {id:'search',label:'探す',  deg:60, R:130, dir:'↗', dirName:'もっと斜め上'},
+  {id:'ask',   label:'頼む',  deg:90, R:116, dir:'↑', dirName:'真上'}
+];
+var fanEl = $('#fan'), aimEl = fanEl.querySelector('.aim');
+function originCenter(){
+  var r = $('#origin').getBoundingClientRect(), fr = $('#frame').getBoundingClientRect();
+  return {x: r.left - fr.left + r.width/2, y: r.top - fr.top + r.height/2};
+}
+function buildFan(){
+  $$('#fan .wedge').forEach(function(n){n.remove();});
+  var c = originCenter(), sx = state.hand==='L' ? 1 : -1;
+  FACES.forEach(function(f){
+    var rad = f.deg*Math.PI/180, R = f.R;
+    var x = c.x + sx*R*Math.cos(rad), y = c.y - R*Math.sin(rad);
+    var here = state.face===f.id && !state.stack.length;
+    var el = document.createElement('button');
+    el.className = 'wedge' + (here ? ' here' : '');
+    el.dataset.face = f.id;
+    el.setAttribute('role','menuitem');
+    el.setAttribute('aria-label', f.label + (here?'（いまここ）':'') + '。原点から'+f.dirName+'へ引いても行ける');
+    el.innerHTML = '<span class="dir" aria-hidden="true">'+(sx>0?f.dir:f.dir.replace('→','←').replace('↗','↖'))+'</span><span class="lb">'+f.label+'</span>';
+    el.style.left = x+'px'; el.style.top = y+'px';
+    // ピルの「原点に近い辺」を半径の位置に合わせる（隣どうしが重ならない）
+    el.style.transform = 'translate('+(-50 + 50*sx*Math.cos(rad)).toFixed(2)+'%,'+(-50 - 50*Math.sin(rad)).toFixed(2)+'%)';
+    fanEl.appendChild(el);
+  });
+  var b = document.createElement('button');
+  b.className = 'wedge back'; b.dataset.face='__back';
+  b.setAttribute('role','menuitem');
+  b.setAttribute('aria-label','ひとつ戻す。原点から下へ引いても戻せる');
+  b.innerHTML = '<span class="dir" aria-hidden="true">↓</span><span class="lb">戻す</span>';
+  b.style.left = c.x+'px'; b.style.top = (c.y+52)+'px';
+  b.style.transform = 'translate(-50%,0)';
+  fanEl.appendChild(b);
+  fanEl.style.setProperty('--ox', c.x+'px');
+  fanEl.style.setProperty('--oy', c.y+'px');
+  aimEl.style.left = c.x+'px'; aimEl.style.top = c.y+'px';
+}
+function showFan(on){
+  state.fanOpen = on;
+  fanEl.classList.toggle('on', on);
+  if(on){ buildFan(); }
+  else { fanEl.classList.remove('latch'); state.fanLatch=false; state.hot=null; aimEl.style.width='0px'; clearTimeout(latchT); }
+  $('#legend').setAttribute('aria-expanded', on ? 'true' : 'false');
+}
+function setHot(id){
+  state.hot = id;
+  $$('#fan .wedge').forEach(function(w){ w.classList.toggle('hot', w.dataset.face===id); });
+}
+fanEl.addEventListener('click', function(e){
+  var w = e.target.closest('.wedge');
+  showFan(false);
+  if(w){ doDir(w.dataset.face); }
+});
+// ドラッグを使わずに扇を開く道（キーボード・支援技術用の可視な代替経路）
+function openFanMenu(){
+  clearTimeout(latchT);
+  state.fanLatch = true;
+  showFan(true);
+  fanEl.classList.add('latch');
+  var first = fanEl.querySelector('.wedge');
+  if(first) first.focus({preventScroll:true});
+}
+$('#legend').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(state.fanLatch){ showFan(false); $('#legend').focus({preventScroll:true}); return; }
+  openFanMenu();
+});
+fanEl.addEventListener('keydown', function(e){
+  var ws = $$('#fan .wedge'); if(!ws.length) return;
+  var i = ws.indexOf(document.activeElement);
+  if(e.key==='ArrowDown'||e.key==='ArrowRight'){ ws[(i+1+ws.length)%ws.length].focus(); e.preventDefault(); }
+  else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){ ws[(i-1+ws.length)%ws.length].focus(); e.preventDefault(); }
+  else if(e.key==='Escape'){ showFan(false); $('#legend').focus({preventScroll:true}); e.preventDefault(); }
+});
+
+function doDir(id){
+  if(id==='__back'){ pop(); return; }
+  if(id){ goFace(id); }
+}
+
+/* ============================ 原点のジェスチャ ============================ */
+var org = $('#origin');
+var g = null, latchT = null, handledAt = 0;
+function runPrimary(){
+  var p = primaryOf(cur(), curItems[curIdx]);
+  if(p.run) p.run();
+  else if(p.split) toast('原点が2つに割れている。左＝あやしい／右＝わかった');
+}
+// 支援技術・キーボードからの activate は click で来る（pointer 経由の分は重複させない）
+$('#originBtn').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(Date.now()-handledAt < 500) return;
+  handledAt = Date.now();
+  runPrimary();
+});
+$('#lobeL').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(Date.now()-handledAt < 500) return;
+  handledAt = Date.now(); judge('fz');
+});
+$('#lobeR').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(Date.now()-handledAt < 500) return;
+  handledAt = Date.now(); judge('ok');
+});
+org.addEventListener('pointerdown', function(e){
+  e.preventDefault();
+  if(state.fanLatch){ showFan(false); }
+  var r = org.getBoundingClientRect();
+  var lobe = null;
+  if(org.classList.contains('split')){
+    lobe = (e.clientX - r.left) < r.width/2 ? 'fz' : 'ok';
+  }
+  g = {x0:e.clientX, y0:e.clientY, t0:Date.now(), moved:false, lobe:lobe, id:e.pointerId};
+  org.setPointerCapture(e.pointerId);
+  org.classList.add('press');
+  g.timer = setTimeout(function(){ if(g && !g.moved){ showFan(true); } }, 180);
+}, {passive:false});
+org.addEventListener('pointermove', function(e){
+  if(!g) return;
+  var dx = e.clientX-g.x0, dy = e.clientY-g.y0, dist = Math.hypot(dx,dy);
+  if(dist > 14){
+    g.moved = true;
+    if(!state.fanOpen) showFan(true);
+    var sx = state.hand==='L' ? 1 : -1;
+    var ang = Math.atan2(-dy, sx*dx)*180/Math.PI;
+    var c = originCenter();
+    aimEl.style.width = Math.min(dist,150)+'px';
+    aimEl.style.transform = 'rotate('+Math.atan2(dy, dx)*180/Math.PI+'deg)';
+    if(dist < 40){ setHot(null); return; }
+    if(ang < -40 && ang > -140){ setHot('__back'); return; }
+    var a = Math.max(0, Math.min(100, ang));
+    var id = a<15?'today' : a<45?'shelf' : a<75?'search' : 'ask';
+    setHot(id);
+  }
+}, {passive:false});
+org.addEventListener('pointerup', function(e){
+  if(!g) return;
+  clearTimeout(g.timer);
+  org.classList.remove('press');
+  var dt = Date.now()-g.t0;
+  var dx = e.clientX-g.x0, dy = e.clientY-g.y0, dist = Math.hypot(dx,dy);
+  aimEl.style.width='0px';
+  if(g.moved && dist>=40 && state.hot){ var h=state.hot; showFan(false); g=null; doDir(h); return; }
+  if(g.moved){ showFan(false); g=null; return; }
+  if(dt < 180){
+    // ぽん、と叩いた = 実行
+    showFan(false);
+    handledAt = Date.now();          // 直後の click は無視させる（二重発火の防止）
+    if(g.lobe){ var lb=g.lobe; g=null; judge(lb); return; }
+    g = null;
+    runPrimary();
+    return;
+  }
+  // 押しっぱなしのまま離した = 扇を出したままにする（指を離しても目で見て選べる）
+  g = null;
+  state.fanLatch = true;
+  showFan(true);
+  clearTimeout(latchT);
+  // 直後に飛んでくる click で自分を閉じないよう、有効化を1フレーム遅らせる
+  setTimeout(function(){ if(state.fanLatch) fanEl.classList.add('latch'); }, 90);
+  latchT = setTimeout(function(){ if(state.fanLatch) showFan(false); }, 6000);
+}, {passive:false});
+org.addEventListener('pointercancel', function(){ if(g){clearTimeout(g.timer);} g=null; org.classList.remove('press'); showFan(false); });
+
+/* ============================ 伝票 ============================ */
+function docketText(){
+  return 'muninn への依頼（'+TODAY+'）\n' + docket.map(function(d,i){return (i+1)+'. '+d;}).join('\n');
+}
+var sheetPrefill = '';
+var TPL = [
+  {l:'調べて記事に', t:'について調べて、記事にして'},
+  {l:'更新して',   t:'を最新の情報で更新して'},
+  {l:'深掘りして', t:'をもっと深く掘って、章を書き足して'},
+  {l:'道を引いて', t:'に、関連する記事への道（理由つき）を引いて'},
+  {l:'自由に書く', t:''}
+];
+function openSheet(prefill){
+  sheetPrefill = prefill||'';
+  var t = $('#composer');
+  t.value = sheetPrefill;
+  $('#sheet .tpl').innerHTML = TPL.map(function(x,i){return '<button data-i="'+i+'">'+esc(x.l)+'</button>';}).join('');
+  $('#sheet').classList.add('on');
+  setTimeout(function(){ t.focus(); t.setSelectionRange(t.value.length,t.value.length); },60);
+}
+$('#sheet .tpl').addEventListener('click', function(e){
+  var b = e.target.closest('button'); if(!b) return;
+  $$('#sheet .tpl button').forEach(function(x){x.classList.remove('on');});
+  b.classList.add('on');
+  var t = TPL[+b.dataset.i];
+  var base = sheetPrefill.replace(/について、$/,'').replace(/。$/,'');
+  $('#composer').value = t.t ? (base + t.t) : base;
+  $('#composer').focus();
+});
+$('#cCancel').addEventListener('click', function(){ $('#sheet').classList.remove('on'); });
+$('#cAdd').addEventListener('click', function(){
+  var v = $('#composer').value.trim();
+  if(!v){ toast('何を頼むか、一言でいいから書く'); return; }
+  docket.push(v); saveAll();
+  $('#sheet').classList.remove('on');
+  if(state.face!=='ask' || state.stack.length){ goFace('ask'); } else { render(true); }
+  toast('伝票に足した（'+docket.length+'件）');
+});
+function copyDocket(){
+  var txt = docketText();
+  function ok(){ toast('伝票をコピーした（'+docket.length+'件）。Mac で Claude に貼る'); }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(ok, fallback);
+  } else fallback();
+  function fallback(){
+    var ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); ok(); }catch(e){ toast('コピーできなかった'); }
+    document.body.removeChild(ta);
+  }
+}
+
+/* ============================ トースト / Undo ============================ */
+var toastT=null;
+function toast(m){
+  var t=$('#toast'); t.textContent=m; t.classList.add('on');
+  clearTimeout(toastT); toastT=setTimeout(function(){t.classList.remove('on');},2200);
+}
+var undoT=null, undoFn=null;
+function showUndo(label, fn){
+  var u=$('#undo'); u.textContent='↺ '+label; u.classList.add('on'); undoFn=fn;
+  $('#counter').style.visibility='hidden';
+  clearTimeout(undoT); undoT=setTimeout(function(){ u.classList.remove('on'); undoFn=null;
+    $('#counter').style.visibility='visible'; }, 6000);
+}
+$('#undo').addEventListener('click', function(e){
+  e.stopPropagation();
+  if(undoFn){ undoFn(); }
+  $('#undo').classList.remove('on'); undoFn=null; clearTimeout(undoT);
+  $('#counter').style.visibility='visible';
+});
+
+/* ============================ 描画 ============================ */
+function whereLabel(){
+  var f = FACES.filter(function(x){return x.id===state.face;})[0];
+  var parts = ['<b>'+f.label+'</b>'];
+  state.stack.forEach(function(s){
+    var pv = previewOf(s);
+    var nm = pv ? pv.title : ({theme:tagJP(s.tag), session:'観測 '+(s.date||''), atlas:'連載'}[s.t]||s.t);
+    parts.push(esc(String(nm).slice(0,14)));
+  });
+  return parts.join(' <span style="opacity:.5">▸</span> ');
+}
+function render(mode){
+  var sc = cur();
+  var items = (REEL[sc.t]||function(){return [];})(sc);
+  var key = memKey(sc);
+  if(mode===true){
+    var want = (idxMem[key]!=null && idxMem[key] < items.length) ? idxMem[key] : 0;
+    if(sc.t==='today'){
+      // 今日：未判定の最初の1枚に合わせる
+      var jj = judged[TODAY]||{}, f=-1;
+      for(var i=0;i<items.length;i++){ if(items[i].card && !jj[items[i].card]){ f=i; break; } }
+      if(f>=0) want=f; else if(idxMem[key]==null) want=0;
+    }
+    setReel(items, want);
+  } else if(mode==='keep'){
+    setReel(items, curIdx);
+  } else {
+    curItems = items;
+    if(reelEl.children.length !== items.length) setReel(items, Math.min(curIdx, items.length-1));
+    else markSel();
+  }
+  idxMem[key] = curIdx;
+  var item = items[curIdx];
+
+  // 見る領域
+  var vf = VIEW[sc.t];
+  $('#viewIn').className = (sc.t==='today' && item && item.card) ? 'fill' : '';
+  $('#viewIn').innerHTML = vf ? vf(sc, item, items) : '';
+  if(mode===true) $('#view').scrollTop = 0;
+
+  // 覗き窓
+  var showPeek = !(sc.t==='today');
+  renderPeek(sc, showPeek ? item : null);
+
+  // 帯が空のとき
+  var empty = $('#reelEmpty');
+  if(!items.length){
+    empty.style.display='flex';
+    empty.textContent = sc.t==='search' ? 'ことばを打つと、ここに候補が並ぶ' : 'ここには候補が無い。原点を引いて別の場所へ。';
+  } else empty.style.display='none';
+
+  // 原点
+  var p = primaryOf(sc, item);
+  org.classList.toggle('split', !!p.split);
+  org.classList.toggle('rh', state.hand==='R');
+  org.querySelector('.verb').textContent = p.short;
+  // 支援技術に、原点がいま何をするコントロールなのかを毎回伝える
+  var selName = item ? (item.k+'：'+item.l) : 'なし';
+  $('#originBtn').setAttribute('aria-label',
+    p.run ? (p.label + '。選んでいるのは ' + selName) : (p.label + '（いまは押せない）'));
+  $('#originBtn').setAttribute('aria-disabled', p.run ? 'false' : 'true');
+  if(p.split){
+    var cn = item && item.card ? noteBy[item.card] : null;
+    var q = cn ? cn.recall : '';
+    $('#lobeL').setAttribute('aria-label','あやしい。答えは「'+(cn?cn.title:'')+'」。近いうちにまた出す');
+    $('#lobeR').setAttribute('aria-label','わかった。答えは「'+(cn?cn.title:'')+'」。次に出るまでの間隔を伸ばす');
+  }
+  $('#ctx .where').innerHTML = whereLabel();
+  if(p.split){
+    $('#ctx .act').innerHTML = '<em>思い出せた？</em>';
+  } else if(item && p.run){
+    $('#ctx .act').innerHTML = '叩く → <em>'+esc(p.label)+'</em>';
+  } else {
+    $('#ctx .act').innerHTML = '引く → <em>行き先を選ぶ</em>';
+  }
+  // 凡例（永久に見えるヒント＝そのまま行き先ボタン）
+  $('#legend').innerHTML = FACES.map(function(f){
+    var sx = state.hand==='L';
+    var d = sx ? f.dir : f.dir.replace('→','←').replace('↗','↖');
+    return '<span class="'+(state.face===f.id && !state.stack.length?'cur':'')+'" aria-hidden="true"><b>'+d+'</b>'+f.label+'</span>';
+  }).join('') + '<span aria-hidden="true"><b>↓</b>戻す</span>';
+  $('#legend').setAttribute('aria-label','行き先を選ぶ。今日・見渡す・探す・頼む・戻す。原点から方向へ引いても同じ');
+  // 増えるカウンタ
+  var wc = weekCount();
+  $('#counter').textContent = wc ? '今週 '+wc+'枚 めくった' : '';
+  // 検索欄
+  $('#find').classList.toggle('on', sc.t==='search');
+  $('#ctx').style.display = sc.t==='search' ? 'none' : 'block';
+  // 利き手（原点は左下 or 右下。順序＝水平→垂直 は変えない）
+  var right = state.hand==='R', split = !!p.split;
+  var oOff = split ? '16px' : '32px';
+  org.style.left  = right ? 'auto' : oOff;
+  org.style.right = right ? oOff : 'auto';
+  var near = split ? 168 : 124, far = 14, farL = split ? 14 : 108;
+  function place(el, l, r){ el.style.left = (right? r : l)+'px'; el.style.right = (right? l : r)+'px'; }
+  place($('#ctx'), near, far);
+  place($('#legend'), near, farL);
+  place($('#counter'), near, farL);
+  $('#tools').style.display = split ? 'none' : 'flex';   // 判定中は道具を引っ込める
+  $('#find').style.left = right ? far+'px' : near+'px';
+  $('#find').style.right = right ? near+'px' : far+'px';
+  $('#undo').style.left = right ? 'auto' : near+'px';
+  $('#undo').style.right = right ? near+'px' : 'auto';
+  $('#tools').style.right = right ? 'auto' : '10px';
+  $('#tools').style.left = right ? '10px' : 'auto';
+}
+
+/* ============================ 入力 ============================ */
+$('#findInput').addEventListener('input', function(e){
+  if(e.isComposing) return;
+  state.q = e.target.value; render(true);
+});
+$('#findInput').addEventListener('compositionend', function(e){
+  state.q = e.target.value; render(true);
+});
+$('#findInput').addEventListener('keydown', function(e){
+  if(e.isComposing || e.keyCode===229) return;
+  if(e.key==='Enter'){ e.preventDefault(); var p=primaryOf(cur(), curItems[curIdx]); if(p.run){ $('#findInput').blur(); p.run(); } }
+});
+$('#btnHand').addEventListener('click', function(){
+  state.hand = state.hand==='L' ? 'R' : 'L'; LS.set('hand', state.hand);
+  render(); toast(state.hand==='L' ? '原点を左下へ' : '原点を右下へ');
+});
+$('#btnHelp').addEventListener('click', function(){ $('#intro').classList.remove('off'); });
+$('#introGo').addEventListener('click', function(){ $('#intro').classList.add('off'); LS.set('introSeen',1); render(true); });
+
+document.addEventListener('keydown', function(e){
+  if($('#intro').classList.contains('off')===false){ if(e.key==='Enter'){$('#introGo').click();} return; }
+  var t = e.target.tagName;
+  if(t==='INPUT'||t==='TEXTAREA'){
+    if(e.key==='Escape'){ e.target.blur(); if($('#sheet').classList.contains('on')) $('#sheet').classList.remove('on'); }
+    return;
+  }
+  // ボタンにフォーカスがあるときは、そのボタン自身の活性化に任せる（二重発火の防止）
+  var onBtn = t && t.closest && t.closest('button');
+  if(onBtn && (e.key==='Enter'||e.key===' ')) return;
+  if(onBtn && (e.key==='ArrowRight'||e.key==='ArrowLeft')) return;
+  if(e.key==='ArrowRight'){ scrollToIndex(curIdx+1,true); e.preventDefault(); }
+  else if(e.key==='ArrowLeft'){ scrollToIndex(curIdx-1,true); e.preventDefault(); }
+  else if(e.key==='Enter'||e.key===' '){ runPrimary(); e.preventDefault(); }
+  else if(e.key==='Escape'||e.key==='Backspace'){ pop(); e.preventDefault(); }
+  else if(e.key>='1'&&e.key<='4'){ goFace(FACES[+e.key-1].id); }
+  else if(e.key==='h'||e.key==='H'){ $('#btnHand').click(); }
+});
+
+window.addEventListener('resize', function(){
+  var pad = (reelEl.clientWidth - ITEM_W)/2;
+  reelEl.style.paddingLeft = pad+'px'; reelEl.style.paddingRight = pad+'px';
+  suppressScroll=true; reelEl.scrollLeft = curIdx*STEP;
+  requestAnimationFrame(function(){ suppressScroll=false; fisheye(); });
+  if(state.fanOpen) buildFan();
+});
+
+/* ============================ 起動 ============================ */
+if(LS.get('introSeen',0)) { /* それでも毎回出す：レビュー用に核を必ず提示 */ }
+render(true);
+})();
+</script>
+</body>
+</html>

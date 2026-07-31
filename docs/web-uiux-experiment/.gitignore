@@ -1,0 +1,5 @@
+# モックが読む実データ。正本（notes/ 等）からの派生物なので入れない。
+# 作り直し: sh mocks/make-data.sh（先に cd web && npm run build:data）
+mocks/mn-data.js
+# 配布用に1ファイルへ畳んだ出力（データと画像を data URI で埋め込むため巨大）
+mocks/dist/

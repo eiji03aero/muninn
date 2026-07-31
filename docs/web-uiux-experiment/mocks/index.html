@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>muninn UIUX 実験 — 3案の比較と審査</title>
+<style>
+  :root{
+    --bg:#f7f5f0; --ink:#16181d; --mut:#5c6270; --fnt:#8b909c; --rule:#d9d4c8;
+    --a:#c9761d; --b:#227a5c; --c:#a8412f; --warn:#b4462f; --ok:#2f7a52;
+    --card:#fffefb; --shadow:0 10px 34px -18px rgba(0,0,0,.5);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0d0f13; --ink:#eceef4; --mut:#9aa1b2; --fnt:#6b7285; --rule:#262a33;
+           --a:#f0a54a; --b:#5fd0a4; --c:#f08a72; --warn:#ff8f74; --ok:#5fd0a4;
+           --card:#14171d; --shadow:0 10px 34px -18px rgba(0,0,0,.9); }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0d0f13; --ink:#eceef4; --mut:#9aa1b2; --fnt:#6b7285; --rule:#262a33;
+    --a:#f0a54a; --b:#5fd0a4; --c:#f08a72; --warn:#ff8f74; --ok:#5fd0a4;
+    --card:#14171d; --shadow:0 10px 34px -18px rgba(0,0,0,.9);
+  }
+  :root[data-theme="light"]{
+    --bg:#f7f5f0; --ink:#16181d; --mut:#5c6270; --fnt:#8b909c; --rule:#d9d4c8;
+    --a:#c9761d; --b:#227a5c; --c:#a8412f; --warn:#b4462f; --ok:#2f7a52;
+    --card:#fffefb; --shadow:0 10px 34px -18px rgba(0,0,0,.5);
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;
+    line-height:1.85; font-size:15px; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:1000px; margin:0 auto; padding:44px 20px 80px; }
+  h1{ font-size:30px; line-height:1.35; margin:0 0 6px; letter-spacing:-.01em; font-weight:800; }
+  .sub{ color:var(--mut); font-size:13.5px; margin:0 0 34px; }
+  h2{ font-size:12px; letter-spacing:.16em; color:var(--fnt); font-weight:700;
+      margin:56px 0 18px; padding-bottom:8px; border-bottom:1px solid var(--rule); }
+  p{ margin:0 0 12px; }
+  .lede{ font-size:16px; max-width:74ch; }
+  .mut{ color:var(--mut); } .fnt{ color:var(--fnt); font-size:13px; }
+  code{ font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.88em;
+        background:color-mix(in srgb, var(--ink) 8%, transparent); padding:.08em .35em; border-radius:4px; }
+  ol.jobs{ padding-left:1.3em; margin:0; } ol.jobs li{ margin:6px 0; }
+
+  /* ── 案ブロック（画面つき） ── */
+  .plan{ display:grid; grid-template-columns:auto 1fr; gap:28px; align-items:start;
+         padding:26px 0 30px; border-top:1px solid var(--rule); }
+  .plan:first-of-type{ border-top:none; }
+  .shots{ display:flex; gap:12px; }
+  figure{ margin:0; width:212px; }
+  figure img{ width:100%; height:auto; display:block; border-radius:13px;
+              border:1px solid var(--rule); box-shadow:var(--shadow); background:#000; }
+  figcaption{ font-size:11.5px; color:var(--fnt); line-height:1.6; margin-top:7px; }
+  .tag{ font-size:10.5px; letter-spacing:.1em; font-weight:800; padding:2px 8px; border-radius:999px; }
+  .tag.a{ color:var(--a); background:color-mix(in srgb,var(--a) 15%,transparent); }
+  .tag.b{ color:var(--b); background:color-mix(in srgb,var(--b) 15%,transparent); }
+  .tag.c{ color:var(--c); background:color-mix(in srgb,var(--c) 15%,transparent); }
+  .plan h3{ font-size:21px; margin:0 0 4px; font-weight:800; letter-spacing:-.01em;
+            display:flex; align-items:center; gap:10px; }
+  .oneline{ font-size:14.5px; color:var(--mut); margin:0 0 16px; }
+  .facts{ border-top:1px solid var(--rule); }
+  .facts div{ padding:10px 0; border-bottom:1px solid var(--rule); font-size:13.5px; }
+  /* ラベルだけをブロックにする。文中の <b> まで巻き込むと本文が途中で改行されて壊れる */
+  .facts div > b:first-child{ display:block; font-size:10.5px; letter-spacing:.11em; color:var(--fnt);
+            font-weight:700; margin-bottom:3px; }
+  .risk{ color:var(--warn); }
+
+  /* ── 採点ブロック ── */
+  .grade{ display:grid; gap:12px; }
+  .gitem{ background:var(--card); border:1px solid var(--rule); border-radius:12px; padding:16px 18px; }
+  .gitem.common{ background:transparent; border-style:dashed; }
+  .ghead{ font-weight:750; font-size:14.5px; margin-bottom:10px; display:flex; align-items:center; gap:9px; }
+  .gitem p{ margin:0 0 8px; font-size:13.5px; color:var(--mut); }
+  .gitem p:last-child{ margin-bottom:0; }
+  .gitem p b:first-child{ display:block; font-size:10.5px; letter-spacing:.1em; margin-bottom:2px; }
+
+  /* ── 表 ── */
+  .scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -20px; padding:0 20px; }
+  table{ border-collapse:collapse; width:100%; min-width:620px; font-size:13px; }
+  th,td{ text-align:left; padding:10px 12px; border-bottom:1px solid var(--rule); vertical-align:top; }
+  th{ font-size:11px; letter-spacing:.1em; color:var(--fnt); font-weight:700; white-space:nowrap; }
+  td:first-child{ color:var(--mut); white-space:nowrap; }
+  .ok{ color:var(--ok); font-weight:700; } .warn{ color:var(--warn); font-weight:700; }
+
+  .verdict{ background:var(--card); border:1px solid var(--rule); border-radius:14px; padding:20px 18px; margin-bottom:14px; }
+  .verdict h3{ display:flex; align-items:baseline; gap:10px; font-size:17px; margin:0; font-weight:750; }
+  .rec{ border:1px solid var(--rule); border-left:3px solid var(--b); background:var(--card);
+        border-radius:0 14px 14px 0; padding:20px; }
+  .note{ font-size:12.5px; color:var(--mut); border-top:1px solid var(--rule); margin-top:48px; padding-top:16px; }
+
+  @media (max-width:820px){
+    .plan{ grid-template-columns:1fr; gap:18px; }
+    figure{ width:calc(50% - 6px); }
+    .shots{ max-width:440px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>muninn 閲覧サイト — 尖ったUIUXの3案</h1>
+  <p class="sub">2026-07-31 ／ 8分野の先行事例リサーチ → 3方針の競作 → 人間工学による採点</p>
+
+  <p class="lede">
+    現行サイトは<b>下タブ4つ・カードの縦リスト・sticky ヘッダ</b>という定石のど真ん中にある。実装の質は高いが、
+    muninn だけが持つ武器——<b>全リンクに「なぜ関連するか」の理由が1行付いている</b>という規約——が、その器に閉じ込められている。
+    そこで「定石を壊して、実際に速く・楽に使える面を作る」ことだけを目的に、方針の異なる3案を<b>同じ実データ</b>で競作させた。
+    以下の画面はすべて muninn の本物のデータ（記事93本・理由つきリンク91本分）で動いている。
+  </p>
+
+  <h2>前提 — この面が答えるべき4つのジョブ</h2>
+  <ol class="jobs">
+    <li><b>めくる</b> — 今日読むものを差し出される（起動直後の3秒。通勤・寝る前）</li>
+    <li><b>見渡す</b> — 「何があるんだっけ」に答える（記事93本／1テーマが47%を占める偏り）</li>
+    <li><b>当てる</b> — 「あれ何だっけ」のピンポイント想起</li>
+    <li><b>頼む</b> — Claude に渡す依頼を作って溜める（サイトにできる唯一の"書き込み"）</li>
+  </ol>
+  <p class="fnt" style="margin-top:10px">
+    心臓部は<b>想起</b>。タイトルが言い切り形＝答えそのものなので伏せ、問いだけを見せて「めくる→わかった／あやしい」。
+    knowledge 59本すべてに問いが入っているが、<b>59本すべてが復習期限を過ぎている</b>——だから総量は絶対に画面に出さない。
+  </p>
+
+  <h2>3案</h2>
+
+  <div class="plan">
+    <div class="shots">
+      <figure>
+        <img src="__IMG_A1__" alt="案A 今日の面。上7割に問いだけが立ち、下に帯と原点">
+        <figcaption><b>今日の面。</b>上7割は問いだけ。操作は下の帯と左下の原点にすべて集約されている</figcaption>
+      </figure>
+      <figure>
+        <img src="__IMG_A2__" alt="案A 原点が2つに割れ、左があやしい・右がわかったになった状態">
+        <figcaption><b>原点が2つに割れる。</b>左＝あやしい／右＝わかった。指は原点から一歩も動かない</figcaption>
+      </figure>
+    </div>
+    <div>
+      <h3><span class="tag a">案A</span>親指ひとつ</h3>
+      <p class="oneline">操作原点はひとつ、方向が意味。画面の上7割から操作要素を1つ残らず追い出す。</p>
+      <div class="facts">
+        <div><b>核となる一手</b>原点を叩くと答えが出て、<b>原点が2つに割れる</b>。想起という最頻出操作が「同じ場所を2回叩く」まで圧縮される</div>
+        <div><b>壊したもの</b>上部AppBar・戻る・ボトムタブ・グラス質感</div>
+        <div><b>依拠</b>Hoober の実測（親指がタップの75%を担う）／Samsung One UI の見る・操作の恒常分離／マーキングメニュー（パイは15%速い・Callahan 1988）</div>
+        <div class="risk"><b>最大の賭け</b>方向の記憶が「1日数分」の利用頻度で育つか。育たなければ毎回「押しっぱなし→扇を見る→選ぶ」となり、タブ4つより1手遅くなる</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="plan">
+    <div class="shots">
+      <figure>
+        <img src="__IMG_B1__" alt="案B 空欄の面。欄の真上に想起カード、その上に今日の一本と定点の推移">
+        <figcaption><b>打たない状態が本体。</b>欄に近いものほど強い——真上に想起カード、その上に今日の一本と定点の推移</figcaption>
+      </figure>
+      <figure>
+        <img src="__IMG_B2__" alt="案B ゼロヒット時。ここから先はmuninnの外として依頼テンプレが並ぶ">
+        <figcaption><b>ゼロヒット。</b>「近いのはこのあたり」の先に<b>ここから先は muninn の外</b>——そのまま依頼になる</figcaption>
+      </figure>
+    </div>
+    <div>
+      <h3><span class="tag b">案B</span>一本の欄</h3>
+      <p class="oneline">打つことが全部。タブもページ遷移も無く、面の中身は欄の中身だけで決まる。</p>
+      <div class="facts">
+        <div><b>核となる一手</b>Notational Velocity の「見つからなければ、そのまま作る」を、読み専用の制約下で<b>「見つからなければ、そのまま Claude への依頼になる」</b>に翻訳した</div>
+        <div><b>壊したもの</b>画面という単位・ページ遷移・上から下へ読む順序</div>
+        <div><b>依拠</b>Notational Velocity「検索欄＝作成欄」／Raskin のモードレスと quasimode（欄を消せば必ず元に戻る）／Bloomberg Terminal の密度＝信頼</div>
+        <div class="risk"><b>最大の賭け</b>「上へ積む」組版に体が馴染むか。スクロール位置が下端に固定されるのはチャットの文法であって読み物の文法ではない</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="plan">
+    <div class="shots">
+      <figure>
+        <img src="__IMG_C1__" alt="案C 一面。題字と縦組みの柱、明朝の見出し、下端の帯">
+        <figcaption><b>一面。</b>題字・縦組みの柱（今日の一問／拾い読み）・罫線・明朝。下端の帯をなぞってめくる</figcaption>
+      </figure>
+      <figure>
+        <img src="__IMG_C2__" alt="案C 記事面。欄外に傍註としてリンク元が書いた理由が組まれている">
+        <figcaption><b>記事面の「欄外」。</b>傍註1・2に<b>リンク元が書いた理由</b>がそのまま組まれる</figcaption>
+      </figure>
+    </div>
+    <div>
+      <h3><span class="tag c">案C</span>紙面をめくる</h3>
+      <p class="oneline">組版が編集判断。縦スクロールを主動作から降ろし、めくる軸（横）と読む軸（縦）を直交させる。</p>
+      <div class="facts">
+        <div><b>核となる一手</b>記事の欄外に<b>「傍註」としてリンク元が書いた理由</b>を組む。Wikipedia の Page Previews より一段リッチな、muninn だけが持てる紙面表現</div>
+        <div><b>壊したもの</b>縦スクロール・均一カード・ダークグラス（紙とインクへ）</div>
+        <div><b>依拠</b>Bloomberg Businessweek のモジュール型紙面／Tufte「視線移動を減らす」／日本語組版（明朝×ゴシック・縦組みの柱・Webフォントゼロ）</div>
+        <div class="risk"><b>最大の賭け</b>横めくりが縦スクロールより読みやすいと言えるか。<b>実証研究は割れており確定的優位性がない</b></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>人間工学からの採点</h2>
+  <p class="mut" style="font-size:13.5px">
+    Fitts／Steering law／Hoober の親指可動域／Norman &amp; Nielsen のジェスチャ批判／Hick／Raskin のモード論／WCAG 2.2 の
+    ターゲットサイズ基準に照らして、3案それぞれの<b>成立条件</b>と<b>破綻条件</b>を出した。
+  </p>
+  <div class="grade">
+    <div class="gitem">
+      <div class="ghead"><span class="tag a">案A</span>親指ひとつ</div>
+      <p><b class="ok">成立する条件</b>分岐は1階層・主要動線は最大4／原点を親指の自然域に固定／ヒントを常時表示／VoiceOver 時は標準UIへ縮退</p>
+      <p><b class="warn">破綻する条件</b>8方向を使うと記憶限界を超える／「上7割は操作要素ゼロ」は<b>初見で原点の存在自体が発見されない</b>／左下起点のドラッグが iOS の戻るジェスチャと物理衝突しうる</p>
+    </div>
+    <div class="gitem">
+      <div class="ghead"><span class="tag b">案B</span>一本の欄</div>
+      <p><b class="ok">成立する条件</b><code>visualViewport</code> への完全対応（生命線）／空欄・入力中・ゼロヒットの3状態を<b>色・記号・文言の複数チャネルで常時可視化</b></p>
+      <p><b class="warn">破綻する条件</b>テキストの有無だけで状態が変わる暗黙モードは<b>モードエラーの典型</b>／キーボード表示中は情報が画面上半分に圧縮され、親指可動域の知見と衝突</p>
+    </div>
+    <div class="gitem">
+      <div class="ghead"><span class="tag c">案C</span>紙面をめくる</div>
+      <p><b class="ok">成立する条件</b>めくる軸と読む軸の直交はモード論的に比較的安全／現在地インジケータ必須／画面端でなく内側起点のスワイプ</p>
+      <p><b class="warn">破綻する条件</b><b>横めくりが縦スクロールより読みやすいという実証は割れており、確定的優位性がない</b>／端起点だと戻るジェスチャと正面衝突／93本規模では位置を見失いやすい</p>
+    </div>
+    <div class="gitem common">
+      <div class="ghead">3案共通の判定</div>
+      <p>想起の<b>2択は Hick 則的に理論上最速（n=2）</b>で強く支持される。ただし左右の意味は全画面・全セッションで固定し、ジェスチャ化するならボタンを必ず並置すること。
+      リンクのプレビューは有効だが、「長押し＝時間依存の不可視パラメータ」は Norman &amp; Nielsen 批判の典型例——VoiceOver 代替導線が要る。</p>
+    </div>
+  </div>
+
+  <h2>「越えてはいけない線」の自己採点</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>線</th><th>案A</th><th>案B</th><th>案C</th></tr></thead>
+    <tbody>
+      <tr><td>自前ジェスチャの数</td><td>2種</td><td class="ok">0種</td><td>1種（帯をなぞる）</td></tr>
+      <tr><td><code>backdrop-filter</code></td><td class="ok">不使用</td><td class="ok">不使用</td><td class="ok">不使用</td></tr>
+      <tr><td>不可逆判定の Undo</td><td class="ok">6秒</td><td class="ok">6秒＋居座り</td><td class="ok">次の判定まで</td></tr>
+      <tr><td>左端20px／下端の回避</td><td class="ok">帯は left:28px から</td><td class="ok">ジェスチャ無し</td><td class="ok">帯は下端22〜70px</td></tr>
+      <tr><td>未消化件数（59）の非表示</td><td class="ok">守った</td><td class="ok">守った</td><td class="ok">守った</td></tr>
+      <tr><td>100ms 以内の反応</td><td class="warn">判定後 340ms の自動送り</td><td class="ok">演出ゼロ</td><td class="warn">めくり170ms／反転180ms</td></tr>
+      <tr><td>VoiceOver 到達性</td><td class="ok">原点が状態つきボタン（修正済）</td><td class="ok">全て素のボタン</td><td class="ok">click 経由で到達可</td></tr>
+      <tr><td>行き止まり</td><td class="ok">ゼロ</td><td class="ok">ゼロ</td><td class="ok">126ページ全て検査済</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>審査</h2>
+
+  <div class="verdict">
+    <h3><span class="tag b">案B</span>一本の欄 — <span class="mut" style="font-weight:600">最も"使い勝手"に効く</span></h3>
+    <p class="mut" style="margin:8px 0 0">
+      15項目の線をほぼ全て素通りする唯一の案。<b>自前ジェスチャ0・演出0・グラス0</b>で、削った先に残ったのが
+      「muninn に無かったこと自体が次の蓄積の入口になる」という、この製品にしか成立しない一手だった。
+      リスクは人間工学ではなく<b>習慣</b>——上向きの組版に体が馴染むかどうか、その一点に集約されている。
+    </p>
+  </div>
+
+  <div class="verdict">
+    <h3><span class="tag a">案A</span>親指ひとつ — <span class="mut" style="font-weight:600">一手の鋭さは随一、賭けが一番重い</span></h3>
+    <p class="mut" style="margin:8px 0 0">
+      「原点が2つに割れる」は3案で最も鮮烈な瞬間で、最頻出操作を<b>同じ場所を2回叩く</b>まで圧縮している。
+      ただしマーキングメニューの優位は<b>反復頻度</b>が支える。1日数分の muninn でそれが育たなければ、
+      毎回「押しっぱなし→扇を見る→選ぶ」となり<b>タブ4つより1手遅くなる</b>。可視の逃げ道を4重に用意したのは、その自覚の裏返しでもある。
+    </p>
+  </div>
+
+  <div class="verdict">
+    <h3><span class="tag c">案C</span>紙面をめくる — <span class="mut" style="font-weight:600">"他にない"の度合いは最大</span></h3>
+    <p class="mut" style="margin:8px 0 0">
+      唯一<b>製品の見た目が別物になる</b>案で、日本語組版と「理由つき傍註」という muninn 固有の資産を最も豊かに使っている。
+      弱点は骨格側にある——横めくりに読書効率上の確定的優位はなく、<b>操作の刷新ではなく様式の刷新</b>に留まる危険がある。
+      新聞メタファは「中身がないのに様式だけ真似ない」という自らの設計原則と、常に隣り合っている。
+    </p>
+  </div>
+
+  <h2>結論</h2>
+  <div class="rec">
+    <p style="margin:0 0 12px"><b>骨格は案B、読む面の組版は案C、想起の一手は案A。</b></p>
+    <p class="mut" style="margin:0 0 10px">
+      3案は競合ではなく、<b>賭けている層が違う</b>。Bは<b>操作の構造</b>（モードを消す）、Cは<b>情報の重み付け</b>（組版で編集する）、
+      Aは<b>1操作の物理</b>（指を動かさない）に賭けている。どれか1つを丸ごと採るより、層ごとに勝った案を採るほうが強い。
+    </p>
+    <p class="mut" style="margin:0">
+      ただし<b>これは合成案の推奨ではない</b>。3つを混ぜると、それぞれの案が持っていた「法則がひとつしかないから予測できる」という
+      最大の美点が壊れる。<b>まず1案を選んで骨格を通し</b>、そのうえで他案の一手を移植するかを判断するのが正しい順序だ。
+      迷うなら B から始めるのを勧める——実装コストが最も小さく（既存実装から画面数が減る）、失敗したときに一番安く引き返せる。
+    </p>
+  </div>
+
+  <p class="note">
+    各案のモックは<b>muninn の実データ</b>（記事93本・タグ・連載の型付きエッジ・定点の時系列・理由つきリンク91本分）で動いている。
+    ダミーテキストは一切使っていない。3案とも iPhone サイズ（390×844）を第一に設計し、上の画面はその実寸を切り出したもの。
+    先行事例のリサーチは8分野（片手操作の人間工学／空間UI・ZUI／PKMの実験的UI／コマンド駆動とモードレス／エディトリアル組版／
+    ゲームHUDとラジアル／記憶と間隔反復の体験設計／人間工学の法則）。
+    実装コスト見積りは A=4〜5人日／B=3〜5人日／C=3〜4人日。
+  </p>
+
+</div>
+</body>
+</html>
