@@ -29,5 +29,7 @@ atlas/            # 学習アトラス。1トピック1ディレクトリ。atla
 logs/             # ログ（記録帖）。1トピック1ディレクトリ。topic.md（スキーマ）/ entries/ / images/
 templates/        # note.md / follow-*.md / collect.md / atlas.md / concept.md / log-topic.md / log-entry.md
 scripts/          # 補助ツール（mn-status.mjs = ダッシュボード。依存ゼロ）
+web/              # 閲覧サイト（GitHub Pages）。設計思想は web/DESIGN.md
+docs/             # 設計資料（web-renewal/ = サイト刷新の経緯）
 .claude/skills/   # 作業手順（mn-capture / mn-research / mn-process-inbox / mn-regen-moc / mn-review / mn-follow / mn-collect / mn-brief / mn-learn / mn-log）
 ```
