@@ -2,19 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Box, Flex, HStack, VStack, Heading, Text, Button } from '@chakra-ui/react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useData } from './lib/ctx.js';
-import { AppBar, Chip, Chips, DueBadge, Card, Center, Md } from './ui.jsx';
+import { AppBar, Page, Slot, Chip, Chips, Card, Center, Md, Backlinks, CopyButton, NotFound } from './ui.jsx';
+import { loadRead, saveRead, markSeen, addSlip } from './lib/recall.js';
+import { shortTitle } from './lib/graph.js';
 import { C, tint } from './theme.js';
-
-// ---- 読了トラッキング（localStorage・サーバ不要） ----
-const READ_KEY = (slug) => `mn.atlas.${slug}.read`;
-function loadRead(slug) {
-  try { return new Set(JSON.parse(localStorage.getItem(READ_KEY(slug)) || '[]')); } catch { return new Set(); }
-}
-function saveRead(slug, set) {
-  try { localStorage.setItem(READ_KEY(slug), JSON.stringify([...set])); } catch { /* noop */ }
-}
-
-const shortTitle = (t) => (t || '').split('—')[0].trim();
 
 // ---- グラフ・レイアウト（requires の最長鎖で深さを決める決定的配置） ----
 const NODE_W = 140;
@@ -203,15 +194,15 @@ function RouteView({ atlas, routeId, read, onOpen }) {
 
 // ---- アトラス概要ページ（マップ ⇄ ルート） ----
 export function Atlas() {
-  const { idx } = useData();
+  const { idx, reads } = useData();
   const { slug } = useParams();
   const navigate = useNavigate();
   const atlas = idx.atlases?.get(slug);
   const [view, setView] = useState('route');
   const [routeId, setRouteId] = useState(atlas?.routes?.[0]?.id);
-  const [read] = useState(() => loadRead(slug));
+  const read = reads?.[slug] || new Set();
 
-  if (!atlas) return <Center><Text color={C.muted}>アトラスが見つからないのだ</Text><Button colorPalette="blue" onClick={() => navigate('/')}>ホームへ</Button></Center>;
+  if (!atlas) return <NotFound what="連載" />;
 
   const written = atlas.concepts.filter((c) => c.status !== 'stub').length;
   const readCount = atlas.concepts.filter((c) => read.has(c.slug)).length;
@@ -222,7 +213,7 @@ export function Atlas() {
   return (
     <>
       <AppBar title={atlas.title} subtitle={`概念 ${atlas.concepts.length}（執筆済 ${written}） · 読了 ${readCount}`} />
-      <Box maxW="720px" mx="auto" px="4" py="4" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+      <Page>
         <Box mb="5"><Md text={atlas.body} /></Box>
 
         <Flex wrap="wrap" gap="2" mb="4">
@@ -258,7 +249,9 @@ export function Atlas() {
         {view === 'route'
           ? <RouteView atlas={atlas} routeId={routeId} read={read} onOpen={open} />
           : <MapView atlas={atlas} read={read} onOpen={(cslug) => open(cslug)} />}
-      </Box>
+
+        <Backlinks route={`/atlas/${atlas.slug}`} title={atlas.title} />
+      </Page>
     </>
   );
 }
@@ -291,13 +284,14 @@ function deepDivePrompt(atlas, concept) {
 }
 
 export function Concept() {
-  const { idx } = useData();
+  const { idx, refresh } = useData();
   const { slug, cslug } = useParams();
   const [sp] = useSearchParams();
   const navigate = useNavigate();
   const atlas = idx.atlases?.get(slug);
   const concept = atlas?.concepts.find((c) => c.slug === cslug);
   const [copied, setCopied] = useState(false);
+  const [queued, setQueued] = useState(false);
 
   // 逆引き（inbound）エッジ: 他概念からこの概念に張られた関係を集める
   const inbound = useMemo(() => {
@@ -311,11 +305,12 @@ export function Concept() {
   useEffect(() => {
     if (atlas && concept && concept.status !== 'stub') {
       const s = loadRead(slug);
-      if (!s.has(cslug)) { s.add(cslug); saveRead(slug, s); }
+      if (!s.has(cslug)) { s.add(cslug); saveRead(slug, s); refresh?.(); }
+      markSeen(`/atlas/${slug}/concept/${cslug}`, shortTitle(concept.title));
     }
-  }, [slug, cslug, atlas, concept]);
+  }, [slug, cslug, atlas, concept, refresh]);
 
-  if (!atlas || !concept) return <Center><Text color={C.muted}>概念が見つからないのだ</Text><Button colorPalette="blue" onClick={() => navigate('/')}>ホームへ</Button></Center>;
+  if (!atlas || !concept) return <NotFound what="章" />;
 
   const byId = new Map(atlas.concepts.map((c) => [c.slug, c]));
   // アクティブなルート（?route=、無ければこの概念を含む最初のルート）で前後を決める
@@ -359,14 +354,22 @@ export function Concept() {
   return (
     <>
       <AppBar title={shortTitle(concept.title)} subtitle={atlas.title} />
-      <Box maxW="680px" mx="auto" px="4" py="4" style={{ paddingBottom: 'max(2rem, env(safe-area-inset-bottom))' }}>
+      <Page maxW="680px">
         {concept.tags?.length > 0 && <Box mb="4"><Chips items={concept.tags} color={C.sky} /></Box>}
 
         {concept.status === 'stub' ? (
           <Card>
-            <Text fontSize="sm" color={C.ink} mb="1" fontWeight="600">この概念はまだ執筆されていないのだ</Text>
-            <Text fontSize="sm" color={C.muted}>{concept.gist}</Text>
-            <Text fontSize="xs" color={C.faint} mt="2">グラフ上の位置づけとつながりだけが置かれている。`/mn-learn` で本文を生成できる。</Text>
+            <Text fontSize="sm" color={C.ink} mb="1" fontWeight="600">この章はまだ書かれていない</Text>
+            <Text fontSize="sm" color={C.muted} lineHeight="1.7">{concept.gist}</Text>
+            <Text fontSize="xs" color={C.faint} mt="2" lineHeight="1.6">
+              グラフ上の位置づけとつながりだけが置かれている。
+            </Text>
+            <Box mt="3">
+              <CopyButton tone="amber"
+                text={`/mn-learn 学習アトラス「${atlas.title}」(${atlas.slug}) の概念「${shortTitle(concept.title)}」(${cslug}) がまだ stub のまま。調査して読み物として執筆し、覚える価値のある知識は notes/ に蒸留して相互リンクして。エッジ（前提・対比・発展・深掘り）を物語に織り込みながら書くこと。`}>
+                この章の執筆を依頼
+              </CopyButton>
+            </Box>
           </Card>
         ) : (
           <Md text={concept.body} />
@@ -393,39 +396,55 @@ export function Concept() {
           </Box>
         )}
 
+        {/* 読む流れを切らないために、その場でコピーせず伝票に積む道も用意する。
+            スマホで読んでいる最中に何度もアプリを切り替えさせない。 */}
         <Box className="glass-soft" p="4" borderRadius="14px" mt="4">
-          <Flex align="center" justify="space-between" gap="3" wrap="wrap">
-            <Box flex="1" minW="180px">
-              <Text fontSize="sm" fontWeight="700" color={C.ink}>ここから深掘りする</Text>
-              <Text fontSize="xs" color={C.faint} mt="1" lineHeight="1.5">
-                依頼文をコピー → Claude に貼って送ると、調べて新しい概念をグラフに足し、このページから辿れるようにするのだ。
-              </Text>
-            </Box>
+          <Text fontSize="sm" fontWeight="700" color={C.ink}>ここから深掘りする</Text>
+          <Text fontSize="xs" color={C.faint} mt="1" lineHeight="1.6">
+            調べて新しい章をグラフに足し、このページから辿れるようにする。
+          </Text>
+          <Flex gap="2" mt="3" wrap="wrap">
             <Button size="sm" borderRadius="12px" flexShrink="0" fontWeight="700"
               color={copied ? C.ink : '#08111f'}
               bg={copied ? 'transparent' : 'linear-gradient(120deg,#ffd479,#ffb054)'}
               border="1px solid" borderColor={copied ? C.line : 'transparent'}
               onClick={copyDeepDive} _hover={{ opacity: 0.92 }}>
-              {copied ? '✓ コピーした' : '深掘りを依頼（コピー）'}
+              {copied ? '✓ コピーした' : 'いますぐコピー'}
+            </Button>
+            <Button size="sm" borderRadius="12px" flexShrink="0" fontWeight="600"
+              color={queued ? C.green : C.muted} bg="transparent"
+              border="1px solid" borderColor={queued ? tint(C.green, 40) : C.line}
+              _hover={{ color: C.ink }}
+              onClick={() => {
+                addSlip({
+                  id: `deepdive:${atlas.slug}/${cslug}`,
+                  kind: 'deepdive',
+                  label: `深掘り（${shortTitle(concept.title)}）`,
+                  intro: '/mn-learn 以下の概念からの深掘りを頼む。それぞれ elaborates で親に繋いだ新しい概念ノードを作り、調査→執筆→（価値があれば notes/ に蒸留）まで。',
+                  line: `atlas ${atlas.slug} / ${cslug}（${shortTitle(concept.title)}）から深掘り`,
+                });
+                setQueued(true);
+                refresh?.();
+              }}>
+              {queued ? '✓ 伝票に積んだ' : '伝票に積む'}
             </Button>
           </Flex>
         </Box>
 
         {distilled.length > 0 && (
-          <Box mt="6">
-            <Heading size="xs" color={C.muted} mb="2.5" letterSpacing="0.02em">キーポイント（覚える用）</Heading>
+          <Box mt="7">
+            <Slot>キーポイント（覚える用）</Slot>
             <VStack align="stretch" gap="2">
               {distilled.map((n) => (
                 <Card key={n.slug} onClick={() => navigate(`/note/${n.slug}`)}>
-                  <HStack justify="space-between" align="start" gap="2">
-                    <Text fontWeight="600" fontSize="sm" color={C.ink}>{n.title}</Text>
-                    {n.due && <DueBadge />}
-                  </HStack>
+                  <Text fontWeight="600" fontSize="sm" color={C.ink} lineHeight="1.55">{n.title}</Text>
                 </Card>
               ))}
             </VStack>
           </Box>
         )}
+
+        <Backlinks route={`/atlas/${slug}/concept/${cslug}`} title={shortTitle(concept.title)} />
 
         {(prev || next) && (
           <Flex justify="space-between" gap="3" mt="8">
@@ -444,7 +463,7 @@ export function Concept() {
             ) : <Box />}
           </Flex>
         )}
-      </Box>
+      </Page>
     </>
   );
 }
