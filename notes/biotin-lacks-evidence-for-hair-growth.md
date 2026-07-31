@@ -3,6 +3,7 @@ title: ビオチンは髪サプリの定番だが健常者の髪を育てるエ�
 created: 2026-06-07
 kind: knowledge
 tags: [health/hair, health/nutrition]
+recall: "髪目的でビオチンサプリを買うのがイマイチなのはなぜか。効果が無いこと以外に、高用量摂取そのものが持つ実害は何か。"
 srs:
   last: null
   interval: 0

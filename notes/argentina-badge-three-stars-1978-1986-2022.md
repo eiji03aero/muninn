@@ -3,6 +3,7 @@ title: アルゼンチン代表エンブレムの3つ星は1978・1986・2022の
 created: 2026-07-23
 kind: knowledge
 tags: [sports/football]
+recall: "代表エンブレムの3つ星が指す3つの年はいつか。そのうち2つが、国民の物語の中でどう結びつけて語られるか。"
 srs:
   last: null
   interval: 0

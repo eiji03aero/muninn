@@ -3,6 +3,7 @@ title: ゴルフでフィニッシュに上体が目標と反対へそり返る�
 created: 2026-06-26
 kind: knowledge
 tags: [sports/golf]
+recall: "フィニッシュで上体が後ろへそり返るのは何のサインか。それが招くマイナスを飛距離・ミート・故障の観点で挙げよ。プロが垂直に立てるのはなぜか。"
 srs:
   last: null
   interval: 0

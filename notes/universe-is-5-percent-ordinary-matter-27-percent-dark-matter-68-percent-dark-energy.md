@@ -3,6 +3,7 @@ title: 宇宙は約5%の通常物質・27%の暗黒物質・68%の暗黒エネ�
 created: 2026-07-14
 kind: knowledge
 tags: [science/cosmology]
+recall: "宇宙の内訳を3つに分けて割合とともに言え。そのうちどれだけが正体不明で、膨張の様子に効いているのはどれか。"
 srs:
   last: null
   interval: 0

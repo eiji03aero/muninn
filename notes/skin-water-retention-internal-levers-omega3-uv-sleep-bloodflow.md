@@ -3,6 +3,7 @@ title: 肌の水分保持を内側から上げるレバーはオメガ3・紫外
 created: 2026-07-09
 kind: knowledge
 tags: [health/skincare, health/nutrition]
+recall: "肌の水分を2層に分けると、それぞれ何が効くか。内側から狙うべきは「水を溜める」ではなく何か。水をたくさん飲めば潤うと言えない理由は。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: 2026 W杯のアルゼンチンは延長・終了間際弾で勝ち上が�
 created: 2026-07-23
 kind: knowledge
 tags: [sports/football]
+recall: "2026 W杯でのアルゼンチンの勝ち上がりを一言で特徴づけると何か。準決勝はどんな展開で、それを可能にした設計上の理由は何か。"
 srs:
   last: null
   interval: 0

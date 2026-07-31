@@ -3,6 +3,7 @@ title: ヒズボラはイランが1982年に作ったレバノンのシーア派
 created: 2026-06-21
 kind: knowledge
 tags: [geopolitics/middle-east]
+recall: "ヒズボラは誰が何のために作った組織か。「対イスラエル抵抗運動」という理解だけでは不十分なのはなぜか。持っている3つの顔とは。"
 srs:
   last: null
   interval: 0

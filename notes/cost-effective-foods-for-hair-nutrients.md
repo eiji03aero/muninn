@@ -3,6 +3,7 @@ title: 髪の主要栄養素（タンパク質・鉄・亜鉛・ビタミンD）
 created: 2026-06-07
 kind: knowledge
 tags: [health/hair, health/nutrition]
+recall: "髪の主要栄養素をサプリなしで揃える定番食品を挙げ、それぞれ何を担うか。頻度を週1に抑えるべき食品はどれで、それはなぜか。"
 srs:
   last: null
   interval: 0

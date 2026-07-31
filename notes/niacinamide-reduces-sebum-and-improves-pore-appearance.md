@@ -3,6 +3,7 @@ title: ナイアシンアミドは皮脂分泌を抑え、毛穴の見た目を�
 created: 2026-07-09
 kind: knowledge
 tags: [health/skincare]
+recall: "ナイアシンアミドが毛穴に効く理屈を2つの作用で説明せよ。濃度は高いほど良いのか、また効果が見えるまでの期間は。"
 srs:
   last: null
   interval: 0

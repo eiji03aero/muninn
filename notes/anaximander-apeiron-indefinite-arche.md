@@ -3,6 +3,7 @@ title: アナクシマンドロスはアルケーを特定物質でなく無限�
 created: 2026-07-27
 kind: knowledge
 tags: [philosophy/ancient]
+recall: "万物の根源が水や火のような特定の性質であってはならない、とアナクシマンドロスはどう論証したか。この一歩が哲学史で飛躍と呼ばれるのはなぜか。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: ゴルフのフェースの開閉は手首コックの方向ではなく�
 created: 2026-06-26
 kind: knowledge
 tags: [sports/golf]
+recall: "フェースの開閉を実際に決めている動きは何か。親指側へのコックはそれとどういう関係にあるか。ハーフウェイバックでの確認方法は。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: スカローニ体制「ラ・スカロネータ」は主要3大会連続
 created: 2026-07-23
 kind: knowledge
 tags: [sports/football]
+recall: "スカローニ体制が連続制覇した主要3大会は何と何と何か。この体制の哲学を一言で言うと何で、愛称の由来は。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: 原始核合成は最初の数分で軽元素（水素・ヘリウム約2
 created: 2026-07-14
 kind: knowledge
 tags: [science/cosmology]
+recall: "宇宙誕生から最初の数分で作られた元素は何で、鉄や酸素がそこに含まれないのはなぜか。この存在比が重要視される理由は。"
 srs:
   last: null
   interval: 0

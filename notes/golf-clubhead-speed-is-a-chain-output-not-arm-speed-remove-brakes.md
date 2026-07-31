@@ -3,6 +3,7 @@ title: ヘッドスピードは腕を速く振ることではなくチェーン�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "ヘッドスピードを上げる対象が腕ではないのはなぜか。効くレバーを複数挙げ、それらの多くが「力を足す」ではなく何をしていることになるか。"
 srs:
   last: null
   interval: 0

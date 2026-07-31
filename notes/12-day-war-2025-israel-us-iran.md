@@ -3,6 +3,7 @@ title: 2025年6月の「12日間戦争」でイスラエルと米国がイラン
 created: 2026-06-20
 kind: knowledge
 tags: [geopolitics/middle-east]
+recall: "2025年6月の短期戦争で、米国はいつどの施設をどう攻撃したか。またこの戦争がイランに残した打撃は、翌年の展開の前提としてなぜ重要か。"
 srs:
   last: null
   interval: 0

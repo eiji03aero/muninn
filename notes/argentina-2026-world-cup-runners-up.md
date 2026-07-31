@@ -3,6 +3,7 @@ title: アルゼンチンは2026 W杯準優勝（決勝でスペインに0-1・�
 created: 2026-07-23
 kind: knowledge
 tags: [sports/football]
+recall: "2026 W杯決勝でアルゼンチンはどこに、どういう試合展開で敗れたか。この敗戦によって逃したのはどんな記録か。"
 srs:
   last: null
   interval: 0

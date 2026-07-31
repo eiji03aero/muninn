@@ -3,6 +3,7 @@ title: 最初の星は暗黒物質の足場に重力でガスが集まって生�
 created: 2026-07-14
 kind: knowledge
 tags: [science/cosmology]
+recall: "最初の星が生まれるまでに何が先に集まる必要があったか。その構造形成の種は、さらに何まで遡れるか。"
 srs:
   last: null
   interval: 0

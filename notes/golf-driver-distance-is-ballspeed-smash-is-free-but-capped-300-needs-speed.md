@@ -3,6 +3,7 @@ title: ドライバー飛距離はほぼボール初速（＝HS×ミート率）
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "芯を食う（ミート率）で稼げる距離が「タダ」と言えるのはなぜで、その上限はどこから来るか。大幅増の本丸は何か。しなり戻りを狙うのが非効率な理由は。"
 srs:
   last: null
   interval: 0

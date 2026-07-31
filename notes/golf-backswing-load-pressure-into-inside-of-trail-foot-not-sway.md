@@ -3,6 +3,7 @@ title: ゴルフのバックスイングは圧を後ろ足の内側に積む動�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "バックスイングの体重移動を「積む」と「流す」で分けると何が違うか。代表的な2つの失敗はそれぞれどんな症状を招くか。"
 srs:
   last: null
   interval: 0

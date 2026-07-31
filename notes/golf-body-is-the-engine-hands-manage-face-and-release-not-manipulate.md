@@ -3,6 +3,7 @@ title: ゴルフスイングのエンジンとタイミングの枠は体（大�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "「手か体か」という二択が誤りなのはなぜか。体と手はそれぞれ何を担い、手を完全に殺すのもまた誤りなのはなぜか。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: ヒズボラは国軍を上回る武力を持つ「国家の中の国家�
 created: 2026-06-21
 kind: knowledge
 tags: [geopolitics/middle-east]
+recall: "ヒズボラが「国家の中の国家」と呼ばれるのはどういう意味か。レバノンが戦争に巻き込まれる構図を、国家の意思決定との関係で説明せよ。"
 srs:
   last: null
   interval: 0

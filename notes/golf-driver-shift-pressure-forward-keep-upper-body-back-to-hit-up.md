@@ -3,6 +3,7 @@ title: ドライバーは圧を前足へ移しつつ上体（頭・胸）をボ�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "ドライバーでアッパー軌道を作るとき、下半身と上半身はそれぞれどう動かすか。これと混同されがちな失敗は何で、どこが決定的に違うか。"
 srs:
   last: null
   interval: 0

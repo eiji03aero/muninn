@@ -3,6 +3,7 @@ title: スキンケアは水性→油性の順で重ねる（テクスチャの�
 created: 2026-07-26
 kind: knowledge
 tags: [health/skincare]
+recall: "複数のスキンケアを重ねる順番の原則は何で、その理由は。ナイアシンアミドとレチノールならどちらが先で、それはなぜか。"
 srs:
   last: null
   interval: 0

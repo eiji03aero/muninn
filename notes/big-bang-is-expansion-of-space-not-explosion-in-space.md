@@ -3,6 +3,7 @@ title: ビッグバンは空間の中の爆発ではなく空間そのものの�
 created: 2026-07-14
 kind: knowledge
 tags: [science/cosmology]
+recall: "ビッグバンを「爆発」と呼ぶのが不正確なのはなぜか。それを支える主な観測証拠を3つ挙げ、この理論が説明していない範囲はどこまでか。"
 srs:
   last: null
   interval: 0

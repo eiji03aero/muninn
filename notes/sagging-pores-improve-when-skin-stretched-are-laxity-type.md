@@ -3,6 +3,7 @@ title: 横に引くと目立たなくなる毛穴は「たるみ毛穴」（弾�
 created: 2026-07-26
 kind: knowledge
 tags: [health/skincare]
+recall: "自分の毛穴がどのタイプか判別する簡単なテストは何で、なぜそれで判別できるのか。判別できると打ち手はどう変わるか。"
 srs:
   last: null
   interval: 0

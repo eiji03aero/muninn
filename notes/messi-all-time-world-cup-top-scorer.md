@@ -3,6 +3,7 @@ title: メッシは2026 W杯で通算得点王に到達（クローゼ超え・3
 created: 2026-07-23
 kind: knowledge
 tags: [sports/football]
+recall: "メッシが2026 W杯で到達した記録は何で、誰の記録を抜いたか。年齢の面で何が特筆されるか。この大会で彼が獲った個人賞は。"
 srs:
   last: null
   interval: 0

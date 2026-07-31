@@ -3,6 +3,7 @@ title: 寝起きに顔のハリが良いのは体液のむくみ（浮腫）で�
 created: 2026-07-09
 kind: knowledge
 tags: [health/skincare]
+recall: "寝起きに顔のハリが良く感じる正体は何か。だから「顔に水分を溜める」方向を目指すのが筋が悪いのはなぜか。寝る姿勢で差が出る理由は。"
 srs:
   last: null
   interval: 0

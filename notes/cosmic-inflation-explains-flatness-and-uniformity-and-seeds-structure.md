@@ -3,6 +3,7 @@ title: 宇宙のインフレーションは一瞬の指数関数的膨張で一�
 created: 2026-07-14
 kind: knowledge
 tags: [science/cosmology]
+recall: "インフレーションが説明できるとされることを3つ挙げよ。銀河などの全構造の種はどこから来たことになるか。この理論の現在の確からしさは。"
 srs:
   last: null
   interval: 0

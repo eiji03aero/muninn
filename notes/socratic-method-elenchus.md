@@ -3,6 +3,7 @@ title: ソクラテスの問答法（エレンコス）は問いで相手の無�
 created: 2026-07-26
 kind: knowledge
 tags: [philosophy/ancient]
+recall: "ソクラテスが哲学の関心をどこからどこへ転じたか。問答法はどういう手順で何を相手に起こさせるか。彼の思想が本人の著作から辿れないのはなぜか。"
 srs:
   last: null
   interval: 0

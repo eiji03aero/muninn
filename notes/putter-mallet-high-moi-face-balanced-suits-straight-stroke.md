@@ -3,6 +3,7 @@ title: マレット型パターは高MOI（芯を外しにくい）でフェー�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "マレット型パターの設計上の特徴は何で、どんなストロークと噛み合うか。逆にアークを使うストロークにはどんなパターが合うか。"
 srs:
   last: null
   interval: 0

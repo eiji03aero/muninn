@@ -3,6 +3,7 @@ title: 髪の主成分はケラチン（タンパク質）であり、タンパ�
 created: 2026-06-07
 kind: knowledge
 tags: [health/hair, health/nutrition]
+recall: "タンパク質不足が脱毛につながる仕組みを、体の優先順位と毛周期の言葉で説明せよ。抜けるまでに時間差があるのはなぜで、可逆的か。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: 外用レチノイドは毛穴・キメ改善のゴールドスタンダ�
 created: 2026-07-09
 kind: knowledge
 tags: [health/skincare]
+recall: "レチノイドが毛穴の両タイプに効くのは、どの2つの作用によるか。導入時に守るべきことと、避けるべき状況は。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: アルゼンチン代表の戦術の核は「メッシを危険地帯で�
 created: 2026-07-23
 kind: knowledge
 tags: [sports/football]
+recall: "スカローニ体制の戦術を貫く組織原理を一文で言うと何か。中盤3枚はそれぞれどんな役割を分担し、チームが最も危険になる局面はどこか。"
 srs:
   last: null
   interval: 0

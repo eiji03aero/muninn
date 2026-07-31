@@ -3,6 +3,7 @@ title: ゴルフの梃子（二重振り子）は物理モデルとしては正�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "梃子（二重振り子）について、物理モデルとしての是非と打法としての是非を分けて説明せよ。手で操作すると何が起きるか。"
 srs:
   last: null
   interval: 0

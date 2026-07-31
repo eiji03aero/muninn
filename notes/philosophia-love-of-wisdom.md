@@ -3,6 +3,7 @@ title: 哲学（philosophy）の語源はギリシア語 philosophia＝「知を
 created: 2026-07-26
 kind: knowledge
 tags: [philosophy]
+recall: "philosophia は何と何の合成語で、そこから哲学者はどういう存在だと言えるか。哲学が「諸学問の母」と呼ばれるのはなぜか。"
 srs:
   last: null
   interval: 0

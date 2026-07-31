@@ -3,6 +3,7 @@ title: 欠乏がないのに髪目的でサプリを飲むのは非推奨で、�
 created: 2026-06-07
 kind: knowledge
 tags: [health/hair, health/nutrition]
+recall: "欠乏のない人が髪目的でサプリを飲むべきでないのはなぜか。むしろ過剰摂取で脱毛を招きうる栄養素と、その理由は。脱毛が気になるとき先にやるべきことは。"
 srs:
   last: 2026-06-20
   interval: 1

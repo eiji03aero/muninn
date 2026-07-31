@@ -3,6 +3,7 @@ title: 日焼け止めは毛穴・老化ケアの土台。UVが真皮のコラ�
 created: 2026-07-09
 kind: knowledge
 tags: [health/skincare]
+recall: "日焼け止めが「毛穴・老化ケアの土台」と言えるのはなぜか。攻めのケアだけを足しても進まないのはどういう理屈か。"
 srs:
   last: null
   interval: 0

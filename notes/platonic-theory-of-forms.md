@@ -3,6 +3,7 @@ title: プラトンのイデア論 — 真の実在は永遠不変のイデア�
 created: 2026-07-26
 kind: knowledge
 tags: [philosophy/ancient]
+recall: "プラトンは世界をどう二層に分けたか。イデアは何によって捉えられるとされ、それを描いた有名な比喩は何を意味しているか。"
 srs:
   last: null
   interval: 0

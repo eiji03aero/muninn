@@ -3,6 +3,7 @@ title: クラブは長い番手ほど入射角が浅く・プレーンがフラ�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "番手が長くなるほど連続的に変わる要素を挙げよ。長い番手を「払う」ことと「すくい上げる」ことの違いは何で、上り際に打ってよいのはどの状況だけか。"
 srs:
   last: null
   interval: 0

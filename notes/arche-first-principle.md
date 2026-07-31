@@ -3,6 +3,7 @@ title: 古代ギリシア自然哲学はアルケー（万物の根源）を神�
 created: 2026-07-26
 kind: knowledge
 tags: [philosophy/ancient]
+recall: "古代ギリシアの自然哲学者たちが出した答えはばらばらだったのに、そこが哲学の誕生とされるのはなぜか。彼らは何を何に置き換えようとしたか。"
 srs:
   last: null
   interval: 0

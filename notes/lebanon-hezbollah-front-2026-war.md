@@ -3,6 +3,7 @@ title: レバノンはヒズボラを通じイラン陣営の最前線として2
 created: 2026-06-20
 kind: knowledge
 tags: [geopolitics/middle-east]
+recall: "2026年にレバノンが戦場になった引き金は何か。「レバノンという国が攻撃された」という言い方が不正確なのはなぜか。"
 srs:
   last: null
   interval: 0

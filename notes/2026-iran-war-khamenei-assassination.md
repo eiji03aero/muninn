@@ -3,6 +3,7 @@ title: 2026年2月の戦争で米・イスラエルがイラン最高指導者�
 created: 2026-06-20
 kind: knowledge
 tags: [geopolitics/middle-east]
+recall: "2026年2月の攻撃がイランに生んだ「前例のない危機」とは何か。またこの攻撃から戦火がレバノンへ波及したのはどういう経路か。"
 srs:
   last: null
   interval: 0

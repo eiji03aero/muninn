@@ -3,6 +3,7 @@ title: 40℃前後の湯船入浴はシャワーよりストレスとネガテ�
 created: 2026-06-21
 kind: knowledge
 tags: [health/stress, health/bathing]
+recall: "湯船がシャワーより気分に効くことは、どんな研究でどう示されたか。主観面と客観面のそれぞれで何が確かめられたか。"
 srs:
   last: null
   interval: 0

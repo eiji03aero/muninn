@@ -3,6 +3,7 @@ title: ダウンブローはすくわず、ロフトより緩い進入角（ス�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "スピンロフトはどう定義され、それがバックスピンを生む仕組みはどうなっているか。ドライバーとアイアンを同じ枠で説明すると、違うのは何か。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: ぬるめの湯船は副交感神経を優位にしてセロトニン・�
 created: 2026-06-21
 kind: knowledge
 tags: [health/stress, health/bathing]
+recall: "湯船で気持ちが落ち着く体感の生理的な機序を説明せよ。自律神経に何が起き、どんな物質が関わるか。"
 srs:
   last: null
   interval: 0

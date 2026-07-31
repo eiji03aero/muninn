@@ -3,6 +3,7 @@ title: 炭素・酸素・鉄などの重元素は恒星内部と超新星で作�
 created: 2026-07-14
 kind: knowledge
 tags: [science/cosmology]
+recall: "炭素や鉄はどこで作られ、どうやって宇宙にばらまかれたか。軽元素との「役割分担」を時期で説明せよ。"
 srs:
   last: null
   interval: 0

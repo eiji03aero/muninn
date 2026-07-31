@@ -3,6 +3,7 @@ title: 毛穴の開きの主因は皮脂量・肌の弾力低下・毛包サイ�
 created: 2026-07-09
 kind: knowledge
 tags: [health/skincare]
+recall: "毛穴が開いて見える主因を3つ挙げ、原因ごとに打ち手がどう変わるか。ゴールの立て方として共通して重要な前提は何か。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: 再結合（約38万年後）で中性原子ができ光が自由にな�
 created: 2026-07-14
 kind: knowledge
 tags: [science/cosmology]
+recall: "宇宙が「晴れ上がった」とはどういう出来事か。それ以前に光が直進できなかったのはなぜで、このとき放たれた光はいま何として観測されるか。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: 入浴のリラックス効果は湯温依存で、38〜40℃は副交感
 created: 2026-06-21
 kind: knowledge
 tags: [health/stress, health/bathing]
+recall: "入浴がリラックスになるか逆効果になるかを分けるのは何か。イライラを鎮めたい夜と、目覚めたい朝で選ぶべき湯温が違うのはなぜか。"
 srs:
   last: null
   interval: 0

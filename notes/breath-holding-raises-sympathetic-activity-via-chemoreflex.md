@@ -3,6 +3,7 @@ title: 随意的な息止めは頸動脈化学受容体反射で交感神経活�
 created: 2026-06-21
 kind: knowledge
 tags: [health/sleep]
+recall: "息止めが交感神経を上げる機序は何で、駆動因子が低酸素だと言えるのはどんな実験結果からか。「眠気覚ましに効く」と言い切れない理由は。"
 srs:
   last: null
   interval: 0

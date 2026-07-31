@@ -3,6 +3,7 @@ title: レバノンは宗派ごとに役職を固定配分する「宗派制度�
 created: 2026-06-21
 kind: knowledge
 tags: [geopolitics/middle-east]
+recall: "レバノンの宗派制度とはどういう仕組みで、三権のトップはどの宗派に固定されているか。この制度が諸刃の剣と言われ、後に何を招いたか。"
 srs:
   last: null
   interval: 0

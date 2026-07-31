@@ -3,6 +3,7 @@ title: トッププロはパワー源とスイングシーケンスが普遍的�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "「プロのスイングは人それぞれ」が誤りなのはなぜか。個人差が出るのは主にどの2点で、選手の語る感覚をそのまま真似てはいけない理由は。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: アリストテレスは形相を個物に内在させ（質料形相論�
 created: 2026-07-26
 kind: knowledge
 tags: [philosophy/ancient]
+recall: "アリストテレスは師の説のどこを批判し、本質をどこに置き直したか。彼が創始した学問と、そこで内容から切り離されたものは何か。"
 srs:
   last: null
   interval: 0

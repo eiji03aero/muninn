@@ -3,6 +3,7 @@ title: ゴルフのダウンスイングは地面から順（圧移動→骨盤�
 created: 2026-06-28
 kind: knowledge
 tags: [sports/golf]
+recall: "ダウンスイングの正しい順序を、どこから始まってどこへ渡るかで言え。上体や腕から先に動くと何が壊れるか。体で覚えるための比喩は。"
 srs:
   last: null
   interval: 0

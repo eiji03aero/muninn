@@ -3,6 +3,7 @@ title: 哲学の中核5分野＝形而上学・認識論・論理学・倫理学
 created: 2026-07-26
 kind: knowledge
 tags: [philosophy]
+recall: "哲学の中核5分野を挙げ、それぞれが問うていることを一言で言え。応用分野（〜の哲学）はどうやって生まれるか。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: クリシェは「使い古されて陳腐」が核で、必ずしも古�
 created: 2026-06-22
 kind: knowledge
 tags: [language/vocabulary]
+recall: "クリシェの語源は何で、そこからどう意味が転じたか。「古い表現」「決め台詞」と混同されがちだが、核にあるのは何か。"
 srs:
   last: null
   interval: 0

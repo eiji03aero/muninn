@@ -3,6 +3,7 @@ title: アルゼンチンはCopa América最多16回優勝（2024決勝はコロ
 created: 2026-07-23
 kind: knowledge
 tags: [sports/football]
+recall: "アルゼンチンの Copa América 優勝回数は何回で、その位置づけは。直近2024年の決勝はどんな試合だったか。"
 srs:
   last: null
   interval: 0

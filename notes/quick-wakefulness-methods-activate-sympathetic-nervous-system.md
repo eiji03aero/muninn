@@ -3,6 +3,7 @@ title: 道具なしの即効的な眠気覚ましは交感神経の賦活で説�
 created: 2026-06-21
 kind: knowledge
 tags: [health/sleep]
+recall: "道具なしの眠気覚ましは、共通してどんな原理で説明できるか。それらの限界は何で、根本的にはどうするのが効くか。"
 srs:
   last: null
   interval: 0
