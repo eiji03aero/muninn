@@ -169,7 +169,9 @@ export const DIRS = [
   { id: 'today', label: '今日', deg: 0, r: 130, arrow: '→', arrowR: '←', say: '横' },
   { id: 'shelf', label: '見渡す', deg: 30, r: 130, arrow: '↗', arrowR: '↖', say: '斜め上' },
   { id: 'search', label: '探す', deg: 60, r: 130, arrow: '↗', arrowR: '↖', say: 'もっと斜め上' },
-  { id: 'ask', label: '頼む', deg: 90, r: 116, arrow: '↑', arrowR: '↑', say: '真上' },
+  // 頼む（真上）の半径だけ小さい。ここが扇の最上端になるので、
+  // 「主要な操作要素はすべて画面下端から250px以内」を割らない位置に留める。
+  { id: 'ask', label: '頼む', deg: 90, r: 106, arrow: '↑', arrowR: '↑', say: '真上' },
 ];
 export const BACK_DIR = { id: '__back', label: '戻す', arrow: '↓', say: '下' };
 

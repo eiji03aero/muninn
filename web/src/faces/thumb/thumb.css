@@ -254,7 +254,8 @@
   border: 1px solid var(--line2); border-radius: 9px; background: #0e1116;
   display: flex; flex-direction: column; justify-content: center; gap: 4px;
   padding: 6px 7px; text-align: left; will-change: transform;
-  transition: border-color .12s, background .12s;
+  /* 選択の切り替えは即時。色のトランジションは合成できず（transform/opacity 以外）、
+     スクロール中に毎フレーム走らせると帯がもたつく */
 }
 [data-face="thumb"] .tb-rk { font-size: 8.5px; letter-spacing: .1em; color: var(--dimmer); }
 [data-face="thumb"] .tb-rl {
@@ -310,10 +311,13 @@
 [data-face="thumb"] .tb-legend .is-cur { color: var(--hud); }
 
 [data-face="thumb"] .tb-foot { display: flex; align-items: center; gap: 6px; margin-top: auto; min-height: 44px; }
-[data-face="thumb"] .tb-spacer { flex: 1; }
+[data-face="thumb"] .tb-spacer { flex: 1; min-width: 0; }
+/* 道具（設定への導線を含む）は絶対に押し出さない。詰まったら先にカウンタを削る */
 [data-face="thumb"] .tb-counter {
+  flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
   font-size: 10px; color: var(--dimmer); font-family: var(--mono); letter-spacing: .05em; white-space: nowrap;
 }
+[data-face="thumb"] .tb-undo { flex: 0 1 auto; min-width: 0; overflow: hidden; }
 [data-face="thumb"] .tb-undo {
   display: flex; align-items: center; min-height: 40px; padding: 0 14px;
   border: 1px solid var(--fuzz); border-radius: 20px; background: rgba(147, 178, 232, .12);
@@ -409,7 +413,7 @@
 [data-face="thumb"] .tb-wedge.is-hot .tb-wdir, [data-face="thumb"] .tb-wedge.is-hot .tb-wlb { color: var(--hud); }
 [data-face="thumb"] .tb-wedge.is-here { border-color: var(--hud-d); }
 [data-face="thumb"] .tb-wedge.is-here .tb-wlb { color: var(--hud); }
-[data-face="thumb"] .tb-wedge-back { padding: 7px 12px; min-height: 40px; }
+[data-face="thumb"] .tb-wedge-back { padding: 9px 12px; }
 
 /* ---------------- 依頼コンポーザ ---------------- */
 [data-face="thumb"] .tb-sheet {

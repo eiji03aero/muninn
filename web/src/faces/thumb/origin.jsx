@@ -32,7 +32,7 @@ export const Origin = forwardRef(function Origin(
 
   const center = useCallback(() => {
     const r = wrapRef.current?.getBoundingClientRect();
-    return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : { x: 0, y: 0 };
+    return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2, half: r.width / 2 } : { x: 0, y: 0, half: 38 };
   }, []);
 
   const closeFan = useCallback(() => {
@@ -240,8 +240,12 @@ export const Origin = forwardRef(function Origin(
           role="menuitem"
           className={`tb-wedge tb-wedge-back${hot === BACK_DIR.id ? ' is-hot' : ''}`}
           aria-label="ひとつ戻す。原点から下へ引いても戻せる"
-          /* 原点の真下。ただしホームインジケータに掛からない高さに収める（下端は原点中心+78px） */
-          style={{ left: c.x, top: c.y + 40, transform: 'translate(-50%, 0)' }}
+          /* 引く方向は「下」だが、ピルを真下に置くと 44px 角を確保した時点で画面最下端
+             （iOS のホームインジケータ帯）に食い込む。斜め下にずらして高さを稼ぐ。 */
+          style={{
+            left: c.x + sx * (c.half + 58), top: c.y + 30,
+            transform: 'translate(-50%, -50%)',
+          }}
           onClick={() => { closeFan(); onDir(BACK_DIR.id); }}
         >
           <span className="tb-wdir" aria-hidden="true">{BACK_DIR.arrow}</span>

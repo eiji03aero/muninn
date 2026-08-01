@@ -215,6 +215,15 @@ export default function ThumbRoot({ initialTarget }) {
     else goFace(id);
   }, [pop, goFace]);
 
+  // 起動直後は、今日の未判定の最初の1枚に合わせる（続きから差し出す）
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (seeded.current || face !== 'today' || stack.length || !items.length) return;
+    seeded.current = true;
+    const i = items.findIndex((x) => x.card && !judged[x.card]);
+    if (i > 0) setReelIdx(i);
+  }, [items, judged, face, stack.length]);
+
   // ---- ディープリンク ----
   useEffect(() => {
     if (!initialTarget?.route) return;
@@ -341,7 +350,10 @@ export default function ThumbRoot({ initialTarget }) {
               {undo ? (
                 <button type="button" className="tb-undo" onClick={() => { undo.run(); }}>↺ {undo.label}</button>
               ) : (
-                <span className="tb-counter" role="status">{week ? `今週 ${week}枚 めくった` : ''}</span>
+                // 判定中は原点が太るぶん幅が無い。削るのはカウンタから（道具は残す）
+                <span className="tb-counter" role="status">
+                  {!primary.split && week ? `今週 ${week}枚 めくった` : ''}
+                </span>
               )}
               <span className="tb-spacer" />
               <div className="tb-tools">
