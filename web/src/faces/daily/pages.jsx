@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Flex, HStack, VStack, SimpleGrid, Heading, Text, Button, Textarea } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useData } from './lib/ctx.js';
+import { useData } from '../../lib/ctx.js';
 import {
   AppBar, Page, Slot, Card, Chip, Chips, TagChips, CopyButton, Backlinks,
   Sparkline, Delta, NotFound, Md, relDay, GROUP, GROUP_ORDER,
 } from './ui.jsx';
-import { cleanTitle, tagLabel } from './lib/graph.js';
+import { cleanTitle, tagLabel } from '../../lib/graph.js';
 import {
   effectiveSrs, recordVerdict, markSeen, todayISO, daysBetween, effectiveNext,
-} from './lib/recall.js';
-import { C, ACCENT_GRADIENT, tint } from './theme.js';
+} from '../../lib/recall.js';
+import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
 
 const clipHref = (c) => (c.url ? c.url : `https://www.youtube.com/results?search_query=${encodeURIComponent(c.query || c.title || '')}`);
 const statusColor = (s) => (s === 'injured' ? C.pink : s === 'inactive' ? C.faint : C.green);

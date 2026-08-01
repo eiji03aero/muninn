@@ -1,83 +1,38 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation, useNavigationType, useParams } from 'react-router-dom';
-import { Heading, Text, Input, Button, VStack } from '@chakra-ui/react';
+// shell —— 面の外側。どの面が選ばれていても必ず通る層。
+//
+// 責務は4つだけ:
+//   1. 復号してデータをメモリに載せる（DataCtx）
+//   2. どの面を出すかを決める（localStorage `mn.face`。未設定・未知の値は日報に落ちる）
+//   3. `#/settings` を開く非常口を全面に用意する
+//   4. ディープリンク（`#/note/:slug` 等）を面に渡す
+//
+// 面ごとにナビゲーションの流儀が違う（日報はルータ、面Aは方向、面Bは遷移そのものが無い）ので、
+// **共通のルータを全面に強制しない**。shell が握るのは上の2つの URL だけで、
+// 画面内の移動は各面の自由にする。
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataCtx } from './lib/ctx.js';
+import { ShellCtx } from './shell/ctx.js';
 import { loadSite } from './lib/data.js';
 import { buildIndex } from './lib/wiki.js';
-import { buildGraph, tagToParam } from './lib/graph.js';
-import { loadShadow, loadRead } from './lib/recall.js';
-import { Note, Follow, Player } from './pages.jsx';
-import { Edition } from './edition.jsx';
-import { Shelf, ShelfBoard } from './shelf.jsx';
-import { Search } from './search.jsx';
-import { Desk } from './desk.jsx';
-import { Atlas, Concept } from './atlas.jsx';
-import { LogTopic, LogEntry } from './logs.jsx';
-import { Center, Loading, BottomTabs } from './ui.jsx';
-import { C, ACCENT_GRADIENT } from './theme.js';
-
-function PasswordGate({ onSubmit, error }) {
-  const [pw, setPw] = useState('');
-  const [busy, setBusy] = useState(false);
-  const submit = async () => { setBusy(true); await onSubmit(pw); setBusy(false); };
-  return (
-    <Center>
-      <Heading size="xl" color={C.ink} letterSpacing="0.3em">muninn</Heading>
-      <Text fontSize="sm" color={C.muted}>パスワードを入れるのだ</Text>
-      <VStack gap="3" w="100%" maxW="300px" mt="2">
-        <Input type="password" value={pw} placeholder="password"
-          onChange={(e) => setPw(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && submit()}
-          color={C.ink} bg="rgba(255,255,255,.05)" border="1px solid" borderColor={C.line}
-          borderRadius="14px" textAlign="center" _placeholder={{ color: C.faint }}
-          _focus={{ borderColor: C.sky, outline: 'none' }} />
-        <Button w="100%" onClick={submit} loading={busy} color="#08111f" fontWeight="700"
-          bg={ACCENT_GRADIENT} borderRadius="14px" _hover={{ opacity: 0.92 }}>開く</Button>
-        {error && <Text fontSize="sm" color={C.pink}>{error}</Text>}
-      </VStack>
-    </Center>
-  );
-}
-
-// 新ページ遷移(PUSH/REPLACE)は先頭へ、戻る(POP)は直前のスクロール位置を復元する。
-function ScrollManager() {
-  const location = useLocation();
-  const navType = useNavigationType();
-  const positions = useRef(new Map());
-  const currentKey = useRef(location.key);
-
-  useEffect(() => {
-    if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
-    const onScroll = () => positions.current.set(currentKey.current, window.scrollY);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
-
-  useLayoutEffect(() => {
-    currentKey.current = location.key;
-    if (navType === 'POP') {
-      const y = positions.current.get(location.key) ?? 0;
-      const restore = () => window.scrollTo(0, y);
-      requestAnimationFrame(() => { restore(); requestAnimationFrame(restore); });
-    } else {
-      window.scrollTo(0, 0);
-    }
-  }, [location.key, navType]);
-
-  return null;
-}
-
-// 旧ルート（/notes・/moc/:slug・/logs）の着地。PWA のホーム追加やブックマークから
-// 旧URLが踏まれるのは実運用で必ず起きる。黙って飛ばさず、何がどこへ行ったかを1回だけ告げる。
-function LegacyMoc({ graph }) {
-  const { slug } = useParams();
-  const bundle = graph.bundles.find((b) => b.moc === slug && b.tag);
-  const to = bundle ? `/shelf/${tagToParam(bundle.tag)}` : '/shelf';
-  return <Navigate to={to} replace state={{ legacy: 'moc' }} />;
-}
+import { buildGraph } from './lib/graph.js';
+import { loadShadow, loadRead, setLogSource } from './lib/recall.js';
+import { faceById, loadFaceId, saveFaceId, touchFace } from './shell/face.js';
+import { currentPath, setPath, parseTarget, SETTINGS_PATH } from './shell/hash.js';
+import { Settings } from './shell/Settings.jsx';
+import { PasswordGate, ShellLoading, ShellError } from './shell/Gate.jsx';
+import './shell/shell.css';
 
 export default function App() {
   const [state, setState] = useState({ status: 'loading', site: null, idx: null, error: '' });
   const [tick, setTick] = useState(0);
+  const [faceId, setFaceId] = useState(loadFaceId);
+  // 設定は「面の代わりに出す」。面の上に重ねると、面のルータが `#/settings` を
+  // 知らないパスとして自分の入口へ書き戻してしまい、hash の取り合いになる。
+  const [inSettings, setInSettings] = useState(() => currentPath() === SETTINGS_PATH);
+  // 面が立ち上がる時点で「開くべき対象」。URL を持たない面（親指ひとつ・一本の欄）では、
+  // 外から飛んできたディープリンクを受け取る唯一の経路でもある。
+  const [target, setTarget] = useState(() => parseTarget(currentPath()));
+  const returnPath = useRef('/');
 
   useEffect(() => {
     loadSite(null)
@@ -87,6 +42,26 @@ export default function App() {
         else setState((p) => ({ ...p, status: 'error', error: String(e.message || e) }));
       });
   }, []);
+
+  // 面を跨いで使い回す状態（影SRS・伝票・読了）は面ごとに分けない。分けた瞬間に
+  // 「面を変えたら積み上げが消える」が起きる。記録するのは「どの面で読んだか」のラベルだけ。
+  useEffect(() => {
+    setLogSource(faceId);
+    touchFace(faceId);
+  }, [faceId]);
+
+  // URL 直打ち・PWA のブックマークから `#/settings` に入ってこられるようにする。
+  useEffect(() => {
+    const onHash = () => setInSettings(currentPath() === SETTINGS_PATH);
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
+  // 面を畳んだ**あと**に hash を書き換える（この effect は commit 後に走るので、
+  // このとき面のルータはもう居ない＝書き換えを奪い返されない）。
+  useEffect(() => {
+    if (inSettings && currentPath() !== SETTINGS_PATH) setPath(SETTINGS_PATH);
+  }, [inSettings]);
 
   const submitPass = async (pw) => {
     try {
@@ -109,39 +84,71 @@ export default function App() {
     return m;
   }, [state.site, tick]);
   const refresh = useCallback(() => setTick((t) => t + 1), []);
+  const data = useMemo(
+    () => ({ site: state.site, idx: state.idx, graph, shadow, reads, refresh }),
+    [state.site, state.idx, graph, shadow, reads, refresh],
+  );
 
-  if (state.status === 'loading') return <Loading />;
+  const openSettings = useCallback(() => {
+    returnPath.current = currentPath();
+    setInSettings(true);
+  }, []);
+
+  const closeSettings = useCallback((to) => {
+    const dest = to || returnPath.current || '/';
+    setInSettings(false);
+    setPath(dest); // 面が再び立ち上がる前に hash を戻す（面はこの hash を見て始まる）
+    setTarget(parseTarget(dest));
+  }, []);
+
+  // 選んだら即座に切り替わる（リロード不要）。新しい面は入口から始める——
+  // 直前まで見ていたページは前の面の流儀の産物で、次の面に同じ場所があるとは限らない。
+  const pickFace = useCallback((id) => {
+    const next = faceById(id).id;
+    saveFaceId(next);
+    setFaceId(next);
+    closeSettings('/');
+  }, [closeSettings]);
+
+  const face = faceById(faceId);
+
+  // URL を持たない面のときだけ、shell が hash を見張って対象を差し替える。
+  // ディープリンクは「別のアプリから飛んでくる」だけでなく、PWA を開いたまま
+  // 共有リンクを踏む形でも来る——初回マウントだけ見ていると、その2回目以降を落とす。
+  // 逆に日報のように自分で URL を書き換える面でこれをやると、面が動くたびに
+  // shell まで巻き込んで再描画してしまうので、面の宣言（ownsUrl）で切り分ける。
+  useEffect(() => {
+    if (face.ownsUrl) return undefined;
+    const onHash = () => {
+      const p = currentPath();
+      if (p !== SETTINGS_PATH) setTarget(parseTarget(p));
+    };
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, [face.ownsUrl]);
+
+  const initialTarget = inSettings ? null : target;
+
+  const shell = useMemo(
+    () => ({ face, openSettings, initialTarget }),
+    [face, openSettings, initialTarget],
+  );
+
+  if (state.status === 'loading') return <ShellLoading />;
   if (state.status === 'needpass') return <PasswordGate onSubmit={submitPass} error={state.error} />;
-  if (state.status === 'error') return <Center><Text color={C.muted}>読み込み失敗: {state.error}</Text></Center>;
+  if (state.status === 'error') return <ShellError message={state.error} />;
 
   return (
-    <DataCtx.Provider value={{ site: state.site, idx: state.idx, graph, shadow, reads, refresh }}>
-      <HashRouter>
-        <ScrollManager />
-        <Routes>
-          <Route path="/" element={<Edition />} />
-          <Route path="/shelf" element={<Shelf />} />
-          <Route path="/shelf/:tag" element={<ShelfBoard />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/desk" element={<Desk />} />
-
-          <Route path="/note/:slug" element={<Note />} />
-          <Route path="/follow/:name" element={<Follow />} />
-          <Route path="/follow/:name/player/:slug" element={<Player />} />
-          <Route path="/atlas/:slug" element={<Atlas />} />
-          <Route path="/atlas/:slug/concept/:cslug" element={<Concept />} />
-          <Route path="/log/:topic" element={<LogTopic />} />
-          <Route path="/log/:topic/entry/:slug" element={<LogEntry />} />
-
-          {/* 廃止した3ルート */}
-          <Route path="/notes" element={<Navigate to="/shelf" replace state={{ legacy: 'notes' }} />} />
-          <Route path="/logs" element={<Navigate to="/shelf" replace state={{ legacy: 'logs' }} />} />
-          <Route path="/moc/:slug" element={<LegacyMoc graph={graph} />} />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <BottomTabs />
-      </HashRouter>
+    <DataCtx.Provider value={data}>
+      <ShellCtx.Provider value={shell}>
+        {inSettings ? (
+          <Settings faceId={faceId} onPick={pickFace} onClose={() => closeSettings()} />
+        ) : (
+          <Suspense fallback={<ShellLoading />}>
+            <face.Root key={face.id} initialTarget={initialTarget} />
+          </Suspense>
+        )}
+      </ShellCtx.Provider>
     </DataCtx.Provider>
   );
 }

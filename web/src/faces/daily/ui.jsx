@@ -1,13 +1,19 @@
+// 面「日報」の見た目の部品（グラス・ボトムタブ・カード）。**この面の中だけで使う**。
+// 面A・面Bはグラスもボトムタブも使わないので、ここを共有部品にしてはいけない。
+// 面をまたいで意味が同じもの（本文の描画・数値の解釈・相対日・コピー）は ../../shared/ にある。
 import { useState } from 'react';
 import { Box, Flex, HStack, VStack, Heading, Text, Button, Spinner } from '@chakra-ui/react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import ReactMarkdown from 'react-markdown';
-import { useData } from './lib/ctx.js';
-import { wikiToMarkdown } from './lib/wiki.js';
-import { typeLabel, tagLabel, tagToParam } from './lib/graph.js';
-import { C, ACCENT_GRADIENT, tint } from './theme.js';
+import { useData } from '../../lib/ctx.js';
+import { typeLabel, tagLabel, tagToParam } from '../../lib/graph.js';
+import { copyText } from '../../shared/util.js';
+import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
 
-export { GROUP, GROUP_ORDER } from './theme.js';
+export { GROUP, GROUP_ORDER } from '../../shared/theme.js';
+// 共有部品はこの面の入口からも引けるようにしておく（移設で各ページの import を書き換えないため）。
+export { Md } from '../../shared/Md.jsx';
+export { Sparkline, Delta } from '../../shared/Sparkline.jsx';
+export { relDay, copyText } from '../../shared/util.js';
 
 // ---------------- ページ枠 ----------------
 // ボトムタブぶんの余白を必ず確保する（safe-area 込み）。
@@ -139,11 +145,6 @@ export function Loading() {
   return <Center><Spinner size="lg" color={C.sky} /></Center>;
 }
 
-export function Md({ text }) {
-  const { idx } = useData();
-  return <div className="md"><ReactMarkdown>{wikiToMarkdown(text || '', idx)}</ReactMarkdown></div>;
-}
-
 export function NotFound({ what }) {
   const navigate = useNavigate();
   return (
@@ -156,18 +157,6 @@ export function NotFound({ what }) {
 
 // ---------------- コピーボタン ----------------
 // サイトは書き込めないが、書き込みの「意図」は渡せる。atlas の先行実装と同じ挙動。
-export async function copyText(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch {
-    const ta = document.createElement('textarea');
-    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta); ta.select();
-    try { document.execCommand('copy'); } catch { /* noop */ }
-    document.body.removeChild(ta);
-  }
-}
-
 export function CopyButton({ text, children, tone = 'sky', size = 'sm', w }) {
   const [done, setDone] = useState(false);
   const color = tone === 'amber' ? C.amber : tone === 'green' ? C.green : C.sky;
@@ -225,86 +214,6 @@ export function Backlinks({ route, title }) {
       )}
     </Box>
   );
-}
-
-// ---------------- スパークライン ----------------
-// 定点観測の本質は「前回と比べる」。静止した数値タイルではその役に立たない。
-export function Sparkline({ points, height = 44, color = C.sky, goal = null }) {
-  if (!points || points.length < 2) return null;
-  const vals = points.map((p) => p.value);
-  const min = Math.min(...vals), max = Math.max(...vals);
-  const span = max - min || 1;
-  const W = 100, H = height;
-  const xy = points.map((p, i) => [
-    (i / (points.length - 1)) * W,
-    H - 4 - ((p.value - min) / span) * (H - 10),
-  ]);
-  const d = xy.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(2)},${y.toFixed(2)}`).join(' ');
-  const area = `${d} L${W},${H} L0,${H} Z`;
-  const [lx, ly] = xy[xy.length - 1];
-  // 終点を強調するのは「良い方向の最高記録」のときだけ。中立の指標では強調しない。
-  const isBest = goal ? vals[vals.length - 1] === (goal === 'up' ? max : min) : false;
-  // 横方向は幅いっぱいに引き伸ばす（preserveAspectRatio="none"）ので、終点マーカーを SVG の
-  // circle で描くと楕円に潰れる。マーカーだけは HTML 要素として % 配置する。
-  return (
-    <Box position="relative" w="100%" h={`${H}px`}>
-      <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" width="100%" height={H} aria-hidden="true"
-        style={{ display: 'block' }}>
-        <path d={area} fill={tint(color, 12)} />
-        <path d={d} fill="none" stroke={color} strokeWidth="1.6" vectorEffect="non-scaling-stroke"
-          strokeLinejoin="round" strokeLinecap="round" />
-      </svg>
-      <Box position="absolute" w="7px" h="7px" borderRadius="full"
-        bg={isBest ? C.ink : color} pointerEvents="none"
-        style={{
-          left: `${lx}%`, top: `${(ly / H) * 100}%`, transform: 'translate(-50%,-50%)',
-          boxShadow: isBest ? `0 0 8px ${color}` : 'none',
-        }} />
-    </Box>
-  );
-}
-
-// 数値と前回比。
-// goal（up=大きいほど良い / down=小さいほど良い / null=中立）を見て改善・悪化を判定する。
-// 中立の指標に「自己ベスト」を出したり、増加を緑にしたりしない——たとえばフェース角は
-// 大きくなるほど悪いので、最大値を成果として見せると定点観測が嘘をつくことになる。
-export function Delta({ points, unit, goal }) {
-  if (!points?.length) return null;
-  const vals = points.map((p) => p.value);
-  const last = vals[vals.length - 1];
-  const prev = vals.length > 1 ? vals[vals.length - 2] : null;
-  const diff = prev == null ? null : Math.round((last - prev) * 100) / 100;
-
-  let deltaColor = C.muted;
-  if (goal && diff) deltaColor = (goal === 'up') === diff > 0 ? C.green : C.pink;
-
-  const isBest = goal
-    ? last === (goal === 'up' ? Math.max(...vals) : Math.min(...vals)) && vals.length > 1
-    : false;
-
-  return (
-    <HStack gap="1.5" align="baseline">
-      <Text fontSize="sm" fontWeight="800" color={C.ink}>{last}{unit ? ` ${unit}` : ''}</Text>
-      {diff != null && diff !== 0 && (
-        <Text fontSize="10px" fontWeight="700" color={deltaColor}>
-          {diff > 0 ? '▲' : '▼'}{Math.abs(diff)}
-        </Text>
-      )}
-      {isBest && <Text fontSize="10px" fontWeight="700" color={C.amber}>自己ベスト</Text>}
-    </HStack>
-  );
-}
-
-// ---------------- 相対日 ----------------
-export function relDay(date, today) {
-  if (!date) return '';
-  const d = Math.round((new Date(`${today}T00:00:00`) - new Date(`${date}T00:00:00`)) / 86400000);
-  if (d <= 0) return '今日';
-  if (d === 1) return '昨日';
-  if (d < 7) return `${d}日前`;
-  if (d < 28) return `${Math.floor(d / 7)}週間前`;
-  if (d < 365) return `${Math.floor(d / 30)}ヶ月前`;
-  return String(date);
 }
 
 export { VStack, HStack, Flex, Box, Text, Heading, Button };

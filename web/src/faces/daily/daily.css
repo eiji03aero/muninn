@@ -1,0 +1,25 @@
+/* 面「日報」のグラス素材。
+   この面が選ばれているときだけ効くよう、すべて [data-face="daily"] の下に閉じる。
+   3つの面は見た目を揃えないのが目的なので、素材が面の外へ漏れると実験そのものが濁る。 */
+
+[data-face="daily"] .glass {
+  background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 8px 30px -12px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.14);
+}
+[data-face="daily"] .glass-bar {
+  background: rgba(9,10,20,.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+[data-face="daily"] .glass-soft {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}

@@ -1,0 +1,168 @@
+/* shell（復号ゲート・設定）のスタイル。
+   面のスタイルとは混ぜない——shell はどの面が選ばれていても出る層なので、
+   ここで面の見た目（グラス・ボトムタブ）に寄せると、面を絞ったときに道連れになる。
+   すべて .mn-shell 配下に閉じる。 */
+
+.mn-shell {
+  --sh-ink: #f2f5ff;
+  --sh-muted: #97a0c4;
+  --sh-faint: #6b7091;
+  --sh-line: rgba(255, 255, 255, .12);
+  --sh-sky: #6ec1ff;
+  --sh-violet: #b79bff;
+  --sh-pink: #ff7aa8;
+  color: var(--sh-ink);
+  font-family: inherit;
+}
+
+/* ---- 中央寄せ（ゲート・読み込み・失敗） ---- */
+.mn-shell .sh-center {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+.mn-shell .sh-wordmark {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: .3em;
+  margin: 0;
+}
+.mn-shell .sh-lede { font-size: .875rem; color: var(--sh-muted); margin: 0; }
+.mn-shell .sh-error { font-size: .875rem; color: var(--sh-pink); margin: 0; }
+
+.mn-shell .sh-form {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  width: 100%;
+  max-width: 300px;
+  margin-top: .5rem;
+}
+/* 16px 未満だと iOS Safari が入力時に勝手にズームする */
+.mn-shell .sh-input {
+  font-size: 16px;
+  min-height: 44px;
+  padding: .55rem .75rem;
+  text-align: center;
+  color: var(--sh-ink);
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--sh-line);
+  border-radius: 14px;
+  outline: none;
+}
+.mn-shell .sh-input::placeholder { color: var(--sh-faint); }
+.mn-shell .sh-input:focus { border-color: var(--sh-sky); }
+.mn-shell .sh-submit {
+  min-height: 44px;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #08111f;
+  background: linear-gradient(120deg, #6ec1ff, #b79bff);
+  cursor: pointer;
+}
+.mn-shell .sh-submit:disabled { opacity: .6; }
+
+/* ---- 読み込み中 ---- */
+.mn-shell .sh-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(110, 193, 255, .25);
+  border-top-color: var(--sh-sky);
+  animation: sh-spin .8s linear infinite;
+}
+@keyframes sh-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .mn-shell .sh-spinner { animation: none; }
+}
+
+/* ---- 設定 ---- */
+.mn-shell .sh-page {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: max(1rem, env(safe-area-inset-top)) 1rem calc(2rem + env(safe-area-inset-bottom));
+}
+.mn-shell .sh-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.mn-shell .sh-title { font-size: 1.25rem; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+.mn-shell .sh-close {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 .75rem;
+  border: 1px solid var(--sh-line);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--sh-muted);
+  font-size: .875rem;
+  cursor: pointer;
+}
+.mn-shell .sh-close:hover { color: var(--sh-ink); }
+
+.mn-shell .sh-slot {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  margin: 1.75rem 0 .75rem;
+  font-size: 11px;
+  letter-spacing: .14em;
+  color: var(--sh-faint);
+}
+.mn-shell .sh-slot::after { content: ""; flex: 1; height: 1px; background: var(--sh-line); }
+
+.mn-shell .sh-faces { display: flex; flex-direction: column; gap: .625rem; }
+.mn-shell .sh-face {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  padding: .9rem 1rem;
+  border: 1px solid var(--sh-line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .04);
+  color: inherit;
+  cursor: pointer;
+  transition: transform .06s ease;
+}
+.mn-shell .sh-face:active { transform: scale(.99); }
+.mn-shell .sh-face[aria-pressed="true"] {
+  border-color: rgba(110, 193, 255, .55);
+  background: color-mix(in srgb, #6ec1ff 12%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .mn-shell .sh-face { transition: none; }
+}
+.mn-shell .sh-face-top { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
+.mn-shell .sh-face-name { font-size: 1rem; font-weight: 700; }
+.mn-shell .sh-face-on { font-size: 11px; font-weight: 700; color: var(--sh-sky); }
+.mn-shell .sh-face-hint {
+  display: block;
+  font-size: .8125rem;
+  color: var(--sh-muted);
+  margin-top: .25rem;
+  line-height: 1.6;
+}
+.mn-shell .sh-face-stat {
+  display: block;
+  font-size: 11px;
+  color: var(--sh-faint);
+  margin-top: .5rem;
+}
+
+.mn-shell .sh-note {
+  border: 1px solid var(--sh-line);
+  border-radius: 14px;
+  padding: .9rem 1rem;
+  background: rgba(255, 255, 255, .03);
+  font-size: .8125rem;
+  line-height: 1.8;
+  color: var(--sh-muted);
+}
+.mn-shell .sh-note strong { color: var(--sh-ink); font-weight: 700; }
+.mn-shell .sh-note p { margin: 0 0 .5rem; }
+.mn-shell .sh-note p:last-child { margin-bottom: 0; }

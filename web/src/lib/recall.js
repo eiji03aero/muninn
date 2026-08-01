@@ -16,6 +16,13 @@ const KEY_SEEN = 'mn.seen';
 const read = (k, fb) => { try { return JSON.parse(localStorage.getItem(k)) ?? fb; } catch { return fb; } };
 const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* 容量超過等は黙って諦める */ } };
 
+// 再読の履歴に「どの面から記録されたか」を添えるためのラベル。
+// **ここは面を解釈しない**——ただ渡された文字列を記録に付けるだけで、
+// 影SRSの計算も出題も面によって変わらない（変わったら面ごとに定着が食い違う）。
+// 3面のうちどれを残すかを判断するときの材料になる（web/DESIGN.md §11）。
+let logSource = null;
+export const setLogSource = (s) => { logSource = s || null; };
+
 export const todayISO = (d = new Date()) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 export const addDays = (iso, n) => {
@@ -95,7 +102,7 @@ export function recordVerdict(note, ok, wroteNote, shadow) {
   write(KEY_PENDING, pending);
 
   const log = read(KEY_LOG, []);
-  log.push({ slug: note.slug, q, date: today });
+  log.push({ slug: note.slug, q, date: today, via: logSource });
   write(KEY_LOG, log.slice(-400));
   return next;
 }

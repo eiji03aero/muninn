@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Box, Flex, HStack, VStack, Text, Button } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useData } from './lib/ctx.js';
+import { useData } from '../../lib/ctx.js';
 import { AppBar, Page, Slot, Card, Chip, CopyButton, Sparkline, Delta, NotFound, relDay, Md } from './ui.jsx';
-import { tagLabel, tagToParam, paramToTag, typeLabel, cleanTitle } from './lib/graph.js';
-import { effectiveSrs, todayISO } from './lib/recall.js';
-import { C, ACCENT_GRADIENT, tint } from './theme.js';
+import { tagLabel, tagToParam, paramToTag, typeLabel, cleanTitle } from '../../lib/graph.js';
+import { effectiveSrs, todayISO } from '../../lib/recall.js';
+import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
 
 // 面積比例のツリーマップ（決定的・乱数なし）。
 // 「何があるんだっけ」にリストではなく面積で答える。ゴルフが画面の4割を占める非対称を

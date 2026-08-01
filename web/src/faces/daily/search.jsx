@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Box, Flex, HStack, VStack, Text, Input, Button } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { useData } from './lib/ctx.js';
+import { useData } from '../../lib/ctx.js';
 import { AppBar, Page, Slot, Card, Chip, CopyButton } from './ui.jsx';
-import { typeLabel, tagLabel, tagToParam } from './lib/graph.js';
-import { loadSeen } from './lib/recall.js';
-import { C } from './theme.js';
+import { typeLabel, tagLabel, tagToParam } from '../../lib/graph.js';
+import { loadSeen } from '../../lib/recall.js';
+import { C } from '../../shared/theme.js';
 
 // ビルド時インデックスは作らない。site.json は復号済みで全メモリ上にあり、90記事規模なら
 // 素の indexOf の総当たりで数ミリ秒。過剰設計を避ける。

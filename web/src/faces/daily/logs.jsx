@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Flex, HStack, VStack, SimpleGrid, Text, Button } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useData } from './lib/ctx.js';
+import { useData } from '../../lib/ctx.js';
 import { AppBar, Page, Slot, Card, Chip, Chips, CopyButton, Backlinks, NotFound, Md } from './ui.jsx';
-import { markSeen } from './lib/recall.js';
-import { C, ACCENT_GRADIENT, tint } from './theme.js';
+import { markSeen } from '../../lib/recall.js';
+import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
 
 const MEDIA = (path) => import.meta.env.BASE_URL + path;
 

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Box, Flex, HStack, VStack, Text, Button } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { useData } from './lib/ctx.js';
+import { useData } from '../../lib/ctx.js';
+import { useShell } from '../../shell/ctx.js';
 import { AppBar, Page, Slot, Card, CopyButton } from './ui.jsx';
-import { loadPending, clearPending, loadSlips, clearSlips, slipsPrompt, reviewPrompt, effectiveSrs } from './lib/recall.js';
-import { C, tint } from './theme.js';
+import { loadPending, clearPending, loadSlips, clearSlips, slipsPrompt, reviewPrompt, effectiveSrs } from '../../lib/recall.js';
+import { C, tint } from '../../shared/theme.js';
 
 // 「何ができるか」を説明するページと「それをやる」ページを同じにする。
 // 説明だけのページは読まれない——見出しは concern 名ではなく目的語で立てる。
@@ -39,6 +40,7 @@ const CAN_DO = [
 export function Desk() {
   const navigate = useNavigate();
   const { site, graph, shadow, refresh } = useData();
+  const { face, openSettings } = useShell();
   const [tick, setTick] = useState(0);
   const pending = loadPending();
   const slips = loadSlips();
@@ -179,6 +181,23 @@ export function Desk() {
                 <b style={{ color: C.ink }}>「Claude に渡す依頼を作って溜めること」</b>まで。
                 溜めた伝票は上の「ぜんぶコピー」で1回にまとめて渡せる。
               </Text>
+            </Card>
+          </Box>
+
+          {/* 読む面のかたちは3つある。どの面からも設定に戻れないと「試したら二度と戻せない」が
+              起きるので、この面の非常口はここ（常に下のタブから1タップで来られる場所）に置く。 */}
+          <Box>
+            <Slot>読む面</Slot>
+            <Card onClick={openSettings}>
+              <Flex align="center" justify="space-between" gap="3">
+                <Box>
+                  <Text fontSize="sm" color={C.ink} fontWeight="700">面のかたち</Text>
+                  <Text fontSize="xs" color={C.muted} mt="1" lineHeight="1.7">
+                    いまは「{face.label}」。他のかたちに替えられる
+                  </Text>
+                </Box>
+                <Text fontSize="sm" color={C.faint} flexShrink="0">›</Text>
+              </Flex>
             </Card>
           </Box>
 

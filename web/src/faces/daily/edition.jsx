@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Box, Flex, HStack, VStack, Heading, Text, Button, Textarea } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
-import { useData } from './lib/ctx.js';
+import { useData } from '../../lib/ctx.js';
 import { AppBar, Page, Slot, Card, Chip, CopyButton, Sparkline, Delta, relDay, Md } from './ui.jsx';
-import { composeEdition, staleness } from './lib/edition.js';
-import { recordVerdict, loadPending, todayISO, doneThisWeek, daysBetween } from './lib/recall.js';
-import { cleanTitle, shortTitle, tagLabel, tagToParam, typeLabel } from './lib/graph.js';
-import { C, ACCENT_GRADIENT, tint } from './theme.js';
+import { composeEdition, staleness } from '../../lib/edition.js';
+import { recordVerdict, loadPending, todayISO, doneThisWeek, daysBetween } from '../../lib/recall.js';
+import { cleanTitle, shortTitle, tagLabel, tagToParam, typeLabel } from '../../lib/graph.js';
+import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
 
 // ---------------- 題字 ----------------
 // 「更新 N日前」を出すのは、面が閲覧日で組まれている（＝押していなくても今日の面である）ことの表明。

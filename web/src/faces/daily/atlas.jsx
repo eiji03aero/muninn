@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Box, Flex, HStack, VStack, Heading, Text, Button } from '@chakra-ui/react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useData } from './lib/ctx.js';
+import { useData } from '../../lib/ctx.js';
 import { AppBar, Page, Slot, Chip, Chips, Card, Center, Md, Backlinks, CopyButton, NotFound } from './ui.jsx';
-import { loadRead, saveRead, markSeen, addSlip } from './lib/recall.js';
-import { shortTitle } from './lib/graph.js';
-import { C, tint } from './theme.js';
+import { loadRead, saveRead, markSeen, addSlip } from '../../lib/recall.js';
+import { shortTitle } from '../../lib/graph.js';
+import { C, tint } from '../../shared/theme.js';
 
 // ---- グラフ・レイアウト（requires の最長鎖で深さを決める決定的配置） ----
 const NODE_W = 140;

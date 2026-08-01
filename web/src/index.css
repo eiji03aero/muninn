@@ -25,28 +25,10 @@ body::before {
     #090a14;
 }
 
-/* ===== グラス素材 ===== */
-.glass {
-  background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 20px;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  box-shadow: 0 8px 30px -12px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.14);
-}
-.glass-bar {
-  background: rgba(9,10,20,.72);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-bottom: 1px solid rgba(255,255,255,.10);
-}
-.glass-soft {
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.10);
-  border-radius: 14px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
+/* ここに置いてよいのは「どの面でも同じであるべきもの」だけ。
+   面の素材（日報のグラス等）は faces/<面>/*.css に置き、[data-face="..."] の下に閉じる。
+   面ごとに見た目を揃えないのが目的なので、素材をここに戻さないこと。 */
+
 .press { transition: transform .06s ease; }
 .press:active { transform: scale(.985); }
 @media (prefers-reduced-motion: reduce) { .press { transition: none; } }
