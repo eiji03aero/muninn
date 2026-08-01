@@ -22,3 +22,4 @@ tags: [sports/golf]
 - [[golf-shallow-backswing-hand-and-shaft-in-line-reduces-fat]] — 深く引かず一直線/オンプレーンに上げる側。この始動の受け皿
 - [[golf-backswing-keep-good-tilt-kill-sway-and-dip-rotate-onto-inside-trail-hip]] — やり過ぎ＝"深く引きすぎ→軸倒れ"の注意（この記事の但し書きの根拠）
 - [[golf-driver-stop-forcing-extreme-inside-out-deliver-neutral-through-ball]] — ダウンが戻る"内側の道"（中立軌道でボールに通す）
+- [[golf-takeaway-using-hands-is-normal-natural-set-helps-smash-but-keep-face-toe-up-square]] — 手を使うのは正常（体だけは矯正の誇張）／ただしフェースはトウアップ＝スクエアに
