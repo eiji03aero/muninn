@@ -17,7 +17,7 @@ import { recallQueue } from '../../lib/edition.js';
 import { shortTitle } from '../../lib/graph.js';
 import {
   addSlip, doneThisWeek, loadPending, loadSeen, loadSlips,
-  markSeen, recallLog, recordVerdict, removeSlip, slipsPrompt, todayISO,
+  markSeen, recallLog, recordVerdict, removeSlip, slipsPrompt, todayISO, undoVerdict,
 } from '../../lib/recall.js';
 import { copyText } from '../../shared/util.js';
 import { DIRS, extraBacklinks, tagJa } from './model.js';
@@ -173,6 +173,22 @@ export default function ThumbRoot({ initialTarget }) {
     setTimeout(nextCard, NEXT_MS);
   }, [item, cards, index, commit, nextCard]);
 
+  // 猶予が切れて書き込まれたあとの取り消し。判定は取り消せないままにしない（受け入れ条件9）。
+  // 巻き戻しは lib の undoVerdict に任せる——影SRS・伝票・履歴の3つを同時に動かすのは
+  // recordVerdict なので、その逆操作を面ごとに自作すると必ずどれか1つを取りこぼす。
+  const unjudge = useCallback((slug) => {
+    if (held.current?.note.slug === slug) {
+      held.current = null;
+      clearTimeout(commitT.current);
+    } else {
+      undoVerdict(slug, baseShadow[slug]);
+    }
+    setUndo(null);
+    setJudged((j) => { const n = { ...j }; delete n[slug]; return n; });
+    setFlipped(true);
+    setSlipV((n) => n + 1);
+  }, [baseShadow]);
+
   // 画面を離れる前に、宙に浮いた判定を必ず書き込む
   useEffect(() => {
     const flush = () => commit();
@@ -252,6 +268,8 @@ export default function ThumbRoot({ initialTarget }) {
       if (t?.closest?.('button') && (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight' || e.key === 'ArrowLeft')) return;
       if (e.key === 'ArrowRight') { setReelIdx((i) => Math.min(i + 1, items.length - 1)); e.preventDefault(); }
       else if (e.key === 'ArrowLeft') { setReelIdx((i) => Math.max(i - 1, 0)); e.preventDefault(); }
+      else if (e.key === 'Home') { setReelIdx(0); e.preventDefault(); }
+      else if (e.key === 'End') { setReelIdx(items.length - 1); e.preventDefault(); }
       else if (e.key === 'Enter' || e.key === ' ') { runAct(primary.act); e.preventDefault(); }
       else if (e.key === 'Escape' || e.key === 'Backspace') { pop(); e.preventDefault(); }
       else if (e.key >= '1' && e.key <= '4') goFace(DIRS[Number(e.key) - 1].id);
@@ -277,6 +295,8 @@ export default function ThumbRoot({ initialTarget }) {
 
   const nested = stack.length > 0;
   const near = primary.split ? 172 : 128;
+  // いま選んでいるのが「判定ずみの札」なら、いつでも判定を戻せる
+  const judgedCard = item?.card && judged[item.card] ? item.card : null;
 
   return (
     <div className={`face-thumb${hand === 'R' ? ' is-right' : ''}`} data-face="thumb">
@@ -349,6 +369,9 @@ export default function ThumbRoot({ initialTarget }) {
             <div className="tb-foot">
               {undo ? (
                 <button type="button" className="tb-undo" onClick={() => { undo.run(); }}>↺ {undo.label}</button>
+              ) : judgedCard ? (
+                // 猶予が切れたあとの逃げ道。ここが無いと判定が取り消せない操作になる
+                <button type="button" className="tb-undo" onClick={() => unjudge(judgedCard)}>↺ 判定を戻す</button>
               ) : (
                 // 判定中は原点が太るぶん幅が無い。削るのはカウンタから（道具は残す）
                 <span className="tb-counter" role="status">
