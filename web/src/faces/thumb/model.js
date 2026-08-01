@@ -40,15 +40,33 @@ export const kindOf = (node) =>
 
 export const mocTitle = (node) => `${cleanTitle(node.title)}`;
 
+// 末尾の `## Links` 節を落とす。この面ではリンクを理由つきの「道」として別に出すので、
+// 押せないリンクの一覧が本文に残ると壊れて見える。
+export const stripLinks = (body) =>
+  String(body || '').replace(/\n#{2,4}\s*(?:Links?|リンク)\s*\n[\s\S]*$/i, '\n');
+
+// 正本の文にも内部語彙（アトラス / MOC / mn-xxx）が混じることがある。画面には出さない
+// （web/DESIGN.md）。**表示の直前でだけ**言い換え、正本の markdown には手を触れない。
+// 置き換えるのは読者向けの呼び名が決まっているものだけに絞る（意味を歪めないため）。
+export function deint(s) {
+  return String(s || '')
+    .replace(/学習アトラス|知識アトラス|アトラス/g, '連載')
+    .replace(/\s*[（(]\s*\/?mn-[a-z-]+\s*[）)]/g, '')
+    .replace(/\/?mn-[a-z-]+/g, '')
+    .replace(/\bMOC\b/g, '見取り図')
+    .replace(/[ \t]{2,}/g, ' ');
+}
+
 // markdown を落として、覗き窓・一覧に出せる素の文にする。
 export function plain(s, max = 0) {
-  let t = String(s || '')
+  let t = deint(s)
     .replace(/```[\s\S]*?```/g, ' ')
     .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
     .replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, a, b) => (b || a))
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
     .replace(/^\s*[-*>#|]+\s*/gm, '')
     .replace(/[*`_]/g, '')
+    .replace(/\[\[|\]\]/g, '')
     .replace(/\s*\n+\s*/g, ' ／ ')
     .replace(/\s{2,}/g, ' ')
     .trim();
@@ -62,8 +80,7 @@ export function plain(s, max = 0) {
 // 末尾の `## Links` 節はまるごと落とす。この面では同じ情報を「ここから伸びる道」として
 // 理由つきで出しているので、押せないリンクの一覧が本文の末尾に残ると壊れて見える。
 export function wikiToPlainText(body, idx) {
-  const cut = String(body || '').replace(/\n#{2,4}\s*(?:Links?|リンク)\s*\n[\s\S]*$/i, '\n');
-  return cut.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, t, alias) => {
+  return deint(stripLinks(body)).replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (_, t, alias) => {
     const r = resolveTarget(t, idx);
     return (alias || '').trim() || (r ? shortTitle(r.label) : t.trim());
   });

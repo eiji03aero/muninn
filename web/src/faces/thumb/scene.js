@@ -6,7 +6,7 @@
 import { dayIndex, hash32 } from '../../lib/edition.js';
 import { shortTitle, cleanTitle } from '../../lib/graph.js';
 import { resolveTarget } from '../../lib/wiki.js';
-import { EDGE_KEYS, EDGE_OUT, insOf, kindOf, outsOf, plain, tagJa } from './model.js';
+import { EDGE_KEYS, EDGE_OUT, insOf, kindOf, outsOf, plain, stripLinks, tagJa } from './model.js';
 
 export const nodeScene = (route) => ({ t: 'node', route });
 export const sceneKey = (s) => `${s.t}:${s.route || s.tag || ''}`;
@@ -77,7 +77,7 @@ export function reelItems(scene, ctx) {
   if (scene.t === 'ask') {
     const items = [{ k: '書く', l: '新しく頼む', tone: 'act', act: { t: 'write' } }];
     if (slips.length || ctx.pending.length) {
-      items.push({ k: '渡す', l: `伝票をコピー ${slips.length + (ctx.pending.length ? 1 : 0)}件`, tone: 'act', act: { t: 'copy' } });
+      items.push({ k: '渡す', l: '伝票をまるごとコピー', tone: 'act', act: { t: 'copy' } });
     }
     slips.forEach((s, i) => items.push({ k: `依頼${i + 1}`, l: s.label.slice(0, 24), slip: s, tone: 'act', act: { t: 'del', id: s.id } }));
     if (ctx.pending.length) {
@@ -256,7 +256,7 @@ export function searchAll(q, graph) {
     const score = (n.title.toLowerCase().includes(lc) ? 20 : 0)
       + (extra.toLowerCase().includes(lc) ? 8 : 0)
       + (n.type === 'note' ? 3 : 0);
-    out.push({ node: n, score, snip: snippet(n.body, q) || snippet(extra, q) });
+    out.push({ node: n, score, snip: snippet(stripLinks(n.body), q) || snippet(extra, q) });
   }
   return out.sort((a, b) => b.score - a.score || a.node.title.localeCompare(b.node.title)).slice(0, 40);
 }

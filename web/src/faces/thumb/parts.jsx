@@ -58,10 +58,12 @@ export function Peek({ item, ctx }) {
   if (!p) return null;
   return (
     <div className="tb-peek" aria-live="polite" aria-atomic="true">
-      <div className="tb-peekh"><b>覗いている</b><i /><span>{p.head}</span></div>
-      {p.why && <div className="tb-peekwhy">{p.why}</div>}
-      <div className="tb-peekt">{p.title} {p.kind ? <span className="tb-peekk">{p.kind}</span> : null}</div>
-      {p.q ? <div className="tb-peekq">問い： {p.q}</div> : <div className="tb-peekx">{p.ex}</div>}
+      <div className="tb-peekin">
+        <div className="tb-peekh"><b>覗いている</b><i /><span>{p.head}</span></div>
+        {p.why && <div className="tb-peekwhy">{p.why}</div>}
+        <div className="tb-peekt">{p.title} {p.kind ? <span className="tb-peekk">{p.kind}</span> : null}</div>
+        {p.q ? <div className="tb-peekq">問い： {p.q}</div> : <div className="tb-peekx">{p.ex}</div>}
+      </div>
     </div>
   );
 }

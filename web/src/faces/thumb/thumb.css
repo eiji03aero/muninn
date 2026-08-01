@@ -192,9 +192,13 @@
   position: absolute; left: 0; right: 0; bottom: var(--ops); height: 152px; z-index: 12;
   background: #06070a; box-shadow: 0 -14px 22px -8px #06070a;
   border-top: 1px solid rgba(127, 209, 232, .28);
-  padding: 11px 20px 12px; display: flex; flex-direction: column; overflow: hidden;
+  padding: 11px 20px 12px; overflow: hidden;
 }
-[data-face="thumb"] .tb-peek > * { flex: none; }
+[data-face="thumb"] .tb-peekin {
+  height: 100%; max-width: var(--col); margin: 0 auto;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+[data-face="thumb"] .tb-peekin > * { flex: none; }
 [data-face="thumb"] .tb-peekh {
   font-size: 9.5px; letter-spacing: .18em; color: var(--dimmer);
   display: flex; gap: 7px; align-items: center; margin-bottom: 7px;

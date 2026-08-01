@@ -240,7 +240,8 @@ export const Origin = forwardRef(function Origin(
           role="menuitem"
           className={`tb-wedge tb-wedge-back${hot === BACK_DIR.id ? ' is-hot' : ''}`}
           aria-label="ひとつ戻す。原点から下へ引いても戻せる"
-          style={{ left: c.x, top: c.y + 54, transform: 'translate(-50%, 0)' }}
+          /* 原点の真下。ただしホームインジケータに掛からない高さに収める（下端は原点中心+78px） */
+          style={{ left: c.x, top: c.y + 40, transform: 'translate(-50%, 0)' }}
           onClick={() => { closeFan(); onDir(BACK_DIR.id); }}
         >
           <span className="tb-wdir" aria-hidden="true">{BACK_DIR.arrow}</span>

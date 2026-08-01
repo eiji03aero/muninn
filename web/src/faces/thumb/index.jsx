@@ -220,6 +220,7 @@ export default function ThumbRoot({ initialTarget }) {
     if (!initialTarget?.route) return;
     setStack([nodeScene(initialTarget.route)]);
     setReelIdx(0);
+    setSheet(null); // 外から飛んできたら、書きかけの依頼で画面を塞がない
   }, [initialTarget?.route]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 開いたものは共有の「最近見たもの」に記録する（面をまたいで1つ）

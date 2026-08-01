@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { Sparkline } from '../../shared/Sparkline.jsx';
 import { relDay } from '../../shared/util.js';
 import { cleanTitle, shortTitle } from '../../lib/graph.js';
+import { resolveTarget } from '../../lib/wiki.js';
 import { kindOf, plain, previewOf, shelfBars, tagJa, wikiToPlainText } from './model.js';
 
 const HUD = '#ffc46b';
@@ -253,7 +254,8 @@ function Ask({ ctx, item }) {
   return (
     <>
       <Kick note="Claude に渡す伝票">頼む</Kick>
-      <h1 className="tb-h1">依頼 {slips.length + (pending.length ? 1 : 0)} 件</h1>
+      {/* 件数は行のほうに持たせる。h1 で足し算した数を出すと「1件」の中身が読めない */}
+      <h1 className="tb-h1">伝票にたまっているもの</h1>
       <Rows>
         {pending.length > 0 && (
           <Row k="答え合わせ" on={!!item?.pending}>再読の結果 {pending.length}件</Row>
@@ -583,12 +585,18 @@ function MocView({ ctx, node, item }) {
         <div className="tb-grp" key={sec.title}>
           <Kick>{sec.title}</Kick>
           <Rows>
-            {sec.items.map((it) => (
-              <Row key={it.target} k="" on={item?.path?.node?.slug === it.target}>
-                {it.alias || it.target}
-                {it.reason && <div className="tb-rowr">{it.reason}</div>}
-              </Row>
-            ))}
+            {sec.items.map((it) => {
+              // 索引に並んでいるのは slug。読者に slug を見せない（内部語彙を画面に出さない）
+              const r = resolveTarget(it.target, ctx.idx);
+              const to = r && ctx.graph.byRoute.get(r.route);
+              if (!to) return null;
+              return (
+                <Row key={it.target} k={kindOf(to)} on={item?.path?.node?.route === to.route}>
+                  {it.alias || shortTitle(to.title)}
+                  {it.reason && <div className="tb-rowr">{it.reason}</div>}
+                </Row>
+              );
+            })}
           </Rows>
         </div>
       ))}
