@@ -23,3 +23,4 @@ srs:
 - [[golf-my-driver-distance-roadmap-smash-first-then-speed]] — この原則を自分の数値に当てはめた具体プラン
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — 遠心力・リリースは体主導の"出力"という点の裏づけ
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — ヘッドスピードを生むシーケンス
+- [[golf-shaft-bends-multi-plane-but-dont-swing-to-it-fitting-handles-it]] — しなりは多面的（前後＋トウダウン＋ねじれ）だが方向はスイングで操作せずフィットで処理
