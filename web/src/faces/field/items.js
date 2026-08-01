@@ -44,6 +44,22 @@ export const displayTitle = (node) => (node.type === 'moc'
   : node.type === 'follow' || node.type === 'atlas' ? cleanTitle(node.title)
   : node.short || node.title);
 
+// 本文から `## Links` の節だけを落とす。
+// この面は「ここから出ていく道」で同じリンクを**理由つき・覗ける形**で出すので、
+// 生の箇条書きを本文にも残すと同じものが2回並ぶ。`## Sources`（外部URL）は他に出口が無いので残す。
+export function bodyForReading(node) {
+  if (node.type !== 'note' && node.type !== 'concept') return node.body || '';
+  const lines = String(node.body || '').split('\n');
+  const out = [];
+  let skipping = false;
+  for (const line of lines) {
+    const h = /^#{1,6}\s*(.+?)\s*$/.exec(line);
+    if (h) skipping = /^links$/i.test(h[1]);
+    if (!skipping) out.push(line);
+  }
+  return out.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
 // ノード → 添え書き（見出しの下に薄く出す一行）
 function subOf(n) {
   switch (n.type) {

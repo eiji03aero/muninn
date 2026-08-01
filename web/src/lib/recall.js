@@ -124,6 +124,9 @@ export function undoVerdict(slug, prevShadow) {
 
 export const loadPending = () => read(KEY_PENDING, []);
 export const clearPending = () => write(KEY_PENDING, []);
+// 「渡し終わったので消す」を丸ごと取り消せるようにするための復元口。
+// 消す側だけあって戻す側が無いと、面は「半分だけ取り消せる」嘘のUndoを作ることになる。
+export const restorePending = (list) => write(KEY_PENDING, list || []);
 export const recallLog = () => read(KEY_LOG, []);
 
 // 直近7日で何件再読したか。数えるのは「やった量」であって借金ではない。

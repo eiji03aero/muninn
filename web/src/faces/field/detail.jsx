@@ -9,6 +9,7 @@ import { Sparkline } from '../../shared/Sparkline.jsx';
 import { resolveTarget } from '../../lib/wiki.js';
 import { linksWithReason, tagLabel, typeLabel } from '../../lib/graph.js';
 import { relDay } from '../../shared/util.js';
+import { bodyForReading } from './items.js';
 
 const EDGE_LABEL = {
   requires: '前提', contrasts: '対比', leadsTo: '発展', elaborates: '深掘り',
@@ -181,7 +182,7 @@ function Concept({ node }) {
       {c.gist && <p className="fd-lede"><b>要旨</b> {c.gist}</p>}
       {c.status === 'stub'
         ? <p className="fd-dim">この章はまだ書かれていない。順路の上には置いてある。</p>
-        : <Md text={c.body} />}
+        : <Md text={bodyForReading(node)} />}
     </>
   );
 }
@@ -225,7 +226,7 @@ export function DetailBody({ node, onPeek, today }) {
     case 'session': return (
       <>
         {node.ref.summary && <p className="fd-lede">{node.ref.summary}</p>}
-        <Md text={node.body} />
+        <Md text={bodyForReading(node)} />
       </>
     );
     default: return (
@@ -237,7 +238,7 @@ export function DetailBody({ node, onPeek, today }) {
             {node.kind === 'insight' && <span className="fd-chip">じぶんの言葉</span>}
           </p>
         )}
-        <Md text={node.body} />
+        <Md text={bodyForReading(node)} />
       </>
     );
   }

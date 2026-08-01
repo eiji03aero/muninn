@@ -22,7 +22,7 @@ import { composeEdition, recallQueue } from '../../lib/edition.js';
 import {
   todayISO, doneThisWeek, recallLog, markSeen, loadSeen,
   recordVerdict, undoVerdict,
-  loadSlips, addSlip, removeSlip, clearSlips, clearPending, loadPending, slipsPrompt,
+  loadSlips, addSlip, removeSlip, clearSlips, clearPending, restorePending, loadPending, slipsPrompt,
   loadRead, saveRead,
 } from '../../lib/recall.js';
 import { buildItems, search, marks, plain, displayTitle } from './items.js';
@@ -37,15 +37,16 @@ import './field.css';
 const KEY_INTRO = 'mn.face.field.intro';
 
 // いまどの状態かを、色・記号・文言の3チャネルで常時見せる（暗黙のモードを作らないため）。
+// 記号は打った記号の複写ではなく**状態の絵**にする（`> >量子…` のように二重に見えるのを避ける）。
 const STATES = {
   home: { caret: '›', tone: 'idle', word: '' },
   detail: { caret: '›', tone: 'idle', word: '消せば戻る' },
   find: { caret: '›', tone: 'find', word: '絞り込んでいる' },
   zero: { caret: '!', tone: 'zero', word: 'muninn の外' },
-  shelf: { caret: '#', tone: 'shelf', word: '束ねている' },
-  ask: { caret: '>', tone: 'ask', word: '頼んでいる' },
-  help: { caret: '?', tone: 'help', word: '使い方' },
-  memo: { caret: '✎', tone: 'memo', word: 'こたえを書いている' },
+  shelf: { caret: '≡', tone: 'shelf', word: '束ねている' },
+  ask: { caret: '»', tone: 'ask', word: '頼んでいる' },
+  help: { caret: 'i', tone: 'help', word: '使い方' },
+  memo: { caret: '…', tone: 'memo', word: 'こたえを書いている' },
 };
 
 const PLACEHOLDER = {
@@ -168,10 +169,15 @@ export default function FieldRoot({ initialTarget }) {
       showToast(`伝票にためた（${loadSlips().length}件）`, () => { removeSlip(`field:${text}`); bump(); refresh?.(); });
     },
     dropSlip: (id) => { removeSlip(id); bump(); refresh?.(); },
+    // 依頼も答え合わせも、Claude に渡し終わったら一緒に消える。
+    // 消す側だけ用意して戻す側を用意しないと「半分だけ取り消せる」嘘のUndoになるので、両方戻す。
     emptySlips: () => {
-      const old = loadSlips();
+      const oldSlips = loadSlips();
+      const oldPending = loadPending();
       clearSlips(); clearPending(); bump(); refresh?.();
-      showToast('伝票をからにした', () => { old.forEach(addSlip); bump(); refresh?.(); });
+      showToast('渡し終わったものとして消した', () => {
+        oldSlips.forEach(addSlip); restorePending(oldPending); bump(); refresh?.();
+      });
     },
     reopenIntro: () => setIntro(true),
   }), [open, showToast, bump, refresh]);
@@ -247,7 +253,11 @@ export default function FieldRoot({ initialTarget }) {
     () => recallQueue(site, graph, shadow, today, 3 + extra),
     [site, graph, shadow, today, extra],
   );
-  const todaysThree = queue.slice(0, 3);
+  // 「きょうの3枚」は最初に引いた3枚で固定する。判定すると影SRSが動いてキューから外れるので、
+  // 毎回引き直すと進捗の点が永久に埋まらない（＝終わりの見えない借金に見える）。
+  const threeRef = useRef(null);
+  if (!threeRef.current && queue.length) threeRef.current = queue.slice(0, 3).map((c) => c.note.slug);
+  const todaysThree = threeRef.current || [];
   const pending = queue.filter((c) => !doneToday.includes(c.note.slug) && !skipped.includes(c.note.slug));
   const current = pending[0]?.note || null;
 
@@ -328,6 +338,7 @@ export default function FieldRoot({ initialTarget }) {
                   onFlip: () => setFlipped(true),
                   onSkip: () => { setSkipped((s) => [...s, current.slug]); setFlipped(false); setMemo(''); },
                   onJudge: judge, onUndo: () => undo(), onMore: () => setExtra((n) => n + 1), week,
+                  onOpen: () => open(`/note/${current.slug}`),
                 }} />
             ))}
         </div>
@@ -470,7 +481,7 @@ function StackItem({ x, sel, recall }) {
             onClick={() => x.api.copy(slipsPrompt(x.slips, x.pending), `${x.slips.length + (x.pending.length ? 1 : 0)}件ぶんをコピーした`)}>
             ぜんぶコピー
           </button>
-          <button type="button" onClick={x.api.emptySlips}>からにする</button>
+          <button type="button" onClick={x.api.emptySlips}>渡し終わった</button>
         </div>
       );
     case 'askacts':
@@ -510,13 +521,11 @@ function StackItem({ x, sel, recall }) {
    ========================================================== */
 function RecallCard({
   current, todaysThree, doneToday, last, memo, flipped, week,
-  onFlip, onSkip, onJudge, onUndo, onMore,
+  onFlip, onSkip, onJudge, onUndo, onMore, onOpen,
 }) {
   const dots = (
     <span className="ff-dots">
-      {todaysThree.map((c) => (
-        <i key={c.note.slug} className={doneToday.includes(c.note.slug) ? 'on' : ''} />
-      ))}
+      {todaysThree.map((slug) => <i key={slug} className={doneToday.includes(slug) ? 'on' : ''} />)}
     </span>
   );
   const undoStrip = last ? (
@@ -550,14 +559,15 @@ function RecallCard({
             <div className="ff-ax"><Md text={plain(current.body, 260)} /></div>
           </div>
           {/* 一言は「下の欄」に書く。欄を増やさずに、書いた／書かないで q を 5/4 に分ける */}
-          <div className="ff-memo">
+          <div className={`ff-memo${memo.trim() ? ' wrote' : ''}`}>
             {memo.trim()
-              ? <>✎ 一言を書いた。<b>わかった</b> なら深く効く扱いになる</>
-              : <>✎ 下の欄がいま「一言」の欄。書かずに判定してもよい</>}
+              ? <>… 一言を書いた。<b>わかった</b> なら深く効く扱いになる</>
+              : <>… いま下の欄は「一言」の欄。書かずに判定してもよい</>}
           </div>
           <div className="ff-cacts">
             <button type="button" className="g" onClick={() => onJudge(true)}>わかった</button>
             <button type="button" className="w" onClick={() => onJudge(false)}>あやしい</button>
+            <button type="button" onClick={onOpen}>ぜんぶ読む</button>
           </div>
         </>
       ) : (
