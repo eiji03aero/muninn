@@ -102,13 +102,22 @@
 }
 [data-face="field"] .ff-hint b { color: var(--f-accent2); font-weight: 700; }
 [data-face="field"] .ff-state { color: var(--f-accent); white-space: nowrap; }
+/* 設定への導線は常時ここに置く（面を試したら二度と戻せない、を作らないため）。
+   ヒント帯は26pxしかないので、見た目は小さい札のまま、当たり判定だけ上下へ食み出させて44pxにする。 */
 [data-face="field"] .ff-gear {
   font-size: 11px;
   color: var(--f-dim2);
+  min-height: 44px;
+  margin: -9px 0;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+[data-face="field"] .ff-gear > span {
   border: 1px solid var(--f-line2);
   border-radius: 3px;
   padding: 2px 6px;
-  white-space: nowrap;
 }
 [data-face="field"] .ff-gear:active { color: var(--f-accent); }
 
@@ -343,9 +352,10 @@
 [data-face="field"] .fd-list { margin: 6px 0; padding-left: 18px; list-style: disc; }
 [data-face="field"] .fd-list li { margin: 4px 0; font-family: var(--f-jp); font-size: 12.5px; line-height: 1.7; }
 [data-face="field"] .fd-ordered { list-style: decimal; }
-[data-face="field"] .fd-link,
-[data-face="field"] .ff-lk {
-  display: inline; text-align: left; font-family: var(--f-jp); font-size: 12.5px;
+/* 順路の各段は「押すもの」なので、地の文のリンクと違って44pxの高さを持たせる */
+[data-face="field"] .fd-link {
+  display: inline-flex; align-items: center; min-height: 44px; text-align: left;
+  font-family: var(--f-jp); font-size: 12.5px;
   color: var(--f-accent); border-bottom: 1px dotted var(--f-accent2);
 }
 [data-face="field"] .fd-route { margin-top: 12px; }
@@ -467,7 +477,7 @@
 /* ---------- 動き（transform / opacity のみ・100ms 以内） ---------- */
 @media (prefers-reduced-motion: no-preference) {
   [data-face="field"] .ff-card,
-  [data-face="field"] .ff-toast { animation: ff-in .12s ease-out; }
+  [data-face="field"] .ff-toast { animation: ff-in .1s ease-out; }
   @keyframes ff-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 }
 @media (prefers-reduced-motion: reduce) {

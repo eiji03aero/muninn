@@ -364,7 +364,7 @@ export default function FieldRoot({ initialTarget }) {
           <span><b>&gt;</b> 頼む</span>
           <span><b>?</b> 使い方</span>
           <span className="ff-sp" />
-          <button type="button" className="ff-gear" onClick={openSettings}>面のかたち</button>
+          <button type="button" className="ff-gear" onClick={openSettings}><span>面のかたち</span></button>
           <span className="ff-state">{st.word}</span>
         </div>
         <div className="ff-inputrow">
@@ -665,7 +665,10 @@ function Riser({ riser, node, graph, api, onClose, onPaths, onAskPath }) {
         <div className="ff-rbody">
           {back.map((b) => (
             <button type="button" className="ff-out wide" key={b.route} onClick={() => { onClose(); api.open(b.route); }}>
-              <span className="ff-ot">{b.type === 'note' ? '' : `[${nodeLabel({ type: b.type })}] `}{b.title}</span>
+              <span className="ff-ot">
+                {b.type === 'note' ? '' : `[${nodeLabel({ type: b.type })}] `}
+                {displayTitle(graph.byRoute.get(b.route) || { title: b.title, short: b.title })}
+              </span>
               <span className="ff-or">
                 {b.reason ? `「${b.reason}」と書いてこちらを指している` : 'こちらを指している'}
               </span>
