@@ -107,6 +107,21 @@ export function recordVerdict(note, ok, wroteNote, shadow) {
   return next;
 }
 
+// recordVerdict の逆操作。**取り消せない操作を作らない**ためにここに置く——
+// 影SRS・伝票・履歴の3つを同時に動かすのは recordVerdict なので、その巻き戻しも同じ場所に置かないと
+// 面ごとに localStorage を直接いじる実装が生えて、キーの持ち主が曖昧になる。
+// prevShadow は判定する**前**の shadow[slug]（無かったなら undefined）を呼び出し側が控えておく。
+// 注意: 同じノートに対する「もっと前の日の未送信伝票」は recordVerdict の時点で既に潰れているので戻らない。
+export function undoVerdict(slug, prevShadow) {
+  const s = read(KEY_SHADOW, {});
+  if (prevShadow) s[slug] = prevShadow; else delete s[slug];
+  write(KEY_SHADOW, s);
+  write(KEY_PENDING, read(KEY_PENDING, []).filter((p) => p.slug !== slug));
+  const log = read(KEY_LOG, []);
+  const i = log.map((l) => l.slug).lastIndexOf(slug);
+  if (i >= 0) { log.splice(i, 1); write(KEY_LOG, log); }
+}
+
 export const loadPending = () => read(KEY_PENDING, []);
 export const clearPending = () => write(KEY_PENDING, []);
 export const recallLog = () => read(KEY_LOG, []);
