@@ -24,6 +24,7 @@ tags: [moc]
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — ドライバー。ハンドファーストにせず前傾なしで構えてアッパーに打つ
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアン（対比）。軽いハンドファーストでダウンブロー
 - [[golf-driver-address-connection-without-tension-relax-into-low-trail-shoulder]] — ドライバーの腕/肩の力加減。連結は残しテンションだけ抜く、緩めは右肩を下へ
+- [[golf-my-3u-hybrid-address-ball-forward-of-center-ball-first-sole-flat]] — 3U（ハイブリッド）の構え。ボールはセンターやや前・ボールファースト・ソールは平ら（トウ浮かせない）
 
 ## ダウンブロー・番手別の打ち分け（入射角）
 
@@ -56,6 +57,7 @@ tags: [moc]
 - [[golf-driver-stop-forcing-extreme-inside-out-deliver-neutral-through-ball]] — 極端インからをやめ中立軌道でボールに通す（詰まり→開き→スライス解消／ドローはミルドに）
 - [[golf-dont-open-chest-early-is-good-but-dont-over-hold-sync-and-keep-rotating]] — 「胸を早く開かない」は有効だが、詰まり側は"閉じて我慢"にせず同期・腰主導・回転を止めない
 - [[golf-hands-release-is-a-real-speed-source-but-not-manipulation]] — 手で「振り抜く（リリース）」は速度源で必須／「こねる操作」は別物でNG。体だけでは頭打ち
+- [[golf-forcing-head-to-run-by-manipulating-release-causes-cast-flip-high-fat-weak]] — 失敗例。操作で走らせようとするとキャスト＝天ぷら/ダフり/弱弾道。走らせるのはテンポ＋受動解放
 
 ## 飛距離アップ（ドライバー）
 

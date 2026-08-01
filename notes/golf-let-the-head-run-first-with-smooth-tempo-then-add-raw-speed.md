@@ -19,3 +19,4 @@ tags: [sports/golf]
 - [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — この実感の理論（HSはチェーンの出力／力み＝ブレーキ）
 - [[golf-my-driver-speed-training-plan]] — 効率の上に"生の速度"を積む側（練習は速く・本番はスムーズ）
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — 手で速くしない・体主導の裏づけ
+- [[golf-forcing-head-to-run-by-manipulating-release-causes-cast-flip-high-fat-weak]] — これの真逆をやった失敗例（操作で走らせようとしてキャスト＝天ぷら/ダフり/弱弾道）

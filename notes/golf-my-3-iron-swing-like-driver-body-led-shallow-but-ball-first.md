@@ -19,3 +19,4 @@ tags: [sports/golf]
 - [[golf-club-length-gradient-longer-shallower-flatter-ball-forward]] — この実感の一般原理（番手のグラデーション）
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — 「手でなく体主導」の根拠
 - [[golf-downblow-spin-loft-face-compresses-ball-not-scoop]] — 地面からはボールファースト（すくわない）の物理
+- [[golf-my-3u-hybrid-address-ball-forward-of-center-ball-first-sole-flat]] — 3IをUT化した実機のアドレス基本（ボール位置・最下点・ソール平ら）
