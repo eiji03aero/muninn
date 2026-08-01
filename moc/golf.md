@@ -40,6 +40,7 @@ tags: [moc]
 - [[golf-takeaway-by-feel-hands-in-and-lever-sets-good-return-reference-not-path-preview]] — 始動はプレーンを線でなぞらずハンズイン＋てこで自然に。機構は"ダウンが戻る良い基準づくり"
 - [[golf-reverse-c-is-lower-body-not-arm-rotation-flat-3oclock-shaft-is-too-little-release]] — 逆Cの主因は下半身（ハングバック/すくい）／3時シャフト平行＝リリース控えめ。直しはポストアップ＋回り抜き
 - [[golf-drill-step-l-to-l-groove-weight-shift-post-up-and-club-standing-up]] — ドリル。ステップ×L to L（踏む→回す→たたむ）で体重移動・ポストアップ・クラブの立ちを一括で刷り込む
+- [[golf-l-to-l-positions-happen-naturally-low-point-set-by-pressure-not-rotation]] — L to Lの位置は自然に再現（全速で動作を作らない）／最下点は圧＋手首で決まる（回旋でない）
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — ダウン。地面から順に動き、前足への圧移動が回転に先行する
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — ドライバー特有。圧は前・上体は後ろに残してアッパーに打つ
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — 診断。フィニッシュのそり返りは後ろ足残りのサインで飛距離・ミート・腰にマイナス

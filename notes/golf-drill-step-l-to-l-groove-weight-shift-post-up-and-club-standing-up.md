@@ -30,3 +30,4 @@ tags: [sports/golf]
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — 「踏む→回す」＝圧移動が回転に先行（投げる/ステップの土台）
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 「乗る＋ポストアップ」の到達点
 - [[golf-reverse-c-is-lower-body-not-arm-rotation-flat-3oclock-shaft-is-too-little-release]] — スルーLでクラブを立てる＝3時シャフト平行/逆Cの解消
+- [[golf-l-to-l-positions-happen-naturally-low-point-set-by-pressure-not-rotation]] — このドリルの"使い方"の注意（位置は自然に再現、全速で動作を作らない）
