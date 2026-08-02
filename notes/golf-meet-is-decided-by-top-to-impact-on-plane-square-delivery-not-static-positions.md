@@ -22,3 +22,4 @@ tags: [sports/golf]
 - [[golf-l-to-l-positions-happen-naturally-low-point-set-by-pressure-not-rotation]] — 位置を全速で意識的に作るとキャスト/フリップ。デリバリーを"操作"しない裏付け
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — "意識"を操作でなくチェックポイント/イメージとして持つ具体（ボールの先の通過点）
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — スクエアに"向かわせる"の実体はリード手首/前腕でのフェース管理
+- [[golf-over-inside-plane-tilted-right-is-three-way-loss-not-a-reproducibility-tradeoff]] — デリバリーが過度にインへ行った失敗版。ミートを決めるデリバリーが右に倒れると三方損

@@ -24,3 +24,4 @@ tags: [sports/golf]
 - [[golf-body-led-delivery-is-right-but-chest-opening-ahead-plus-flip-causes-pull-hook]] — 両振れの切り分け。この「詰まり→開いてスライス（ブロック側）」を軌道の観点で埋める
 - [[golf-driver-draw-lower-body-opens-upper-stays-closed-right-shoulder-down]] — ドローは残す＝ミルドなインからの根拠
 - [[golf-driver-grip-secure-but-relaxed-stable-lead-wrist-no-flip]] — 「手で救わない（フェース軸を安定）」の具体
+- [[golf-over-inside-plane-tilted-right-is-three-way-loss-not-a-reproducibility-tradeoff]] — この直し方を"やる/やらないの判断"側から支える。過度インは再現性・操作性・パワーの三方損という切り分け
