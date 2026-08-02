@@ -47,6 +47,8 @@ tags: [moc]
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — 診断。フィニッシュのそり返りは後ろ足残りのサインで飛距離・ミート・腰にマイナス
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 矯正方針。切り返しで先に圧を前足へ→前脚を支柱に立ち上がる
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — 振り抜きのイメージ。インパクト後の通過点でクラブ位置を確認して振り抜く
+- [[golf-halfway-down-p6-square-checkpoint-shaft-parallel-face-matches-spine-flat-lead-wrist]] — チェックポイント。P6(9時)のオンプレーン/スクエア合図（シャフト平行・面は背骨角・手首フラット〜掌屈）。空向き=開き/ヘッドが手元下=潜り
+- [[golf-my-p6-is-stuck-under-open-face-cupped-lead-wrist-fix-causes-not-pose]] — 自己診断。自分のP6は潜り＋開き＋カップ＝スタックの指紋。ポーズでなく手首掌屈＋潜らせないで直す
 - [[golf-driver-draw-lower-body-opens-upper-stays-closed-right-shoulder-down]] — ドローの体の使い方。下半身は開く/上半身は閉じて我慢/右肩は下へ/リード股関節を抜く
 
 ## スイングの原動力（体と手の役割）

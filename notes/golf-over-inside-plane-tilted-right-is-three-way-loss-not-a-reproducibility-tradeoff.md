@@ -27,3 +27,4 @@ tags: [sports/golf]
 - [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — 詰まり→キャスト/減速＝"ブレーキ"。パワー↓の根拠
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — 一直線でもハンドルは前に押し込まない（シャフトリーンはアッパー打ちを殺す）というアドレスの但し書き
 - [[golf-meet-is-decided-by-top-to-impact-on-plane-square-delivery-not-static-positions]] — 「デリバリーがミートを決める」の失敗版＝デリバリーが過度にインへ行ったケース
+- [[golf-my-p6-is-stuck-under-open-face-cupped-lead-wrist-fix-causes-not-pose]] — この"潜り＝スタック"が自分のP6でどう写っているかの現物診断
