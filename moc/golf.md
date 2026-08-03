@@ -63,6 +63,7 @@ tags: [moc]
 - [[golf-over-inside-plane-tilted-right-is-three-way-loss-not-a-reproducibility-tradeoff]] — 判断。過度にインへ引く（プレーン右倒れ）は再現性⇄操作性のトレードでなく三方損。境目はスタックするか
 - [[golf-dont-open-chest-early-is-good-but-dont-over-hold-sync-and-keep-rotating]] — 「胸を早く開かない」は有効だが、詰まり側は"閉じて我慢"にせず同期・腰主導・回転を止めない
 - [[golf-hands-release-is-a-real-speed-source-but-not-manipulation]] — 手で「振り抜く（リリース）」は速度源で必須／「こねる操作」は別物でNG。体だけでは頭打ち
+- [[golf-connection-turn-body-fully-but-keep-arms-in-front-not-restrict-turn-no-fixed-angles]] — コネクションの切り分け。体はフル回転／制限するのは腕の独立深入り。角度で縛らない・肩基準で保つ
 - [[golf-forcing-head-to-run-by-manipulating-release-causes-cast-flip-high-fat-weak]] — 失敗例。操作で走らせようとするとキャスト＝天ぷら/ダフり/弱弾道。走らせるのはテンポ＋受動解放
 
 ## 飛距離アップ（ドライバー）

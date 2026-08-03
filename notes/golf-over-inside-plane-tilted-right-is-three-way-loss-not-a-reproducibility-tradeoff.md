@@ -28,3 +28,4 @@ tags: [sports/golf]
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — 一直線でもハンドルは前に押し込まない（シャフトリーンはアッパー打ちを殺す）というアドレスの但し書き
 - [[golf-meet-is-decided-by-top-to-impact-on-plane-square-delivery-not-static-positions]] — 「デリバリーがミートを決める」の失敗版＝デリバリーが過度にインへ行ったケース
 - [[golf-my-p6-is-stuck-under-open-face-cupped-lead-wrist-fix-causes-not-pose]] — この"潜り＝スタック"が自分のP6でどう写っているかの現物診断
+- [[golf-connection-turn-body-fully-but-keep-arms-in-front-not-restrict-turn-no-fixed-angles]] — 「腕を独立して深く巻き込む＝過度イン」の予防側。体は回し腕は前に残す
