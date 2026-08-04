@@ -15,8 +15,11 @@ tags: [sports/golf]
 
 **補足**: 「グリップが暴れる」感覚は握りの緩さだけでなく、**芯を外してヘッドがねじれる（ギア効果）**でも出る→芯に当てると減る。軽量シャフト（自分の50g）も暴れ感を増やしやすい。
 
+**握り直し（リグリップ）は悪癖**: トップで緩めて切り返しで**能動的に握り直す**のは悪癖。**クラブが手の中で動く/回るのを許す→フェース向きがランダム化→当たり/フェースが不安定**（＝暴れ・開き→フリップで左の温床）。ただし**"受動的にほんの少し緩む"は必ずしも害でなく、害なのは解いて→握り直す(re-clench)動作**。そしてリグリップはたいてい**症状**：①最初から握りすぎ（振るために一度緩めるしかない）→中庸に、②アンカーが緩い（下3本/右手が緩くクラブが滑る→握り直す）→下3本を確実＋右手を隙間なく重ねる。**原因を消せば握り直しは要らなくなる**——対処は「もっと強く」でなく**中庸・一定・アンカーを効かせる**。
+
 ## Links
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — 「手は操作せず体主導」の原則。グリップ・手首を固めない根拠
 - [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — 力み＝ブレーキ。だから"確実さと脱力の両立"が要る
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — 掌屈背屈がフェースを決めるので、その軸を安定させたい原理
 - [[putting-stability-keep-everything-constant-only-shoulders-swing]] — 「握圧一定・手首は静かに角度キープ」と同じ考えのパター版
+- [[golf-my-driver-stealth-hd-draw-bias-fights-my-hook-check-length-strike-in-fitting]] — 「暴れる」感覚のもう一方の要因＝軽量シャフト/長さ（機材側）

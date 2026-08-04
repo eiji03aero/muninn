@@ -72,6 +72,8 @@ tags: [moc]
 
 - [[golf-driver-distance-is-ballspeed-smash-is-free-but-capped-300-needs-speed]] — 原則。飛距離＝HS×ミート率。芯化はタダの距離だが上限~1.5、大幅増はHS向上
 - [[golf-shaft-bends-multi-plane-but-dont-swing-to-it-fitting-handles-it]] — シャフトのしなりは多面的（前後＋トウダウン＋ねじれ）だが、方向はスイングで考えずフィッティングで処理
+- [[golf-driver-fitting-too-long-hurts-smash-draw-bias-and-upright-lie-push-face-left]] — 機材とミス傾向。長すぎ＝smash低下／ドローバイアス・アップライトは左ミス助長／ドライバーのライは影響小
+- [[golf-my-driver-stealth-hd-draw-bias-fights-my-hook-check-length-strike-in-fitting]] — 自分の機材の疑い。HD=ドローバイアスがフック持ちに逆行／軽量TM50の暴れ／フィッティングで長さ・打点・ドローバイアスを診る
 - [[golf-my-driver-distance-roadmap-smash-first-then-speed]] — 自分の方針。現状値と優先順位（まず芯で~280、300はスピードトレ、クラブは補助）
 - [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — 原則。HSは腕速度でなくチェーンの出力。上げる鍵はブレーキを外す効率化
 - [[golf-my-driver-speed-training-plan]] — 自分のスピードトレ計画（オーバースピード＋パワー＋可動域）
