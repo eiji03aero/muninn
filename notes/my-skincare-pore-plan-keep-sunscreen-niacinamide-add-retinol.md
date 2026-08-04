@@ -7,9 +7,10 @@ tags: [health/skincare]
 
 毛穴の開きが気になっての現行ルーティンと、その評価・次の一手。
 
-**現行（2026-07-26 更新）**:
-- 朝: 極潤ヒアルロン液 → ちふれ保湿クリーム（＋外出時のみ ビオレ UV Aqua Rich）
-- 夜: 極潤ヒアルロン液 → The Ordinary レチノール → The Ordinary ナイアシンアミド10%+亜鉛1%（N10）→ ちふれ保湿クリーム
+**現行（2026-08-04 更新）**:
+- 朝: セザンヌ スキンコンディショナー高保湿 → ちふれ保湿クリーム（＋外出時のみ ビオレ UV Aqua Rich）
+- 夜: セザンヌ スキンコンディショナー高保湿 → The Ordinary レチノール → The Ordinary ナイアシンアミド10%+亜鉛1%（N10）→ ちふれ保湿クリーム
+- ※化粧水を極潤ヒアルロン液から切替。極潤液(HAのみ)は蓋なしでは保水が続かない体感だったため、**ヒト型セラミド入りのセザンヌ高保湿**でバリア補修（②エモリエント）を化粧水段階から入れ、蓋はちふれ（③オクルーシブ）を維持。保湿は「与える→補う→閉じる」の3役割で組む。→ [[skincare-moisturizing-is-three-roles-humectant-emollient-occlusive]] / [[humectants-need-occlusive-seal-or-they-dry-skin-in-low-humidity]]
 
 **評価**: 方向性は正しく、レチノール導入で本命のレチノイドも入った。攻めの成分（レチノール＋ナイアシンアミド）と保湿の土台はできている。ただし残る穴が2つ。①**日焼け止めが「外出時だけ」**＝たるみ毛穴の最重要レバー（UVA対策）が抜けている。UVAは窓ガラスを透過し在宅でも降る。夜レチノールで増やしても昼に壊せば差し引きゼロ。②夜の**重ね順が レチノール→ナイアシンアミド**で、水性→油性の原則では逆（→ [[skincare-layer-water-based-before-oil-based]]）。
 
@@ -28,4 +29,6 @@ tags: [health/skincare]
 - [[morning-facial-plumpness-is-edema-not-hydration]] — 「寝起きの肌が良い」を目標にしない理由
 - [[sagging-pores-improve-when-skin-stretched-are-laxity-type]] — 気になる毛穴はたるみ型（横引きで消える）という判定
 - [[skincare-layer-water-based-before-oil-based]] — 夜の重ね順（ナイアシンアミド→レチノール）の根拠
+- [[skincare-moisturizing-is-three-roles-humectant-emollient-occlusive]] — 保湿を3役割で組む（化粧水をセラミド入りに替えた理由）
+- [[humectants-need-occlusive-seal-or-they-dry-skin-in-low-humidity]] — 極潤液が保水しない体感の正体（蓋なしHAは逆効果）
 - [[skincare-pores/profile]] — この方針を時系列で運用するフォロー（定点観測）
