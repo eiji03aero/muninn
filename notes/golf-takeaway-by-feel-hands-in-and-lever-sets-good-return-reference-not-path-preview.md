@@ -24,3 +24,4 @@ tags: [sports/golf]
 - [[golf-driver-stop-forcing-extreme-inside-out-deliver-neutral-through-ball]] — ダウンが戻る"内側の道"（中立軌道でボールに通す）
 - [[golf-takeaway-using-hands-is-normal-natural-set-helps-smash-but-keep-face-toe-up-square]] — 手を使うのは正常（体だけは矯正の誇張）／ただしフェースはトウアップ＝スクエアに
 - [[golf-meet-is-decided-by-top-to-impact-on-plane-square-delivery-not-static-positions]] — 始動/ポジションは"良い基準"を作るだけで、ミートを決めるのはダウンのデリバリー、という対の気づき
+- [[golf-swing-is-not-a-single-plane-kwon-functional-swing-plane-clubhead-plane-hands-tighter-circle-shaft-cone]] — 「プレーンを一枚板で線でなぞる」危険の理論的裏づけ。単一平面は実態でない（Kwon）
