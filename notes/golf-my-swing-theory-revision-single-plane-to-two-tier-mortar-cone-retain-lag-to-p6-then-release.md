@@ -21,3 +21,4 @@ tags: [sports/golf]
 - [[golf-swing-is-not-a-single-plane-kwon-functional-swing-plane-clubhead-plane-hands-tighter-circle-shaft-cone]] — この改訂の客観的根拠（Kwon FSP）。読んで理解＝そちら／自分の運用＝この note
 - [[golf-meet-is-decided-by-top-to-impact-on-plane-square-delivery-not-static-positions]] — 「デリバリーがミートを決める」の発展。デリバリーの中身を二段/円錐で捉え直した
 - [[golf-hands-release-is-a-real-speed-source-but-not-manipulation]] — 「9→3で解放」の根拠。ラグは保持だけでなく解放が要る
+- [[golf-my-driver-cock-and-release-operating-image-set-lever-retain-to-p6-release-9to3-fuller-upward]] — この軌道観の中の"コック＆リリース"部分を実用の操作イメージに落とした統合ハブ

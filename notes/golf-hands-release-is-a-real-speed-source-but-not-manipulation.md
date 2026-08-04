@@ -16,6 +16,7 @@ tags: [sports/golf]
 **自分向け**: やる＝軽く握る＋フルコック＋**下で振り抜く（解放）**。やらない＝前腕を**意識的にこねてフェースを合わせにいく**（フック寄り−491で引っかけ/不安定）。フェースは体の回転＋手首の安定＋自然な解放で戻す。
 
 ## Links
+- [[golf-my-driver-cock-and-release-operating-image-set-lever-retain-to-p6-release-9to3-fuller-upward]] — この「受動的リリース」を含むドライバーの操作イメージ統合ハブ
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — 手の仕事＝フェース管理＋リリース／操作しない、の"リリース"を掘り下げた版
 - [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — リリース/タメも速度の一部、力み＝ブレーキ
 - [[golf-let-the-head-run-first-with-smooth-tempo-then-add-raw-speed]] — 「ヘッドを走らせる＝解放」の実感

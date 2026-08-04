@@ -77,6 +77,7 @@ tags: [moc]
 - [[golf-my-driver-speed-training-plan]] — 自分のスピードトレ計画（オーバースピード＋パワー＋可動域）
 - [[golf-let-the-head-run-first-with-smooth-tempo-then-add-raw-speed]] — まずヘッドを走らせる（スムーズなテンポ）→生の速度は後乗せ。ゆっくり=テンポ、リリースはフル
 - [[golf-my-swing-low-spin-loft-optimize-with-loft-and-vertical-strike]] — 弾道の癖。低スピンロフト体質、最適化はロフト＋縦の打点（もっとアッパーではない）
+- [[golf-my-driver-cock-and-release-operating-image-set-lever-retain-to-p6-release-9to3-fuller-upward]] — 操作イメージ統合ハブ。コック（てこ）→P6までラグ保持→9→3で受動的により完全に解放してアッパー。手で放らない
 
 ## パッティング（マレット型）
 
