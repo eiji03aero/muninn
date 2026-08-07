@@ -22,3 +22,4 @@ tags: [sports/golf]
 - [[golf-meet-is-decided-by-top-to-impact-on-plane-square-delivery-not-static-positions]] — 「デリバリーがミートを決める」の発展。デリバリーの中身を二段/円錐で捉え直した
 - [[golf-hands-release-is-a-real-speed-source-but-not-manipulation]] — 「9→3で解放」の根拠。ラグは保持だけでなく解放が要る
 - [[golf-my-driver-cock-and-release-operating-image-set-lever-retain-to-p6-release-9to3-fuller-upward]] — この軌道観の中の"コック＆リリース"部分を実用の操作イメージに落とした統合ハブ
+- [[golf-takeaway-keep-hands-in-but-club-set-up-not-laid-down-smaller-cone-9-to-top]] — この円錐のバックスイング版（9→トップは小さい円錐、寝かせない）

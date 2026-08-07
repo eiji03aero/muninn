@@ -39,6 +39,7 @@ tags: [moc]
 - [[golf-backswing-keep-good-tilt-kill-sway-and-dip-rotate-onto-inside-trail-hip]] — バックの軸。良い右傾きは残し、スウェー/ディップを消す（回転で内側に乗る）
 - [[golf-takeaway-by-feel-hands-in-and-lever-sets-good-return-reference-not-path-preview]] — 始動はプレーンを線でなぞらずハンズイン＋てこで自然に。機構は"ダウンが戻る良い基準づくり"
 - [[golf-takeaway-using-hands-is-normal-natural-set-helps-smash-but-keep-face-toe-up-square]] — テークバックで手を使うのは正常（体だけは矯正の誇張）。ただしフェースはトウアップ＝スクエアに（被せない）
+- [[golf-takeaway-keep-hands-in-but-club-set-up-not-laid-down-smaller-cone-9-to-top]] — 手はインだがクラブは立ててセット（寝かせない＝ダウンで戻せなくなる）。9時で前腕‑シャフト90〜120°、9→トップは小さい円錐
 - [[golf-reverse-c-is-lower-body-not-arm-rotation-flat-3oclock-shaft-is-too-little-release]] — 逆Cの主因は下半身（ハングバック/すくい）／3時シャフト平行＝リリース控えめ。直しはポストアップ＋回り抜き
 - [[golf-drill-step-l-to-l-groove-weight-shift-post-up-and-club-standing-up]] — ドリル。ステップ×L to L（踏む→回す→たたむ）で体重移動・ポストアップ・クラブの立ちを一括で刷り込む
 - [[golf-l-to-l-positions-happen-naturally-low-point-set-by-pressure-not-rotation]] — L to Lの位置は自然に再現（全速で動作を作らない）／最下点は圧＋手首で決まる（回旋でない）
