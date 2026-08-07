@@ -21,3 +21,4 @@ srs:
 ## Links
 - [[golf-body-is-the-engine-hands-manage-face-and-release-not-manipulate]] — なぜ手で操作しないか（体がエンジン・手はフェースと受動リリース）
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — レバーの解放は「順序」で起きる。手で操作するものではない
+- [[golf-my-downswing-casts-early-release-acquire-double-pendulum-lower-body-first-soft-wrists-whoosh-late]] — この物理を自分に適用（現状キャスト→下半身始動/whooshで習得）

@@ -28,3 +28,4 @@ tags: [sports/golf]
 - [[golf-hands-release-is-a-real-speed-source-but-not-manipulation]] — 「受動的に解く／手で放らない」の核
 - [[golf-forcing-head-to-run-by-manipulating-release-causes-cast-flip-high-fat-weak]] — キャストの失敗機構
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — ドライバー＝ハンドファーストにしない（アッパー）の対
+- [[golf-my-downswing-casts-early-release-acquire-double-pendulum-lower-body-first-soft-wrists-whoosh-late]] — この保持→解放の"二重振り子"習得版（現状キャストの矯正＋whooshドリル）
