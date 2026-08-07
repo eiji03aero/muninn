@@ -28,3 +28,4 @@ srs:
 - [[golf-takeaway-by-feel-hands-in-and-lever-sets-good-return-reference-not-path-preview]] — 「プレーンを一枚板として線でなぞる」危険の対。単一平面が実態でないこととも整合
 - [[golf-halfway-down-p6-square-checkpoint-shaft-parallel-face-matches-spine-flat-lead-wrist]] — FSP上のP6での見え方（ヘッドの面のチェックポイント）
 - [[golf-shaft-bends-multi-plane-but-dont-swing-to-it-fitting-handles-it]] — 別軸で「単一でない」話（シャフトのしなりは多面的）。混同注意：あれはしなり、これは軌道
+- [[golf-why-downswing-shallows-not-single-plane-reproducibility-from-sequence-not-fixed-plane]] — この事実の"なぜ二段が定石か／再現性は順序から"の理屈側
