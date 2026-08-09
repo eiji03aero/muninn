@@ -24,6 +24,8 @@ muninn の入口。テーマごとのMOCはここから辿る。
 
 - [[zettelkasten-one-note-one-idea]] — このナレッジベースの基本原則
 - [[cliche-overused-not-necessarily-old]] — クリシェの意味（使い古されて陳腐が核）
+- [[claude-fable-5-costs-double-opus-5-per-token]] — Fable 5 と Opus 5 の単価差（総額は別）
+- [[llm-comparison-forgotten-criteria-flip-the-verdict]] — モデル比較の設計上の落とし穴
 
 ## フォロー（follows/）
 
@@ -38,3 +40,4 @@ muninn の入口。テーマごとのMOCはここから辿る。
 トピック別に、多数の項目を一貫したスキーマ（記録項目）で貯める記録帖（台帳）。`/mn-log` で運用（notes/ とは別concern）。サイトでは一覧・絞り込みで比較できる。
 
 - [[coffee-beans|コーヒー豆の記録]] — 買った豆を産地・精製・焙煎度・評価で記録して次の豆選びに使う（`logs/coffee-beans/`）
+- [[model-comparison|AIモデル比較の記録]] — 同じお題を複数モデルに投げて成果物を突き合わせ、お題の性質ごとの向き不向きを貯める（`logs/model-comparison/`）
