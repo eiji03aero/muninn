@@ -18,6 +18,7 @@ tags: [sports/golf]
 **まとめ**: 早く開くのはダメ（有効な意識）／でも**"閉じて止める"にすると自分は詰まってスライス**。**"同期・腰主導・回転を止めない"**が効かせ方。
 
 ## Links
+- [[golf-my-driver-transition-feel-hips-lead-chest-delayed-drop-arms-to-p6-then-open-and-release]] — 「胸は遅らせるが凍結でない」を切り返しの操作モデルに組み込んだ版（我慢しすぎ＝ブロック）
 - [[golf-driver-draw-lower-body-opens-upper-stays-closed-right-shoulder-down]] — 基本の「下半身は開く／上半身は閉じて我慢」。その運用注意
 - [[golf-body-led-delivery-is-right-but-chest-opening-ahead-plus-flip-causes-pull-hook]] — 「胸とクラブの同期」の根拠（先行/置き去りの両失敗）
 - [[golf-driver-stop-forcing-extreme-inside-out-deliver-neutral-through-ball]] — 詰まり側の癖。閉じ過ぎがそれを助長する

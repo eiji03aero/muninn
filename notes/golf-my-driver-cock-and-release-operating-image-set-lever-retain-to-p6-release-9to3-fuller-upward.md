@@ -29,3 +29,4 @@ tags: [sports/golf]
 - [[golf-forcing-head-to-run-by-manipulating-release-causes-cast-flip-high-fat-weak]] — キャストの失敗機構
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — ドライバー＝ハンドファーストにしない（アッパー）の対
 - [[golf-my-downswing-casts-early-release-acquire-double-pendulum-lower-body-first-soft-wrists-whoosh-late]] — この保持→解放の"二重振り子"習得版（現状キャストの矯正＋whooshドリル）
+- [[golf-my-driver-transition-feel-hips-lead-chest-delayed-drop-arms-to-p6-then-open-and-release]] — この前半（トップ→P6）の切り返し体感モデル（腰リード＋胸遅れ＋腕落とし）
