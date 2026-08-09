@@ -1,0 +1,31 @@
+// ============================================================================
+// common.fspec — 仕様全体で共有されるパラメータ
+//
+// 仕様中に現れる「数値そのもの」はすべてここに集約する。
+// 24 時間・50% といったマジックナンバーが rule や derive に直接書かれていると、
+// 変更時に取りこぼしが出るうえ影響追跡もできない。param にしておけば
+//   fspec impact common.P_cancel_free_window
+// で波及先が一意に得られる。
+// ============================================================================
+
+module common
+
+param P_billing_timezone: Timezone = "Asia/Tokyo" {
+  doc: "課金・日割り・先行予約日数のすべてを、このタイムゾーンの暦日で数える"
+  configurable: none
+}
+
+param P_cancel_free_window: Duration = PT24H {
+  doc: "予約開始時刻の何時間前まで無償で取り消せるか"
+  configurable: tenant
+}
+
+param P_late_cancel_rate: Decimal(4) = 0.5000 {
+  doc: "キャンセル期限超過時の違約金率。会議室の時間単価 × 利用時間 に乗じる"
+  configurable: tenant
+}
+
+param P_money_rounding: RoundingMode = HALF_UP {
+  doc: "金額を通貨の最小単位に丸めるときのモード。日割り計算の再現性の根拠"
+  configurable: none
+}

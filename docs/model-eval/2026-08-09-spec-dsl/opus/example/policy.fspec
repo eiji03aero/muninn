@@ -1,0 +1,237 @@
+// ============================================================================
+// policy.fspec — 契約と予約にまたがる制約
+//
+// 「予約」と「課金」の双方を参照する制約はここにしか存在しない。
+// reservation.fspec は billing を import せず、billing.fspec は reservation を
+// import しない。両者の結合はこのモジュールが一手に引き受ける。
+// その結果、`fspec impact billing.Subscription` の波及先は必ずここを経由し、
+// 「契約側の変更が予約側のどこに効くか」が構造として読める。
+// ============================================================================
+
+module policy
+
+import req
+import common
+import identity
+import catalog
+import billing
+import reservation
+
+// ---------------------------------------------------------------------------
+// 1. 契約が有効でなければ予約できない
+// ---------------------------------------------------------------------------
+
+rule R_reservation_requires_active_subscription {
+  doc: "有効な契約を持たない部門は新規予約を作成できない"
+  kind: precondition
+  on: [ entity reservation.Reservation on create ]
+  traces: [ req.REQ_12 ]
+
+  let sub = the([ s for s in billing.Subscription where s.department == self.department ])
+  assert: sub.status == Active or sub.status == Cancelling
+  on_violation: reject(E_NO_ACTIVE_SUBSCRIPTION)
+}
+
+// ---------------------------------------------------------------------------
+// 2. 解約後の予約の扱い
+//
+//    同一の述語が「新規作成時は拒否」「既存予約に対しては自動取消」という
+//    2 つの扱いを持つ。制約を 2 本に分裂させず、on_violation を文脈で分岐させる。
+//    これが REQ_06「役務提供終了後にかかる予約は保持しない」の全体である。
+// ---------------------------------------------------------------------------
+
+rule R_reservation_within_service_window {
+  doc: "確定済み予約は、契約の役務提供終了時刻を跨いではならない"
+  kind: invariant
+  on: [ entity reservation.Reservation ]
+  when: self.status == Confirmed
+  traces: [ req.REQ_06 ]
+
+  let sub = the([ s for s in billing.Subscription where s.department == self.department ])
+  assert: sub.service_end == null or self.period.end <= sub.service_end
+
+  // 契約側が書き換わったときに、どの予約を再検査すべきかを明示する。
+  // これがないと「解約したのに既存予約が残る」片方向の考慮漏れが起きる。
+  recheck {
+    on write billing.Subscription as s :
+      [ r for r in reservation.Reservation
+        where r.department == s.department and r.status == Confirmed ]
+  }
+
+  on_violation {
+    when ctx.op.kind == create : reject(E_BEYOND_SERVICE_END, blames: input.period)
+    default: compensate(E_RESERVATION_ENDED_BY_CANCELLATION) {
+      effect {
+        transition self to Cancelled {
+          cancel_reason: SubscriptionEnded
+          cancelled_at:  ctx.now
+        }
+        emit reservation.Ev_reservation_cancelled {
+          reservation: self.id
+          reason:      SubscriptionEnded
+          by:          null
+        }
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 3. プラン上限
+//
+//    「予約を作るとき」と「プランを下位変更するとき」の双方で効く。
+//    recheck によって逆方向（契約側の変更）も同じ 1 本の制約でカバーされる。
+// ---------------------------------------------------------------------------
+
+rule R_plan_quota_active_reservations {
+  doc: "部門の同時有効予約数は、契約プランの上限を超えてはならない"
+  kind: invariant
+  on: [ entity reservation.Reservation ]
+  when: self.status == Confirmed and self.period.end > ctx.now
+  traces: [ req.REQ_11 ]
+
+  let sub = the([ s for s in billing.Subscription where s.department == self.department ])
+  let siblings = [ r for r in reservation.Reservation
+                   where r.department == self.department
+                     and r.status == Confirmed
+                     and r.period.end > ctx.now ]
+  assert: count(siblings) <= sub.plan.max_active_reservations
+
+  recheck {
+    on write billing.Subscription as s :
+      [ r for r in reservation.Reservation
+        where r.department == s.department and r.status == Confirmed ]
+  }
+
+  on_violation {
+    when ctx.op.feature == "billing.F_change_plan" : reject(E_PLAN_LIMIT_EXCEEDED, blames: input.new_plan)
+    default: reject(E_RESERVATION_QUOTA_EXCEEDED, blames: input.period)
+  }
+}
+
+rule R_plan_advance_limit {
+  doc: "予約開始日は、契約プランの先行予約可能日数以内でなければならない"
+  kind: invariant
+  on: [ entity reservation.Reservation ]
+  when: self.status == Confirmed and self.period.end > ctx.now
+  traces: [ req.REQ_11 ]
+
+  let sub = the([ s for s in billing.Subscription where s.department == self.department ])
+  let tz  = common.P_billing_timezone
+  assert: days_between(date_of(ctx.now, tz), date_of(self.period.start, tz))
+          <= sub.plan.max_advance_days
+
+  recheck {
+    on write billing.Subscription as s :
+      [ r for r in reservation.Reservation
+        where r.department == s.department and r.status == Confirmed ]
+  }
+
+  on_violation {
+    when ctx.op.feature == "billing.F_change_plan" : reject(E_PLAN_LIMIT_EXCEEDED, blames: input.new_plan)
+    default: reject(E_ADVANCE_LIMIT_EXCEEDED, blames: input.period)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 4. キャンセル期限と、期限を跨いだ場合の課金
+//
+//    「期限までに取り消すこと」を制約として書き、期限を跨いだ場合の課金を
+//    その違反時の是正処置（compensate）として書く。
+//    「期限」も「違約金」も、この 1 本の rule にしか現れない。
+// ---------------------------------------------------------------------------
+
+rule R_cancel_before_deadline {
+  doc: "予約はキャンセル期限までに取り消さなければならない。期限を跨いだ取消は違約金の対象となる"
+  kind: precondition
+  on: [ feature reservation.F_cancel_reservation ]
+  traces: [ req.REQ_07, req.REQ_14 ]
+
+  let deadline = self.period.start - common.P_cancel_free_window
+  let fee      = billing.D_late_cancel_fee(self.room.hourly_rate, self.period)
+  let open_inv = the([ i for i in billing.Invoice
+                       where i.department == self.department and i.status == Open ])
+
+  assert: ctx.now <= deadline
+
+  // 違反しても操作は成立する。成立させたうえで違約金を計上する。
+  on_violation: compensate(E_LATE_CANCELLATION) {
+    effect {
+      create billing.InvoiceLine {
+        invoice:     open_inv.id
+        kind:        LateCancellationFee
+        amount:      fee
+        description: "キャンセル期限超過による違約金"
+        source_ref:  text(self.id)
+        created_at:  ctx.now
+      }
+    }
+  }
+
+  // 免除も「別機能」ではなく「この制約の上書き」。
+  override {
+    doc: "C_waive_charge を持つ主体は違約金の計上を免除できる"
+    capability: identity.C_waive_charge
+    requested_by: input.waive_fee
+    effect {
+      emit billing.Ev_fee_waived {
+        source_ref:    text(self.id)
+        waived_amount: fee
+        by:            ctx.actor.id
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// エラー
+// ---------------------------------------------------------------------------
+
+error E_NO_ACTIVE_SUBSCRIPTION {
+  doc: "部門に有効な契約がない"
+  class: precondition_failed
+  severity: error
+  message: "有効な契約がないため予約できません"
+}
+
+error E_BEYOND_SERVICE_END {
+  doc: "予約時間帯が役務提供終了時刻を跨いでいる"
+  class: precondition_failed
+  severity: error
+  message: "解約予定日以降の時間帯は予約できません"
+}
+
+error E_RESERVATION_ENDED_BY_CANCELLATION {
+  doc: "契約解約に伴い予約が自動的に取り消された"
+  class: precondition_failed
+  severity: notice
+  message: "解約予定日以降の予約を取り消しました"
+}
+
+error E_PLAN_LIMIT_EXCEEDED {
+  doc: "変更後のプラン上限を既存の予約が超過している"
+  class: quota_exceeded
+  severity: error
+  message: "既存の予約が変更後プランの上限を超えるため、この変更はできません"
+}
+
+error E_RESERVATION_QUOTA_EXCEEDED {
+  doc: "部門の同時有効予約数がプラン上限に達している"
+  class: quota_exceeded
+  severity: error
+  message: "同時に保持できる予約数の上限に達しています"
+}
+
+error E_ADVANCE_LIMIT_EXCEEDED {
+  doc: "予約開始日がプランの先行予約可能日数を超えている"
+  class: quota_exceeded
+  severity: error
+  message: "この日付はプランの先行予約可能期間を超えています"
+}
+
+error E_LATE_CANCELLATION {
+  doc: "キャンセル期限を超過した取消であり、違約金が計上された"
+  class: precondition_failed
+  severity: notice
+  message: "キャンセル期限を過ぎているため違約金が発生します"
+}

@@ -1,0 +1,75 @@
+module constraints
+
+// ---------------------------------------------------------------------------
+// 共有述語・導出集合(単一定義点)
+// ---------------------------------------------------------------------------
+
+calc overlaps(a_start: DateTime, a_end: DateTime, b_start: DateTime, b_end: DateTime) -> Bool =
+  a_start < b_end and b_start < a_end
+
+calc conflicting_reservations(room: ref Room, starts_at: DateTime, ends_at: DateTime) -> set<ref Reservation> =
+  select r in Reservation
+  where r.status == #confirmed
+    and r.room == room
+    and overlaps(r.starts_at, r.ends_at, starts_at, ends_at)
+
+calc active_subscriptions(u: ref User) -> set<ref Subscription> =
+  select s in Subscription where s.owner == u and s.status != #ended
+
+calc future_confirmed_reservations(u: ref User) -> set<ref Reservation> =
+  select r in Reservation
+  where r.owner == u and r.status == #confirmed and r.starts_at > now
+
+// ---------------------------------------------------------------------------
+// 金額計算(単一定義点)
+// ---------------------------------------------------------------------------
+
+calc proration_charge(sub: ref Subscription, new_plan: ref Plan, at: DateTime) -> Money =
+  let remaining_days = days_between(at, sub.current_period_end) in
+  let total_days = days_between(sub.current_period_start, sub.current_period_end) in
+  round((new_plan.monthly_fee - sub.plan.monthly_fee) * remaining_days / total_days, #half_up)
+
+calc cancellation_charge(r: ref Reservation) -> Money =
+  if now > r.cancel_deadline
+  then round(r.room.hourly_rate * hours_between(r.starts_at, r.ends_at), #half_up)
+  else money(0)
+
+// ---------------------------------------------------------------------------
+// 不変条件。適用先の behavior は書かない(書き込み集合から導出される)
+// ---------------------------------------------------------------------------
+
+rule reservation_time_valid on Reservation as r {
+  doc "予約の終了時刻は開始時刻より後でなければならない"
+  require r.ends_at > r.starts_at
+  on violation reject error INVALID_TIME_RANGE
+}
+
+rule no_double_booking on Reservation as r {
+  doc "同一会議室で時間帯が重なる確定予約は複数存在してはならない"
+  trace "REQ-RSV-02"
+  when r.status == #confirmed
+  require is_empty(
+    select o in conflicting_reservations(r.room, r.starts_at, r.ends_at)
+    where o != r)
+  on violation reject error RESERVATION_OVERLAP
+  overridable by system_admin
+}
+
+rule single_active_subscription on Subscription as s {
+  doc "利用者は同時に 1 件までしか有効な契約を持てない"
+  when s.status != #ended
+  require count(select o in active_subscriptions(s.owner) where o != s) == 0
+  on violation reject error SUBSCRIPTION_ALREADY_EXISTS
+}
+
+rule reservation_within_subscription on Reservation as r {
+  doc "将来の確定予約の保有者は、予約開始時点で利用資格の続く契約を持っていること。
+       契約が #active なら自動更新されるため無期限、#cancelling なら期間末まで。
+       解約後の予約の扱い(即時自動取消)はこの条件と Subscription.cancel の効果から導かれる"
+  trace "REQ-BIL-04"
+  when r.status == #confirmed and r.starts_at > now
+  require exists(
+    select s in active_subscriptions(r.owner)
+    where s.status == #active or r.starts_at < s.current_period_end)
+  on violation reject error NO_ACTIVE_SUBSCRIPTION
+}

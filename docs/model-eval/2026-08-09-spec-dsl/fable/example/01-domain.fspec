@@ -1,0 +1,131 @@
+module domain
+
+// ---------------------------------------------------------------------------
+// マスタ・アカウント系(external: 生成・更新はこの仕様セットの範囲外)
+// ---------------------------------------------------------------------------
+
+entity Department external {
+  doc "部門。組織管理システム側で保守される"
+  field name: String unique
+}
+
+entity User external {
+  doc "利用者アカウント。発行・停止はアカウント管理の範囲"
+  field name:       String
+  field email:      String unique
+  field role:       actor
+  field department: ref Department
+}
+
+entity Room external {
+  doc "会議室マスタ"
+  field name:        String unique
+  field capacity:    Int
+  field hourly_rate: Money
+}
+
+entity Plan external {
+  doc "サブスクリプションプランのマスタ"
+  field name:                    String unique
+  field monthly_fee:             Money
+  field max_future_reservations: Int
+}
+
+// ---------------------------------------------------------------------------
+// 課金系
+// ---------------------------------------------------------------------------
+
+enum ChargeReason { #period_fee, #proration, #late_cancellation }
+
+entity Charge {
+  doc "課金事実の記録。決済処理そのものは範囲外(RATIONALE 参照)"
+  field subscription: ref Subscription
+  field amount:       Money
+  field reason:       ChargeReason
+  field charged_at:   DateTime
+}
+
+entity Subscription {
+  doc "利用者ごとのサブスクリプション契約。期間は 1 暦月ごとに自動更新"
+  trace "REQ-BIL-01"
+  field owner:                ref User
+  field plan:                 ref Plan
+  field pending_plan:         optional ref Plan
+  field current_period_start: DateTime
+  field current_period_end:   DateTime
+
+  lifecycle status {
+    initial #active
+    state #active     { doc "有効。期間末に自動更新される" }
+    state #cancelling { doc "解約予約済み。期間末まで利用可、更新されない" }
+    state #ended      { doc "終了。予約の保有資格を失う" }
+
+    transition cancel: #active -> #cancelling {
+      doc "解約を予約する。期間末以降に開始する確定予約は即時に自動取消される"
+      trace "REQ-BIL-04"
+      error CANNOT_CANCEL_SUBSCRIPTION
+      effect {
+        foreach r in select r in Reservation
+            where r.owner == self.owner
+              and r.status == #confirmed
+              and r.starts_at >= self.current_period_end {
+          transition r.system_cancel
+        }
+      }
+    }
+
+    transition renew: #active -> #active {
+      doc "期間末の自動更新。予約済みのプラン変更(下位変更)はここで適用される"
+      at self.current_period_end
+      effect {
+        when self.pending_plan != none {
+          update self { plan = self.pending_plan, pending_plan = none }
+        }
+        create Charge {
+          subscription = self,
+          amount       = self.plan.monthly_fee,
+          reason       = #period_fee,
+          charged_at   = now
+        }
+        update self {
+          current_period_start = self.current_period_end,
+          current_period_end   = add_months(self.current_period_end, 1)
+        }
+      }
+    }
+
+    transition terminate: #cancelling -> #ended {
+      doc "解約予約された契約の期間末終了。期間末以降の予約は cancel 遷移で解消済み"
+      at self.current_period_end
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 予約系
+// ---------------------------------------------------------------------------
+
+entity Reservation {
+  doc "会議室の予約。時間帯は [starts_at, ends_at) の半開区間"
+  trace "REQ-RSV-01"
+  field room:      ref Room
+  field owner:     ref User
+  field starts_at: DateTime
+  field ends_at:   DateTime
+
+  derive cancel_deadline: DateTime = self.starts_at - cancellation_notice
+
+  lifecycle status {
+    initial #confirmed
+    state #confirmed
+    state #cancelled        { doc "利用者または部門管理者による取消" }
+    state #system_cancelled { doc "契約終了に伴う自動取消" }
+    state #overridden       { doc "システム管理者の強制上書きによる解放" }
+
+    transition cancel: #confirmed -> #cancelled {
+      error CANNOT_CANCEL_RESERVATION
+    }
+    transition system_cancel: #confirmed -> #system_cancelled
+    transition force_release: #confirmed -> #overridden
+  }
+}

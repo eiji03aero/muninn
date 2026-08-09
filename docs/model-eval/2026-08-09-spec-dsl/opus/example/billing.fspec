@@ -1,0 +1,414 @@
+// ============================================================================
+// billing.fspec — サブスクリプション契約・請求・日割り計算
+//
+// このモジュールは予約（reservation）を一切知らない。両者にまたがる制約は
+// policy.fspec に置く。これにより import の循環が生じず、
+// 「契約側の変更が予約側に及ぼす影響」が policy を経由する辺として明示される。
+// ============================================================================
+
+module billing
+
+import req
+import common
+import identity
+
+// ---------------------------------------------------------------- ドメイン
+
+entity Plan {
+  doc: "契約プラン"
+  key: id
+
+  field id:                      Id<Plan>
+  field code:                    Text
+  field name:                    Text
+  field monthly_price:           Money
+  field max_active_reservations: Int  { doc: "部門あたりの同時有効予約数の上限" }
+  field max_advance_days:        Int  { doc: "何日先まで予約できるか" }
+  field rank:                    Int  { doc: "上位プランほど大きい。上位変更/下位変更の判定に使う" }
+}
+
+entity Subscription {
+  doc: "部門ごとのサブスクリプション契約。部門につき 1 件"
+  key: id
+  scope_by: department
+
+  field id:                  Id<Subscription>
+  field department:          Ref<identity.Department> { immutable: true }
+  field plan:                Ref<Plan>
+  field status:              State<L_subscription>
+  field current_period:      Interval<Instant> { doc: "当期の課金期間。半開区間" }
+  field cancel_requested_at: Instant?
+  field service_end:         Instant? { doc: "解約により役務提供が終了する時刻。未解約なら null" }
+  field created_at:          Instant  { immutable: true }
+}
+
+lifecycle L_subscription of Subscription.status {
+  doc: "契約の状態遷移"
+  initial: Active
+
+  state Active     { doc: "有効。予約・プラン変更ができる" }
+  state Cancelling { doc: "解約申込済み。service_end までは予約を利用できるが、それ以降は不可" }
+  state Ended      { doc: "役務提供終了", terminal: true }
+
+  transition T_sub_request_cancel: Active     -> Cancelling
+  transition T_sub_resume:         Cancelling -> Active
+  transition T_sub_end:            Cancelling -> Ended
+}
+
+entity Invoice {
+  doc: "部門ごと・課金期間ごとの請求"
+  key: id
+  scope_by: department
+
+  field id:         Id<Invoice>
+  field department: Ref<identity.Department> { immutable: true }
+  field period:     Interval<Instant>        { immutable: true }
+  field status:     State<L_invoice>
+  field issued_at:  Instant?
+}
+
+lifecycle L_invoice of Invoice.status {
+  doc: "請求の状態遷移"
+  initial: Open
+
+  state Open   { doc: "当期。明細が追加されうる" }
+  state Issued { doc: "確定済み。以後明細は追加されない", terminal: true }
+
+  transition T_inv_issue: Open -> Issued
+}
+
+entity InvoiceLine {
+  doc: "請求明細 1 行"
+  key: id
+  scope_by: department
+
+  field id:          Id<InvoiceLine>
+  field invoice:     Ref<Invoice>             { immutable: true }
+  field department:  Ref<identity.Department> { derived: self.invoice.department }
+  field kind:        InvoiceLineKind          { immutable: true }
+  field amount:      Money                    { immutable: true, doc: "控除は負値で表す" }
+  field description: Text
+  field source_ref:  Text?                    { doc: "計上根拠となったエンティティの主キー" }
+  field created_at:  Instant                  { immutable: true }
+}
+
+enum InvoiceLineKind {
+  SubscriptionFee     { doc: "当期の基本料金" }
+  ProrationCharge     { doc: "プラン上位変更による日割り追加請求" }
+  ProrationCredit     { doc: "プラン下位変更による日割り控除（負値）" }
+  LateCancellationFee { doc: "キャンセル期限超過による違約金" }
+}
+
+// ---------------------------------------------------------------- 計算
+//
+// derive は純関数。ctx もエンティティ外延も参照できないため、
+// サーバ・クライアント・テストのいずれでも同一結果になることが構文上保証される。
+
+derive D_remaining_ratio(at: Instant, period: Interval<Instant>) -> Rational {
+  doc: "課金期間の残存比率。P_billing_timezone の暦日で数え、at の当日は未使用日として扱う"
+  let tz    = common.P_billing_timezone
+  let total = days_between(date_of(period.start, tz), date_of(period.end, tz))
+  let used  = days_between(date_of(period.start, tz), date_of(at, tz))
+  value: rational(max(0, total - used), max(1, total))
+}
+
+derive D_proration_delta(from_price: Money, to_price: Money, ratio: Rational) -> Money {
+  doc: "プラン変更時の精算差額。正なら追加請求、負なら控除。丸めは P_money_rounding で 1 度だけ行う"
+  value: round_money((to_price - from_price) * ratio, common.P_money_rounding)
+}
+
+derive D_late_cancel_fee(hourly_rate: Money, period: Interval<Instant>) -> Money {
+  doc: "キャンセル期限超過時の違約金 = 時間単価 × 利用時間(時) × 違約金率"
+  let hours = rational(seconds(duration(period)), 3600)
+  value: round_money(hourly_rate * hours * common.P_late_cancel_rate, common.P_money_rounding)
+}
+
+derive D_next_period(after: Instant) -> Interval<Instant> {
+  doc: "after を起点とする次の課金期間。暦月加算は月末クランプ"
+  let tz = common.P_billing_timezone
+  value: interval(after, instant_at(add_months(date_of(after, tz), 1), time_of(after, tz), tz))
+}
+
+// ---------------------------------------------------------------- 制約
+
+rule R_subscription_period_non_empty {
+  doc: "課金期間は空であってはならない"
+  kind: invariant
+  on: [ entity Subscription ]
+  traces: [ req.REQ_04 ]
+  assert: self.current_period.start < self.current_period.end
+  on_violation: reject(E_INVALID_BILLING_PERIOD)
+}
+
+rule R_one_open_invoice_per_department {
+  doc: "部門ごとに未確定の請求はちょうど 1 件でなければならない。違約金や日割り差額はここに計上される"
+  kind: invariant
+  on: [ entity Invoice ]
+  when: self.status == Open
+  traces: [ req.REQ_04 ]
+  let siblings = [ i for i in Invoice where i.department == self.department and i.status == Open ]
+  assert: count(siblings) == 1
+  on_violation: reject(E_MULTIPLE_OPEN_INVOICES)
+}
+
+rule R_plan_change_requires_active_subscription {
+  doc: "解約申込済み・終了済みの契約はプランを変更できない"
+  kind: precondition
+  on: [ feature F_change_plan ]
+  traces: [ req.REQ_05 ]
+  assert: self.status == Active
+  on_violation: reject(E_SUBSCRIPTION_NOT_ACTIVE)
+}
+
+rule R_plan_change_must_differ {
+  doc: "現在と同じプランへの変更はできない"
+  kind: precondition
+  on: [ feature F_change_plan ]
+  traces: [ req.REQ_05 ]
+  assert: input.new_plan != self.plan
+  on_violation: reject(E_SAME_PLAN, blames: input.new_plan)
+}
+
+rule R_line_only_on_open_invoice {
+  doc: "確定済みの請求に明細を追加してはならない"
+  kind: precondition
+  on: [ entity InvoiceLine on create ]
+  traces: [ req.REQ_04 ]
+  assert: self.invoice.status == Open
+  on_violation: reject(E_INVOICE_ALREADY_ISSUED)
+}
+
+// ---------------------------------------------------------------- 機能
+
+feature F_change_plan {
+  doc: "契約プランを変更する。当期の残存日数で日割りした差額を当期請求に計上する"
+  kind: command
+  actor: identity.DeptAdmin
+  capability: identity.C_change_plan
+  traces: [ req.REQ_05 ]
+
+  input {
+    subscription: Ref<Subscription>
+    new_plan:     Ref<Plan>
+  }
+  subject: input.subscription
+
+  effect {
+    // effect 内のすべての式は操作前の状態に対して評価される。
+    // したがって下の update より後に self.plan と書いても旧プランを指す。
+    let ratio    = D_remaining_ratio(ctx.now, self.current_period)
+    let delta    = D_proration_delta(self.plan.monthly_price, input.new_plan.monthly_price, ratio)
+    let open_inv = the([ i for i in Invoice where i.department == self.department and i.status == Open ])
+
+    update self { plan: input.new_plan }
+
+    if delta != 0 JPY {
+      create InvoiceLine {
+        invoice:     open_inv.id
+        kind:        if delta > 0 JPY then ProrationCharge else ProrationCredit
+        amount:      delta
+        description: "プラン変更差額（日割り）"
+        source_ref:  text(self.id)
+        created_at:  ctx.now
+      }
+    }
+
+    emit Ev_plan_changed {
+      subscription: self.id
+      from_plan:    self.plan
+      to_plan:      input.new_plan
+      proration:    delta
+    }
+  }
+}
+
+feature F_cancel_subscription {
+  doc: "契約を解約する。役務提供は当期末で終了する"
+  kind: command
+  actor: identity.DeptAdmin
+  capability: identity.C_cancel_subscription
+  traces: [ req.REQ_06 ]
+
+  input { subscription: Ref<Subscription> }
+  subject: input.subscription
+
+  effect {
+    transition self to Cancelling {
+      cancel_requested_at: ctx.now
+      service_end:         self.current_period.end
+    }
+    emit Ev_subscription_cancelled {
+      subscription: self.id
+      service_end:  self.current_period.end
+    }
+  }
+}
+
+feature F_resume_subscription {
+  doc: "解約申込を撤回する"
+  kind: command
+  actor: identity.DeptAdmin
+  capability: identity.C_cancel_subscription
+  traces: [ req.REQ_06 ]
+
+  input { subscription: Ref<Subscription> }
+  subject: input.subscription
+
+  effect {
+    transition self to Active {
+      cancel_requested_at: null
+      service_end:         null
+    }
+    emit Ev_subscription_resumed { subscription: self.id }
+  }
+}
+
+feature F_view_invoices {
+  doc: "請求の一覧を参照する"
+  kind: query
+  actor: identity.DeptAdmin
+  capability: identity.C_view_invoice
+  traces: [ req.REQ_04 ]
+
+  input { period: Interval<Instant> }
+  returns: List<Ref<Invoice>>
+  // 「自部門のものだけ」という絞り込みはここに書かない。
+  // grant DeptAdmin { C_view_invoice in S_dept } から自動的に適用される。
+  value: [ i for i in Invoice where i.period overlaps input.period ]
+}
+
+feature F_view_subscription {
+  doc: "自部門の契約内容を参照する"
+  kind: query
+  actor: identity.DeptAdmin
+  capability: identity.C_view_subscription
+  traces: [ req.REQ_03 ]
+
+  input { }
+  returns: List<Ref<Subscription>>
+  value: [ s for s in Subscription ]
+}
+
+// ---------------------------------------------------------------- 時間軸の振る舞い
+
+job J_close_billing_period {
+  doc: "課金期間が終了した契約について、当期請求を確定し、次期間と次期請求を開始する。解約申込済みの契約はここで終了する"
+  trigger: schedule(daily at 03:00, tz: common.P_billing_timezone)
+  traces: [ req.REQ_04, req.REQ_06 ]
+
+  effect {
+    for s in Subscription
+      where (s.status == Active or s.status == Cancelling) and s.current_period.end <= ctx.now
+    {
+      let open_inv = the([ i for i in Invoice where i.department == s.department and i.status == Open ])
+
+      transition open_inv to Issued { issued_at: ctx.now }
+      emit Ev_invoice_issued { invoice: open_inv.id, department: s.department }
+
+      if s.status == Cancelling {
+        transition s to Ended { }
+        emit Ev_subscription_ended { subscription: s.id }
+      } else {
+        let next_period = D_next_period(s.current_period.end)
+        create Invoice as next_inv {
+          department: s.department
+          period:     next_period
+          status:     Open
+        }
+        update s { current_period: next_period }
+        create InvoiceLine {
+          invoice:     next_inv.id
+          kind:        SubscriptionFee
+          amount:      s.plan.monthly_price
+          description: "月額基本料金"
+          source_ref:  text(s.id)
+          created_at:  ctx.now
+        }
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------- イベント
+
+event Ev_plan_changed {
+  doc: "契約プランが変更された"
+  payload {
+    subscription: Ref<Subscription>
+    from_plan:    Ref<Plan>
+    to_plan:      Ref<Plan>
+    proration:    Money
+  }
+}
+
+event Ev_subscription_cancelled {
+  doc: "解約が申し込まれた。役務提供終了時刻が確定した"
+  payload {
+    subscription: Ref<Subscription>
+    service_end:  Instant
+  }
+}
+
+event Ev_subscription_resumed {
+  doc: "解約申込が撤回された"
+  payload { subscription: Ref<Subscription> }
+}
+
+event Ev_subscription_ended {
+  doc: "役務提供が終了した"
+  payload { subscription: Ref<Subscription> }
+}
+
+event Ev_invoice_issued {
+  doc: "請求が確定した"
+  payload {
+    invoice:    Ref<Invoice>
+    department: Ref<identity.Department>
+  }
+}
+
+event Ev_fee_waived {
+  doc: "違約金の計上が免除された"
+  payload {
+    source_ref:    Text
+    waived_amount: Money
+    by:            Ref<identity.User>
+  }
+}
+
+// ---------------------------------------------------------------- エラー
+
+error E_INVALID_BILLING_PERIOD {
+  doc: "課金期間が空または逆転している"
+  class: internal
+  severity: error
+  message: "課金期間の設定が不正です"
+}
+
+error E_MULTIPLE_OPEN_INVOICES {
+  doc: "部門に未確定の請求が複数存在する"
+  class: internal
+  severity: error
+  message: "請求の状態が不整合です"
+}
+
+error E_SUBSCRIPTION_NOT_ACTIVE {
+  doc: "契約が有効状態でない"
+  class: precondition_failed
+  severity: error
+  message: "この契約は現在変更できません"
+}
+
+error E_SAME_PLAN {
+  doc: "変更後プランが現行プランと同一"
+  class: invalid_input
+  severity: error
+  message: "現在と同じプランです"
+}
+
+error E_INVOICE_ALREADY_ISSUED {
+  doc: "確定済みの請求に明細を追加しようとした"
+  class: conflict
+  severity: error
+  message: "この請求は既に確定しています"
+}

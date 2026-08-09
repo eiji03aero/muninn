@@ -1,0 +1,123 @@
+// ============================================================================
+// catalog.fspec — 会議室マスタ
+// ============================================================================
+
+module catalog
+
+import req
+import identity
+
+entity Room {
+  doc: "予約対象の会議室"
+  key: id
+
+  field id:          Id<Room>
+  field name:        Text
+  field capacity:    Int
+  field hourly_rate: Money { doc: "違約金の算定基礎となる時間単価。通常利用はプラン料金に含まれるため課金しない" }
+  field bookable:    Bool  { default: true, doc: "false の会議室は新規予約を受け付けない" }
+}
+
+// ---------------------------------------------------------------- 制約
+
+rule R_room_capacity_positive {
+  doc: "会議室の収容人数は 1 以上でなければならない"
+  kind: invariant
+  on: [ entity Room ]
+  traces: [ req.REQ_02 ]
+  assert: self.capacity > 0
+  on_violation: reject(E_INVALID_ROOM_ATTRIBUTE, blames: input.capacity)
+}
+
+rule R_room_rate_non_negative {
+  doc: "会議室の時間単価は負であってはならない"
+  kind: invariant
+  on: [ entity Room ]
+  traces: [ req.REQ_02 ]
+  assert: self.hourly_rate >= 0 JPY
+  on_violation: reject(E_INVALID_ROOM_ATTRIBUTE, blames: input.hourly_rate)
+}
+
+// ---------------------------------------------------------------- 機能
+
+feature F_register_room {
+  doc: "会議室を登録する"
+  kind: command
+  actor: identity.SysAdmin
+  capability: identity.C_manage_room
+  traces: [ req.REQ_02 ]
+
+  input {
+    name:        Text
+    capacity:    Int
+    hourly_rate: Money
+  }
+
+  draft Room as self {
+    name:        input.name
+    capacity:    input.capacity
+    hourly_rate: input.hourly_rate
+    bookable:    true
+  }
+
+  effect {
+    commit self
+    emit Ev_room_registered { room: self.id }
+  }
+}
+
+feature F_update_room {
+  doc: "会議室の属性を変更する"
+  kind: command
+  actor: identity.SysAdmin
+  capability: identity.C_manage_room
+  traces: [ req.REQ_02 ]
+
+  input {
+    room:        Ref<Room>
+    name:        Text
+    capacity:    Int
+    hourly_rate: Money
+  }
+  subject: input.room
+
+  effect {
+    update self {
+      name:        input.name
+      capacity:    input.capacity
+      hourly_rate: input.hourly_rate
+    }
+    emit Ev_room_updated { room: self.id }
+  }
+}
+
+feature F_retire_room {
+  doc: "会議室を予約受付停止にする。既存の予約には影響しない"
+  kind: command
+  actor: identity.SysAdmin
+  capability: identity.C_manage_room
+  traces: [ req.REQ_02 ]
+
+  input { room: Ref<Room> }
+  subject: input.room
+
+  effect {
+    update self { bookable: false }
+    emit Ev_room_retired { room: self.id }
+  }
+}
+
+// ---------------------------------------------------------------- イベント
+
+event Ev_room_registered { doc: "会議室が登録された", payload { room: Ref<Room> } }
+event Ev_room_updated    { doc: "会議室の属性が変更された", payload { room: Ref<Room> } }
+event Ev_room_retired    { doc: "会議室が予約受付停止になった", payload { room: Ref<Room> } }
+
+// ---------------------------------------------------------------- エラー
+
+error E_INVALID_ROOM_ATTRIBUTE {
+  doc: "会議室の属性値が不正"
+  class: invalid_input
+  severity: error
+  message: "会議室の設定値が不正です"
+}

@@ -1,0 +1,549 @@
+{
+  "_note": "example/ を `fspec build` した結果の抜粋。ir-schema.json に適合する。ノード表・辺・索引は実際には全ノード分が入るが、ここでは代表的な 6 ノードと、それに関わる辺・索引のみを示す。",
+
+  "fspec_version": "1.0",
+  "ir_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "modules": ["req", "common", "identity", "catalog", "billing", "reservation", "policy", "scenarios"],
+
+  "nodes": {
+    "common.P_cancel_free_window": {
+      "kind": "param",
+      "module": "common",
+      "name": "P_cancel_free_window",
+      "doc": "予約開始時刻の何時間前まで無償で取り消せるか",
+      "hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "loc": { "file": "common.fspec", "line": 20, "col": 1 },
+      "props": { "configurable": "tenant" },
+      "returns": { "t": "Duration" },
+      "value": { "n": "lit", "t": "Duration", "v": "PT24H" }
+    },
+
+    "billing.D_late_cancel_fee": {
+      "kind": "derive",
+      "module": "billing",
+      "name": "D_late_cancel_fee",
+      "doc": "キャンセル期限超過時の違約金 = 時間単価 × 利用時間(時) × 違約金率",
+      "hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "params": [
+        { "name": "hourly_rate", "type": { "t": "Money" } },
+        { "name": "period", "type": { "t": "Interval", "of": { "t": "Instant" } } }
+      ],
+      "returns": { "t": "Money" },
+      "lets": [
+        {
+          "name": "hours",
+          "expr": {
+            "n": "call", "fn": "rational",
+            "args": [
+              { "n": "call", "fn": "seconds",
+                "args": [ { "n": "call", "fn": "duration", "args": [ { "n": "path", "base": "period", "segs": [] } ] } ] },
+              { "n": "lit", "t": "Int", "v": "3600" }
+            ]
+          }
+        }
+      ],
+      "value": {
+        "n": "call", "fn": "round_money",
+        "args": [
+          { "n": "bin", "op": "*",
+            "l": { "n": "bin", "op": "*",
+                   "l": { "n": "path", "base": "hourly_rate", "segs": [] },
+                   "r": { "n": "path", "base": "hours", "segs": [] } },
+            "r": { "n": "ref", "id": "common.P_late_cancel_rate" } },
+          { "n": "ref", "id": "common.P_money_rounding" }
+        ]
+      }
+    },
+
+    "reservation.R_no_double_booking": {
+      "kind": "rule",
+      "module": "reservation",
+      "name": "R_no_double_booking",
+      "doc": "同一会議室で確定済み予約の時間帯が重なってはならない",
+      "traces": ["req.REQ_09", "req.REQ_10"],
+      "hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "props": { "kind": "invariant" },
+      "on": [ { "sel": "entity", "target": "reservation.Reservation" } ],
+      "when": {
+        "n": "bin", "op": "==",
+        "l": { "n": "path", "base": "self", "segs": ["status"] },
+        "r": { "n": "lit", "t": "State", "v": "reservation.L_reservation.Confirmed" }
+      },
+      "lets": [
+        {
+          "name": "conflicts",
+          "expr": {
+            "n": "compr", "var": "r",
+            "src": { "n": "ref", "id": "reservation.Reservation" },
+            "where": {
+              "n": "bin", "op": "and",
+              "l": {
+                "n": "bin", "op": "and",
+                "l": {
+                  "n": "bin", "op": "and",
+                  "l": { "n": "bin", "op": "!=",
+                         "l": { "n": "path", "base": "r", "segs": ["id"] },
+                         "r": { "n": "path", "base": "self", "segs": ["id"] } },
+                  "r": { "n": "bin", "op": "==",
+                         "l": { "n": "path", "base": "r", "segs": ["room"] },
+                         "r": { "n": "path", "base": "self", "segs": ["room"] } }
+                },
+                "r": { "n": "bin", "op": "==",
+                       "l": { "n": "path", "base": "r", "segs": ["status"] },
+                       "r": { "n": "lit", "t": "State", "v": "reservation.L_reservation.Confirmed" } }
+              },
+              "r": { "n": "bin", "op": "overlaps",
+                     "l": { "n": "path", "base": "r", "segs": ["period"] },
+                     "r": { "n": "path", "base": "self", "segs": ["period"] } }
+            },
+            "body": { "n": "path", "base": "r", "segs": [] }
+          }
+        }
+      ],
+      "assert": {
+        "n": "bin", "op": "==",
+        "l": { "n": "call", "fn": "count", "args": [ { "n": "path", "base": "conflicts", "segs": [] } ] },
+        "r": { "n": "lit", "t": "Int", "v": "0" }
+      },
+      "on_violation": [
+        {
+          "when": null,
+          "disposition": {
+            "op": "reject",
+            "error": "reservation.E_ROOM_CONFLICT",
+            "blames": ["input", "period"]
+          }
+        }
+      ],
+      "override": {
+        "doc": "C_override_conflict を持つ主体は重複を承知で確定できる。既存予約は取り消される",
+        "capability": "identity.C_override_conflict",
+        "requested_by": { "n": "path", "base": "input", "segs": ["force_override"] },
+        "effect": [
+          {
+            "s": "for", "bind": "c",
+            "src": { "n": "path", "base": "conflicts", "segs": [] },
+            "where": null,
+            "body": [
+              {
+                "s": "transition",
+                "target": { "n": "path", "base": "c", "segs": [] },
+                "to": "Cancelled",
+                "assigns": {
+                  "cancel_reason": { "n": "lit", "t": "Enum", "v": "reservation.CancelReason.OverriddenByAdmin" },
+                  "cancelled_at": { "n": "path", "base": "ctx", "segs": ["now"] }
+                }
+              },
+              {
+                "s": "emit", "event": "reservation.Ev_reservation_overridden",
+                "assigns": {
+                  "reservation": { "n": "path", "base": "c", "segs": ["id"] },
+                  "replaced_by": { "n": "path", "base": "self", "segs": ["id"] },
+                  "by": { "n": "path", "base": "ctx", "segs": ["actor", "id"] }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+
+    "policy.R_reservation_within_service_window": {
+      "kind": "rule",
+      "module": "policy",
+      "name": "R_reservation_within_service_window",
+      "doc": "確定済み予約は、契約の役務提供終了時刻を跨いではならない",
+      "traces": ["req.REQ_06"],
+      "hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "props": { "kind": "invariant" },
+      "on": [ { "sel": "entity", "target": "reservation.Reservation" } ],
+      "when": {
+        "n": "bin", "op": "==",
+        "l": { "n": "path", "base": "self", "segs": ["status"] },
+        "r": { "n": "lit", "t": "State", "v": "reservation.L_reservation.Confirmed" }
+      },
+      "lets": [
+        {
+          "name": "sub",
+          "expr": {
+            "n": "call", "fn": "the",
+            "args": [ {
+              "n": "compr", "var": "s",
+              "src": { "n": "ref", "id": "billing.Subscription" },
+              "where": { "n": "bin", "op": "==",
+                         "l": { "n": "path", "base": "s", "segs": ["department"] },
+                         "r": { "n": "path", "base": "self", "segs": ["department"] } },
+              "body": { "n": "path", "base": "s", "segs": [] }
+            } ]
+          }
+        }
+      ],
+      "assert": {
+        "n": "bin", "op": "or",
+        "l": { "n": "bin", "op": "==",
+               "l": { "n": "path", "base": "sub", "segs": ["service_end"] },
+               "r": { "n": "lit", "t": "Null", "v": null } },
+        "r": { "n": "bin", "op": "<=",
+               "l": { "n": "path", "base": "self", "segs": ["period", "end"] },
+               "r": { "n": "path", "base": "sub", "segs": ["service_end"] } }
+      },
+      "recheck": [
+        {
+          "entity": "billing.Subscription",
+          "bind": "s",
+          "selector": {
+            "n": "compr", "var": "r",
+            "src": { "n": "ref", "id": "reservation.Reservation" },
+            "where": {
+              "n": "bin", "op": "and",
+              "l": { "n": "bin", "op": "==",
+                     "l": { "n": "path", "base": "r", "segs": ["department"] },
+                     "r": { "n": "path", "base": "s", "segs": ["department"] } },
+              "r": { "n": "bin", "op": "==",
+                     "l": { "n": "path", "base": "r", "segs": ["status"] },
+                     "r": { "n": "lit", "t": "State", "v": "reservation.L_reservation.Confirmed" } }
+            },
+            "body": { "n": "path", "base": "r", "segs": [] }
+          }
+        }
+      ],
+      "on_violation": [
+        {
+          "when": { "n": "bin", "op": "==",
+                    "l": { "n": "path", "base": "ctx", "segs": ["op", "kind"] },
+                    "r": { "n": "lit", "t": "Text", "v": "create" } },
+          "disposition": {
+            "op": "reject",
+            "error": "policy.E_BEYOND_SERVICE_END",
+            "blames": ["input", "period"]
+          }
+        },
+        {
+          "when": null,
+          "disposition": {
+            "op": "compensate",
+            "error": "policy.E_RESERVATION_ENDED_BY_CANCELLATION",
+            "effect": [
+              {
+                "s": "transition",
+                "target": { "n": "path", "base": "self", "segs": [] },
+                "to": "Cancelled",
+                "assigns": {
+                  "cancel_reason": { "n": "lit", "t": "Enum", "v": "reservation.CancelReason.SubscriptionEnded" },
+                  "cancelled_at": { "n": "path", "base": "ctx", "segs": ["now"] }
+                }
+              },
+              {
+                "s": "emit", "event": "reservation.Ev_reservation_cancelled",
+                "assigns": {
+                  "reservation": { "n": "path", "base": "self", "segs": ["id"] },
+                  "reason": { "n": "lit", "t": "Enum", "v": "reservation.CancelReason.SubscriptionEnded" },
+                  "by": { "n": "lit", "t": "Null", "v": null }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+
+    "reservation.F_create_reservation": {
+      "kind": "feature",
+      "module": "reservation",
+      "name": "F_create_reservation",
+      "doc": "会議室を予約する",
+      "traces": ["req.REQ_08", "req.REQ_09", "req.REQ_10"],
+      "hash": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+      "props": { "kind": "command", "actor": "identity.Member", "capability": "identity.C_reserve" },
+      "fields": [
+        { "name": "room", "type": { "t": "Ref", "of": "catalog.Room" } },
+        { "name": "period", "type": { "t": "Interval", "of": { "t": "Instant" } } },
+        { "name": "purpose", "type": { "t": "Text" } },
+        { "name": "force_override", "type": { "t": "Bool" },
+          "default": { "n": "lit", "t": "Bool", "v": "false" },
+          "doc": "R_no_double_booking の上書きを要求する" }
+      ],
+      "draft": {
+        "entity": "reservation.Reservation",
+        "bind": "self",
+        "assigns": {
+          "room": { "n": "path", "base": "input", "segs": ["room"] },
+          "organizer": { "n": "path", "base": "ctx", "segs": ["actor", "id"] },
+          "period": { "n": "path", "base": "input", "segs": ["period"] },
+          "purpose": { "n": "path", "base": "input", "segs": ["purpose"] },
+          "status": { "n": "lit", "t": "State", "v": "reservation.L_reservation.Confirmed" },
+          "created_at": { "n": "path", "base": "ctx", "segs": ["now"] }
+        }
+      },
+      "effect": [
+        { "s": "commit", "bind": "self" },
+        { "s": "emit", "event": "reservation.Ev_reservation_created",
+          "assigns": { "reservation": { "n": "path", "base": "self", "segs": ["id"] } } }
+      ]
+    },
+
+    "policy.R_cancel_before_deadline": {
+      "kind": "rule",
+      "module": "policy",
+      "name": "R_cancel_before_deadline",
+      "doc": "予約はキャンセル期限までに取り消さなければならない。期限を跨いだ取消は違約金の対象となる",
+      "traces": ["req.REQ_07", "req.REQ_14"],
+      "hash": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+      "props": { "kind": "precondition" },
+      "on": [ { "sel": "feature", "target": "reservation.F_cancel_reservation" } ],
+      "lets": [
+        { "name": "deadline",
+          "expr": { "n": "bin", "op": "-",
+                    "l": { "n": "path", "base": "self", "segs": ["period", "start"] },
+                    "r": { "n": "ref", "id": "common.P_cancel_free_window" } } },
+        { "name": "fee",
+          "expr": { "n": "derive", "id": "billing.D_late_cancel_fee",
+                    "args": [ { "n": "path", "base": "self", "segs": ["room", "hourly_rate"] },
+                              { "n": "path", "base": "self", "segs": ["period"] } ] } },
+        { "name": "open_inv",
+          "expr": { "n": "call", "fn": "the", "args": [ {
+            "n": "compr", "var": "i",
+            "src": { "n": "ref", "id": "billing.Invoice" },
+            "where": { "n": "bin", "op": "and",
+              "l": { "n": "bin", "op": "==",
+                     "l": { "n": "path", "base": "i", "segs": ["department"] },
+                     "r": { "n": "path", "base": "self", "segs": ["department"] } },
+              "r": { "n": "bin", "op": "==",
+                     "l": { "n": "path", "base": "i", "segs": ["status"] },
+                     "r": { "n": "lit", "t": "State", "v": "billing.L_invoice.Open" } } },
+            "body": { "n": "path", "base": "i", "segs": [] }
+          } ] } }
+      ],
+      "assert": {
+        "n": "bin", "op": "<=",
+        "l": { "n": "path", "base": "ctx", "segs": ["now"] },
+        "r": { "n": "path", "base": "deadline", "segs": [] }
+      },
+      "on_violation": [
+        {
+          "when": null,
+          "disposition": {
+            "op": "compensate",
+            "error": "policy.E_LATE_CANCELLATION",
+            "effect": [
+              {
+                "s": "create", "entity": "billing.InvoiceLine",
+                "assigns": {
+                  "invoice": { "n": "path", "base": "open_inv", "segs": ["id"] },
+                  "kind": { "n": "lit", "t": "Enum", "v": "billing.InvoiceLineKind.LateCancellationFee" },
+                  "amount": { "n": "path", "base": "fee", "segs": [] },
+                  "description": { "n": "lit", "t": "Text", "v": "キャンセル期限超過による違約金" },
+                  "source_ref": { "n": "call", "fn": "text", "args": [ { "n": "path", "base": "self", "segs": ["id"] } ] },
+                  "created_at": { "n": "path", "base": "ctx", "segs": ["now"] }
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "override": {
+        "doc": "C_waive_charge を持つ主体は違約金の計上を免除できる",
+        "capability": "identity.C_waive_charge",
+        "requested_by": { "n": "path", "base": "input", "segs": ["waive_fee"] },
+        "effect": [
+          {
+            "s": "emit", "event": "billing.Ev_fee_waived",
+            "assigns": {
+              "source_ref": { "n": "call", "fn": "text", "args": [ { "n": "path", "base": "self", "segs": ["id"] } ] },
+              "waived_amount": { "n": "path", "base": "fee", "segs": [] },
+              "by": { "n": "path", "base": "ctx", "segs": ["actor", "id"] }
+            }
+          }
+        ]
+      }
+    }
+  },
+
+  "edges": [
+    { "from": "reservation.R_no_double_booking", "to": "req.REQ_09", "kind": "traces" },
+    { "from": "reservation.R_no_double_booking", "to": "reservation.Reservation", "kind": "constrains" },
+    { "from": "reservation.R_no_double_booking", "to": "reservation.E_ROOM_CONFLICT", "kind": "raises" },
+    { "from": "reservation.R_no_double_booking", "to": "identity.C_override_conflict", "kind": "overridden_by" },
+    { "from": "reservation.R_no_double_booking", "to": "reservation.T_cancel", "kind": "transitions" },
+    { "from": "reservation.R_no_double_booking", "to": "reservation.Ev_reservation_overridden", "kind": "emits" },
+    { "from": "reservation.R_no_double_booking", "to": "reservation.F_create_reservation", "kind": "applies_to", "derived": true },
+
+    { "from": "policy.R_cancel_before_deadline", "to": "common.P_cancel_free_window", "kind": "param_of" },
+    { "from": "policy.R_cancel_before_deadline", "to": "billing.D_late_cancel_fee", "kind": "calls" },
+    { "from": "policy.R_cancel_before_deadline", "to": "billing.InvoiceLine", "kind": "writes" },
+    { "from": "policy.R_cancel_before_deadline", "to": "billing.Invoice", "kind": "reads" },
+    { "from": "policy.R_cancel_before_deadline", "to": "identity.C_waive_charge", "kind": "overridden_by" },
+    { "from": "policy.R_cancel_before_deadline", "to": "reservation.F_cancel_reservation", "kind": "constrains" },
+    { "from": "policy.R_cancel_before_deadline", "to": "policy.E_LATE_CANCELLATION", "kind": "raises" },
+
+    { "from": "policy.R_reservation_within_service_window", "to": "reservation.Reservation", "kind": "constrains" },
+    { "from": "policy.R_reservation_within_service_window", "to": "billing.Subscription", "kind": "reads" },
+    { "from": "policy.R_reservation_within_service_window", "to": "billing.Subscription", "kind": "rechecks" },
+    { "from": "policy.R_reservation_within_service_window", "to": "billing.F_cancel_subscription", "kind": "applies_to", "derived": true },
+
+    { "from": "billing.D_late_cancel_fee", "to": "common.P_late_cancel_rate", "kind": "param_of" },
+    { "from": "billing.D_late_cancel_fee", "to": "common.P_money_rounding", "kind": "param_of" },
+
+    { "from": "reservation.F_create_reservation", "to": "identity.C_reserve", "kind": "uses_capability" },
+    { "from": "reservation.F_create_reservation", "to": "reservation.Reservation", "kind": "writes", "derived": true },
+    { "from": "reservation.F_create_reservation", "to": "catalog.Room", "kind": "reads", "derived": true },
+    { "from": "reservation.F_create_reservation", "to": "reservation.Ev_reservation_created", "kind": "emits" }
+  ],
+
+  "indexes": {
+    "rules_by_feature": {
+      "reservation.F_create_reservation": {
+        "guard": [],
+        "precondition": [
+          "identity.R_actor_must_be_active",
+          "reservation.R_reservation_not_in_past",
+          "reservation.R_room_must_be_bookable",
+          "policy.R_reservation_requires_active_subscription"
+        ],
+        "invariant": [
+          "reservation.R_reservation_period_valid",
+          "reservation.R_no_double_booking",
+          "policy.R_reservation_within_service_window",
+          "policy.R_plan_quota_active_reservations",
+          "policy.R_plan_advance_limit"
+        ],
+        "postcondition": []
+      },
+      "reservation.F_cancel_reservation": {
+        "guard": [],
+        "precondition": [
+          "identity.R_actor_must_be_active",
+          "policy.R_cancel_before_deadline"
+        ],
+        "invariant": [
+          "reservation.R_reservation_period_valid",
+          "reservation.R_no_double_booking",
+          "policy.R_reservation_within_service_window",
+          "policy.R_plan_quota_active_reservations",
+          "policy.R_plan_advance_limit",
+          "billing.R_line_only_on_open_invoice"
+        ],
+        "postcondition": []
+      },
+      "billing.F_cancel_subscription": {
+        "guard": [],
+        "precondition": ["identity.R_actor_must_be_active"],
+        "invariant": [
+          "billing.R_subscription_period_non_empty",
+          "policy.R_reservation_within_service_window",
+          "policy.R_plan_quota_active_reservations",
+          "policy.R_plan_advance_limit"
+        ],
+        "postcondition": []
+      }
+    },
+
+    "recheck_index": {
+      "billing.Subscription": [
+        { "rule": "policy.R_reservation_within_service_window", "bind": "s", "selector": { "n": "compr", "var": "r", "src": { "n": "ref", "id": "reservation.Reservation" }, "where": null, "body": { "n": "path", "base": "r", "segs": [] } } },
+        { "rule": "policy.R_plan_quota_active_reservations", "bind": "s", "selector": { "n": "compr", "var": "r", "src": { "n": "ref", "id": "reservation.Reservation" }, "where": null, "body": { "n": "path", "base": "r", "segs": [] } } },
+        { "rule": "policy.R_plan_advance_limit", "bind": "s", "selector": { "n": "compr", "var": "r", "src": { "n": "ref", "id": "reservation.Reservation" }, "where": null, "body": { "n": "path", "base": "r", "segs": [] } } }
+      ]
+    },
+
+    "capabilities_by_actor": {
+      "identity.Member": [
+        { "capability": "identity.C_reserve", "scope": "identity.S_own" },
+        { "capability": "identity.C_view_reservation", "scope": "identity.S_own" },
+        { "capability": "identity.C_view_room_availability", "scope": "identity.S_all" },
+        { "capability": "identity.C_cancel_reservation", "scope": "identity.S_own" }
+      ],
+      "identity.DeptAdmin": [
+        { "capability": "identity.C_reserve", "scope": "identity.S_own" },
+        { "capability": "identity.C_view_reservation", "scope": "identity.S_own" },
+        { "capability": "identity.C_view_reservation", "scope": "identity.S_dept" },
+        { "capability": "identity.C_view_room_availability", "scope": "identity.S_all" },
+        { "capability": "identity.C_cancel_reservation", "scope": "identity.S_own" },
+        { "capability": "identity.C_cancel_reservation", "scope": "identity.S_dept" },
+        { "capability": "identity.C_view_subscription", "scope": "identity.S_dept" },
+        { "capability": "identity.C_change_plan", "scope": "identity.S_dept" },
+        { "capability": "identity.C_cancel_subscription", "scope": "identity.S_dept" },
+        { "capability": "identity.C_view_invoice", "scope": "identity.S_dept" }
+      ]
+    },
+
+    "transitions_by_state": {
+      "reservation.L_reservation.Confirmed": [
+        {
+          "transition": "reservation.T_cancel",
+          "to": "Cancelled",
+          "triggers": [
+            "reservation.F_cancel_reservation",
+            "reservation.R_no_double_booking",
+            "policy.R_reservation_within_service_window"
+          ],
+          "guards": []
+        },
+        {
+          "transition": "reservation.T_complete",
+          "to": "Completed",
+          "triggers": ["reservation.J_complete_past_reservations"],
+          "guards": []
+        }
+      ]
+    },
+
+    "errors_by_feature": {
+      "reservation.F_create_reservation": [
+        "E_FORBIDDEN",
+        "identity.E_INACTIVE_USER",
+        "reservation.E_INVALID_PERIOD",
+        "reservation.E_PERIOD_IN_PAST",
+        "reservation.E_ROOM_NOT_BOOKABLE",
+        "reservation.E_ROOM_CONFLICT",
+        "policy.E_NO_ACTIVE_SUBSCRIPTION",
+        "policy.E_BEYOND_SERVICE_END",
+        "policy.E_RESERVATION_QUOTA_EXCEEDED",
+        "policy.E_ADVANCE_LIMIT_EXCEEDED"
+      ],
+      "reservation.F_cancel_reservation": [
+        "E_FORBIDDEN",
+        "identity.E_INACTIVE_USER",
+        "policy.E_LATE_CANCELLATION"
+      ]
+    },
+
+    "blast": {
+      "common.P_cancel_free_window": [
+        "policy.R_cancel_before_deadline",
+        "reservation.F_cancel_reservation",
+        "billing.InvoiceLine",
+        "policy.E_LATE_CANCELLATION",
+        "identity.C_waive_charge",
+        "scenarios.SC_cancel_before_deadline_is_free",
+        "scenarios.SC_cancel_after_deadline_charges_fee",
+        "scenarios.SC_sysadmin_waives_late_fee",
+        "scenarios.SC_member_cannot_waive_late_fee"
+      ],
+      "billing.Plan": [
+        "billing.Subscription",
+        "policy.R_plan_quota_active_reservations",
+        "policy.R_plan_advance_limit",
+        "billing.F_change_plan",
+        "reservation.F_create_reservation",
+        "billing.J_close_billing_period",
+        "scenarios.SC_plan_upgrade_is_prorated",
+        "scenarios.SC_plan_downgrade_credits",
+        "scenarios.SC_downgrade_blocked_by_advance_limit",
+        "scenarios.SC_quota_blocks_new_reservation"
+      ]
+    },
+
+    "derive_order": [
+      "billing.D_remaining_ratio",
+      "billing.D_proration_delta",
+      "billing.D_late_cancel_fee",
+      "billing.D_next_period"
+    ]
+  },
+
+  "checks": {
+    "status": "pass",
+    "results": []
+  }
+}

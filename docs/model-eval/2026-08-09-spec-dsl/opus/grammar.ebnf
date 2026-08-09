@@ -1,0 +1,384 @@
+(* ============================================================================
+   FSPEC 1.0 — 機能仕様記述言語 形式文法
+   記法: W3C EBNF 風
+     A ::= B          定義
+     |                選択
+     { X }            0回以上の繰り返し
+     [ X ]            省略可能
+     ( X )            グループ化
+     "x"              終端記号（リテラル）
+     UPPER            終端トークン（字句規則で定義）
+     Lower / Camel    非終端記号
+
+   このファイルは規範（normative）である。SPEC.md と食い違う場合は
+   構文についてはこのファイルが優先する。
+   ============================================================================ *)
+
+
+(* ==========================================================================
+   1. 字句構造
+   ========================================================================== *)
+
+(* --- 1.1 トリビア（トークン列から除去される） --- *)
+
+Trivia          ::= HSPACE | LineComment | BlockComment
+HSPACE          ::= " " | "\t" | "\r"
+LineComment     ::= "//" { AnyCharExceptLF }
+BlockComment    ::= "/*" { AnyChar } "*/"        (* 入れ子不可 *)
+
+(* --- 1.2 改行トークン --- *)
+
+NEWLINE         ::= "\n" { "\n" | HSPACE | LineComment }
+(*
+  NEWLINE は有意トークンであり、ブロック内エントリの終端子である。
+  以下の 3 条件のいずれかを満たす改行は「継続」として字句解析器が破棄する:
+    (C1) 直前に読んだトークンが二項演算子・単項演算子・"," ・":" ・"->" ・"=>" のいずれか
+    (C2) "(" または "[" の対応が閉じていない位置にある
+    (C3) 直後の最初の非トリビアトークンが二項演算子 または "," または ")" または "]"
+  "{" "}" は改行抑止を行わない（ブロックの中身は改行区切りである）。
+  連続する改行は 1 個の NEWLINE に畳まれる。
+  ファイル末尾には暗黙の NEWLINE があるものとする。
+*)
+
+(* --- 1.3 識別子・キーワード --- *)
+
+Letter          ::= "A".."Z" | "a".."z"
+UpperLetter     ::= "A".."Z"
+Digit           ::= "0".."9"
+IDENT           ::= ( Letter | "_" ) { Letter | Digit | "_" }
+
+(*
+  予約語（この綴りの IDENT はキーワードとして字句化される）:
+
+    module import as
+    requirement param enum entity record_reserved lifecycle actor capability
+    scope grant rule derive feature job event error scenario
+    field state transition initial terminal extends of on when default
+    let value assert satisfies where for in exists forall if then else match
+    create update delete commit emit transition_reserved draft effect
+    override recheck compensate reject warn allow blames
+    schedule every daily hourly monthly weekly at day tz manual
+    given expect rejected notice emitted created
+    and or not null true false
+    entity_sel feature_sel                     (* 内部用・出現しない *)
+
+  上記のうち "record_reserved" "transition_reserved" "entity_sel" "feature_sel"
+  は将来拡張のための予約であり、FSPEC 1.0 の構文には現れない。
+
+  文脈依存キーワード: ブロック内で「宣言キーワード」として振る舞う語
+  （field / state / transition / let / when / default / override / recheck /
+    fixture / expect など）は、直後のトークンが ":" の場合はプロパティ名として
+    扱われる（LL(2) 判定）。それ以外の位置では通常の IDENT として使用できない。
+*)
+
+(* --- 1.4 リテラルトークン --- *)
+
+INT             ::= Digit { Digit | "_" }
+DECIMAL         ::= INT "." Digit { Digit }
+STRING          ::= '"' { StringChar } '"'
+StringChar      ::= AnyCharExcept('"', "\\", LF) | "\\" ( '"' | "\\" | "n" | "t" | "u" HexQuad )
+
+DATE            ::= Digit Digit Digit Digit "-" Digit Digit "-" Digit Digit
+TIME            ::= Digit Digit ":" Digit Digit [ ":" Digit Digit ]
+INSTANT         ::= DATE "T" TIME [ "." Digit { Digit } ] TZOFFSET
+TZOFFSET        ::= "Z" | ( "+" | "-" ) Digit Digit ":" Digit Digit
+
+DURATION        ::= "P" ( DurDate [ DurTime ] | DurTime )
+DurDate         ::= [ INT "W" ] [ INT "D" ]
+DurTime         ::= "T" [ INT "H" ] [ INT "M" ] [ ( INT | DECIMAL ) "S" ]
+(* 年 (Y) と月 (M-of-date) は長さが可変で決定的でないため文法上禁止。
+   暦月演算は組込み関数 add_months / add_days を用いる。 *)
+
+CURRENCY        ::= UpperLetter UpperLetter UpperLetter
+MONEY           ::= ( INT | DECIMAL ) { HSPACE } CURRENCY
+(* 字句解析器は、数値リテラルの直後（同一行内・改行を挟まない）に CURRENCY 形状の
+   トークンが続く場合にのみ MONEY を生成する。生成は最長一致で決定的。 *)
+
+TZID            ::= STRING            (* IANA tz database 名。例: "Asia/Tokyo" *)
+
+
+(* ==========================================================================
+   2. ファイル構造
+   ========================================================================== *)
+
+File            ::= [ NEWLINE ] ModuleDecl { NEWLINE } { Import Sep } { Decl Sep }
+
+ModuleDecl      ::= "module" IDENT [ Block ]
+Import          ::= "import" QName [ "as" IDENT ]
+
+QName           ::= IDENT { "." IDENT }
+
+Decl            ::= RequirementDecl | ParamDecl   | EnumDecl     | EntityDecl
+                  | LifecycleDecl   | ActorDecl   | CapabilityDecl
+                  | ScopeDecl       | GrantDecl   | RuleDecl     | DeriveDecl
+                  | FeatureDecl     | JobDecl     | EventDecl    | ErrorDecl
+                  | WorldDecl       | ScenarioDecl
+
+(* --- 2.1 汎用ブロック --- *)
+
+Sep             ::= ( NEWLINE | "," ) { NEWLINE | "," }
+(* ブロック内エントリの区切りは改行またはカンマ。両者は等価であり、
+   混在してよい。末尾の区切りは省略可能。以降 "{ ... Sep ... }" の形は
+   すべてこの規則に従う。 *)
+
+Block           ::= "{" [ Sep ] { BlockEntry [ Sep ] } "}"
+BlockEntry      ::= Property | SubDecl
+Property        ::= IDENT ":" PropValue
+PropValue       ::= Expr | TypeRef | List<TypeRef>       (* 文脈で決まる。SPEC.md 各表参照 *)
+(*
+  曖昧性の解消:
+    ブロック内エントリの先頭が IDENT で、次のトークンが ":" ならば Property。
+    そうでなければ、そのブロックの宣言種別に対して定義された SubDecl キーワード
+    でなければならない（各宣言種別ごとに有限集合。以下に列挙）。
+    これにより構文解析は LL(2) で決定的。
+*)
+SubDecl         ::= FieldDecl | StateDecl | TransitionDecl | LetDecl
+                  | EnumCase  | InputDecl | DraftDecl | EffectDecl
+                  | OverrideDecl | RecheckDecl | OnViolationDecl
+                  | GrantEntry | ParamSigEntry | FixtureDecl | ExpectDecl
+                  | WhenEntry | DefaultEntry
+
+ListLit         ::= "[" [ NEWLINE ] [ Expr { "," [NEWLINE] Expr } [ "," ] ] [ NEWLINE ] "]"
+
+
+(* ==========================================================================
+   3. 型
+   ========================================================================== *)
+
+TypeRef         ::= TypeAtom { "?" }
+TypeAtom        ::= ScalarType
+                  | "Id"       "<" QName ">"
+                  | "Ref"      "<" QName ">"
+                  | "List"     "<" TypeRef ">"
+                  | "Interval" "<" TypeRef ">"
+                  | "State"    "<" QName ">"
+                  | "Decimal"  "(" INT ")"
+                  | QName                          (* enum 名 *)
+
+ScalarType      ::= "Text" | "Int" | "Bool" | "Money" | "Rational"
+                  | "Instant" | "Date" | "Time" | "Duration"
+                  | "Timezone" | "Actor" | "Capability" | "RoundingMode"
+
+
+(* ==========================================================================
+   4. 式言語
+   ========================================================================== *)
+
+Expr            ::= Implies
+Implies         ::= Or [ "=>" Implies ]                       (* 右結合・最低優先 *)
+Or              ::= And { "or" And }                          (* 短絡・左結合 *)
+And             ::= Not { "and" Not }                         (* 短絡・左結合 *)
+Not             ::= "not" Not | Compare
+Compare         ::= Additive [ CompareOp Additive ]           (* 非結合 *)
+CompareOp       ::= "==" | "!=" | "<" | "<=" | ">" | ">="
+                  | "in" | "overlaps" | "contains"
+Additive        ::= Multiplicative { ( "+" | "-" ) Multiplicative }
+Multiplicative  ::= Unary { ( "*" | "/" ) Unary }
+Unary           ::= "-" Unary | Postfix
+Postfix         ::= Primary { Selector }
+Selector        ::= "." IDENT
+                  | "(" [ Args ] ")"
+                  | "[" Expr "]"                              (* エンティティ主キー索引 *)
+Args            ::= Arg { "," Arg }
+Arg             ::= [ IDENT ":" ] Expr                        (* 名前付き引数可 *)
+
+Primary         ::= Literal
+                  | QName
+                  | "(" Expr ")"
+                  | ListOrComprehension
+                  | Quantifier
+                  | IfExpr
+                  | MatchExpr
+
+ListOrComprehension
+                ::= "[" [NEWLINE] Expr
+                      ( "for" IDENT "in" Expr [ "where" Expr ] [NEWLINE] "]"
+                      | { "," [NEWLINE] Expr } [ "," ] [NEWLINE] "]" )
+                  | "[" [NEWLINE] "]"
+(* "[" の後の Expr を読み終えた時点で次トークンが "for" なら内包表記、
+   それ以外はリストリテラル。1 トークン先読みで決定的。 *)
+
+Quantifier      ::= ( "exists" | "forall" ) IDENT "in" Postfix
+                      [ "where" Expr ] [ "satisfies" Expr ]
+(*
+  意味論:
+    exists v in S where F satisfies B  ≡  ∃v∈S. (F ∧ B)
+    forall v in S where F satisfies B  ≡  ∀v∈S. (F → B)
+  where / satisfies を省略した場合、それぞれ true とみなす。
+  S は Postfix（内包表記や別の Quantifier を直接置けない）。
+*)
+
+IfExpr          ::= "if" Expr "then" Expr "else" Expr          (* else 必須 *)
+
+MatchExpr       ::= "match" Expr "{" [Sep] MatchArm { Sep MatchArm } [Sep] "}"
+MatchArm        ::= QName "->" Expr                            (* 網羅性は静的検査 C-MATCH *)
+
+Literal         ::= INT | DECIMAL | STRING | MONEY | DURATION
+                  | INSTANT | DATE | TIME
+                  | "true" | "false" | "null"
+
+
+(* ==========================================================================
+   5. 宣言各論
+   ========================================================================== *)
+
+(* --- 5.1 requirement --- *)
+RequirementDecl ::= "requirement" IDENT Block
+(* プロパティ: doc, source, priority *)
+
+(* --- 5.2 param --- *)
+ParamDecl       ::= "param" IDENT ":" TypeRef "=" Expr [ Block ]
+(* プロパティ: doc, configurable *)
+
+(* --- 5.3 enum --- *)
+EnumDecl        ::= "enum" IDENT "{" [Sep] { EnumCase [Sep] } "}"
+EnumCase        ::= IDENT [ Block ]
+
+(* --- 5.4 entity --- *)
+EntityDecl      ::= "entity" IDENT Block
+FieldDecl       ::= "field" IDENT ":" TypeRef [ Block ]
+(* entity プロパティ: doc, key, owner, scope_by
+   field  プロパティ: doc, default, derived, immutable, inverse *)
+
+(* --- 5.5 lifecycle --- *)
+LifecycleDecl   ::= "lifecycle" IDENT "of" QName "." IDENT Block
+StateDecl       ::= "state" IDENT [ Block ]
+TransitionDecl  ::= "transition" IDENT ":" IDENT "->" IDENT [ Block ]
+(* lifecycle プロパティ: doc, initial
+   state プロパティ: doc, terminal
+   transition プロパティ: doc *)
+
+(* --- 5.6 actor / capability / scope / grant --- *)
+ActorDecl       ::= "actor" IDENT [ "extends" QName ] Block
+CapabilityDecl  ::= "capability" IDENT Block
+ScopeDecl       ::= "scope" IDENT Block                (* プロパティ: doc, where *)
+GrantDecl       ::= "grant" QName "{" [Sep] { GrantEntry [Sep] } "}"
+GrantEntry      ::= QName "in" QName                   (* capability in scope *)
+
+(* --- 5.7 rule --- *)
+RuleDecl        ::= "rule" IDENT Block
+LetDecl         ::= "let" IDENT "=" Expr
+OnViolationDecl ::= "on_violation" "{" [Sep] { ( WhenEntry | DefaultEntry ) [Sep] } "}"
+WhenEntry       ::= "when" Expr ":" Disposition
+DefaultEntry    ::= "default" ":" Disposition
+Disposition     ::= "reject"     "(" QName [ "," "blames" ":" Expr ] ")"
+                  | "warn"       "(" QName [ "," "blames" ":" Expr ] ")"
+                  | "allow"      "(" ")"
+                  | "compensate" "(" QName ")" Block   (* Block は effect を含む *)
+OverrideDecl    ::= "override" Block
+RecheckDecl     ::= "recheck" "{" [Sep] { RecheckEntry [Sep] } "}"
+RecheckEntry    ::= "on" "write" QName "as" IDENT ":" Expr
+(*
+  rule プロパティ: doc, kind, on, when, assert, on_violation, traces
+    kind : "invariant" | "precondition" | "postcondition" | "guard"
+    on   : ListLit of Selector（下記 RuleSelector）
+    on_violation は 単一 Disposition（省略記法）または OnViolationDecl ブロック
+  override プロパティ: capability, requested_by, effect(EffectDecl), doc
+*)
+RuleSelector    ::= "entity"  QName [ "on" ( "create" | "update" | "delete" ) ]
+                  | "feature" QName
+                  | "transition" QName
+                  | "any_command" | "any_query" | "any_feature"
+(* RuleSelector は "on:" プロパティ値の位置でのみ現れる。字句上は Expr 位置だが、
+   先頭トークンが上記キーワードのいずれかであれば RuleSelector としてパースする。 *)
+
+(* --- 5.8 derive --- *)
+DeriveDecl      ::= "derive" IDENT "(" [ ParamSig { "," ParamSig } ] ")"
+                      "->" TypeRef Block
+ParamSig        ::= IDENT ":" TypeRef
+(* derive プロパティ: doc, value（必須）。本体に LetDecl を持てる。 *)
+
+(* --- 5.9 feature --- *)
+FeatureDecl     ::= "feature" IDENT Block
+InputDecl       ::= "input" "{" [Sep] { InputField [Sep] } "}"
+InputField      ::= IDENT ":" TypeRef [ "=" Expr ] [ Block ]   (* Block は doc: のみ *)
+DraftDecl       ::= "draft" QName "as" IDENT Block     (* Block は代入プロパティ列 *)
+EffectDecl      ::= "effect" "{" [Sep] { Stmt [Sep] } "}"
+(*
+  feature プロパティ:
+    doc, kind ("command" | "query"; 既定 command), actor, capability,
+    subject, returns, value, after, traces
+  feature サブ宣言: input, draft, effect
+  reads / writes は宣言せず、本体から導出される（SPEC.md §9.3）。
+*)
+
+(* --- 5.10 job --- *)
+JobDecl         ::= "job" IDENT Block
+(* job プロパティ: doc, trigger, traces。サブ宣言: effect *)
+Trigger         ::= "schedule" "(" ScheduleSpec [ "," "tz" ":" Expr ] ")"
+                  | "on" QName                          (* イベント駆動 *)
+                  | "manual"
+ScheduleSpec    ::= "every" DURATION
+                  | "hourly"
+                  | "daily"   "at" TIME
+                  | "weekly"  "on" IDENT "at" TIME      (* IDENT は曜日名 *)
+                  | "monthly" "on" "day" INT "at" TIME
+
+(* --- 5.11 event / error --- *)
+EventDecl       ::= "event" IDENT Block                 (* サブ宣言: payload(=InputDecl 形) *)
+ErrorDecl       ::= "error" IDENT Block
+(* error プロパティ: doc, class, severity, message
+   class    : "invalid_input" | "forbidden" | "not_found" | "conflict"
+            | "precondition_failed" | "quota_exceeded" | "internal"
+   severity : "error" | "notice"（既定 error） *)
+
+(* --- 5.12 effect 文 --- *)
+Stmt            ::= LetDecl
+                  | CreateStmt | UpdateStmt | DeleteStmt | CommitStmt
+                  | TransitionStmt | EmitStmt
+                  | ForStmt | IfStmt
+CreateStmt      ::= "create" QName [ "as" IDENT ] AssignBlock
+UpdateStmt      ::= "update" Postfix AssignBlock
+DeleteStmt      ::= "delete" Postfix
+CommitStmt      ::= "commit" IDENT
+TransitionStmt  ::= "transition" Postfix "to" IDENT [ AssignBlock ]
+EmitStmt        ::= "emit" QName [ AssignBlock ]
+ForStmt         ::= "for" IDENT "in" Expr [ "where" Expr ] "{" [Sep] { Stmt [Sep] } "}"
+IfStmt          ::= "if" Expr "{" [Sep] { Stmt [Sep] } "}"
+                      [ "else" "{" [Sep] { Stmt [Sep] } "}" ]
+AssignBlock     ::= "{" [Sep] { Assign [Sep] } "}"
+Assign          ::= IDENT ":" Expr
+
+(* --- 5.13 world / scenario --- *)
+WorldDecl       ::= "world" IDENT "{" [Sep] { ( FixtureDecl | Property ) [Sep] } "}"
+(* world プロパティ: doc, from (QName — 別 world を継承), now, actor, actor_id, params *)
+
+ScenarioDecl    ::= "scenario" IDENT Block
+GivenDecl       ::= "given" "{" [Sep] { ( FixtureDecl | Property ) [Sep] } "}"
+(* given プロパティ: from (QName — world を取り込む), now, actor, actor_id, params
+   from で取り込んだ world の内容に対し、
+     - 同じ束縛名の fixture は置換
+     - now / actor / actor_id / params は上書き
+     - 新しい束縛名の fixture は追加
+   を適用する。継承は単一・非循環（検査 C-28）。 *)
+FixtureDecl     ::= "fixture" QName IDENT AssignBlock
+ThenDecl        ::= "then" "{" [Sep] { ExpectDecl [Sep] } "}"
+ExpectDecl      ::= "expect" ExpectBody
+ExpectBody      ::= Expr
+                  | "rejected" QName
+                  | "notice"   QName
+                  | "emitted"  QName [ "where" Expr ]
+                  | "created"  QName [ "where" Expr ]
+WhenInvocation  ::= QName [ AssignBlock ]                 (* feature 呼出し *)
+                  | "job" QName
+(*
+  scenario プロパティ: doc, traces, when (= WhenInvocation)
+  scenario サブ宣言: given, then
+  given プロパティ: now (INSTANT), actor (QName), actor_id (STRING),
+                    params (AssignBlock 相当)
+*)
+
+
+(* ==========================================================================
+   6. 演算子優先順位（低 → 高）
+   ==========================================================================
+     1  =>                     右結合
+     2  or                      左結合・短絡
+     3  and                     左結合・短絡
+     4  not                     前置
+     5  == != < <= > >= in overlaps contains     非結合（連鎖は構文エラー）
+     6  + -                     左結合
+     7  * /                     左結合
+     8  単項 -                  前置
+     9  . ( ) [ ]               後置（左から右）
+   ========================================================================== *)

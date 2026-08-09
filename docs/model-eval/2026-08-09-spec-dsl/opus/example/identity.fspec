@@ -1,0 +1,174 @@
+// ============================================================================
+// identity.fspec — 利用者の種別と権限
+//
+// ロール（actor）・権限の原子単位（capability）・作用範囲（scope）を分離し、
+// 三者の対応は grant ブロックにのみ書く。feature 側には capability を 1 つ
+// 書くだけで、「誰が」「どの範囲で」実行できるかは grant から導出される。
+// ============================================================================
+
+module identity
+
+import req
+
+// ---------------------------------------------------------------- ドメイン
+
+entity Department {
+  doc: "部門。契約と課金の単位でもある"
+  key: id
+  scope_by: id
+
+  field id:     Id<Department>
+  field name:   Text
+  field active: Bool { default: true }
+}
+
+entity User {
+  doc: "システム利用者"
+  key: id
+  owner: id
+  scope_by: department
+
+  field id:         Id<User>
+  field name:       Text
+  field department: Ref<Department>
+  field role:       Actor { doc: "値域は宣言済み actor の集合。ロール用の enum は作らない" }
+  field active:     Bool { default: true }
+}
+
+// ---------------------------------------------------------------- アクタ
+
+actor Member {
+  doc: "一般利用者。自分の予約だけを扱える"
+}
+
+actor DeptAdmin extends Member {
+  doc: "部門管理者。自部門の予約と契約を扱える"
+}
+
+actor SysAdmin extends DeptAdmin {
+  doc: "システム管理者。全社の設定と例外操作を扱える"
+}
+
+// ---------------------------------------------------------------- 権限の原子単位
+
+capability C_reserve                 { doc: "会議室の予約を作成する" }
+capability C_view_reservation        { doc: "予約の内容を参照する" }
+capability C_view_room_availability  { doc: "会議室の使用済み時間帯（予約者情報を含まない）を参照する" }
+capability C_cancel_reservation      { doc: "予約を取り消す" }
+capability C_override_conflict       { doc: "重複予約禁止規則を上書きして予約を確定する" }
+capability C_view_subscription       { doc: "契約内容を参照する" }
+capability C_change_plan             { doc: "契約プランを変更する" }
+capability C_cancel_subscription     { doc: "契約を解約する / 解約を撤回する" }
+capability C_view_invoice            { doc: "請求とその明細を参照する" }
+capability C_waive_charge            { doc: "違約金の計上を免除する" }
+capability C_manage_room             { doc: "会議室を登録・変更・廃止する" }
+capability C_manage_user             { doc: "利用者のロールを変更する" }
+
+// ---------------------------------------------------------------- 作用範囲
+//
+// scope はエンティティに依存しない述語として 1 度だけ書く。
+// self.owner      … 対象エンティティの owner: が指すフィールドの値
+// self.scope_key  … 対象エンティティの scope_by: が指すフィールドの値
+
+scope S_own {
+  doc: "自分が所有するもの"
+  where: self.owner == ctx.actor.id
+}
+
+scope S_dept {
+  doc: "自部門に属するもの"
+  where: self.scope_key == ctx.actor.department
+}
+
+scope S_all {
+  doc: "全体"
+  where: true
+}
+
+// ---------------------------------------------------------------- 権限表
+//
+// アクタ × 権限 × 範囲の対応が書かれるのはここだけ。
+// extends により上位アクタは下位アクタの grant をすべて継承する。
+// 同一 capability が複数 scope で付与された場合、範囲は論理和になる。
+
+grant Member {
+  C_reserve                in S_own
+  C_view_reservation       in S_own
+  C_view_room_availability in S_all
+  C_cancel_reservation     in S_own
+}
+
+grant DeptAdmin {
+  C_view_reservation    in S_dept
+  C_cancel_reservation  in S_dept
+  C_view_subscription   in S_dept
+  C_change_plan         in S_dept
+  C_cancel_subscription in S_dept
+  C_view_invoice        in S_dept
+}
+
+grant SysAdmin {
+  C_reserve             in S_all
+  C_view_reservation    in S_all
+  C_cancel_reservation  in S_all
+  C_override_conflict   in S_all
+  C_view_subscription   in S_all
+  C_change_plan         in S_all
+  C_cancel_subscription in S_all
+  C_view_invoice        in S_all
+  C_waive_charge        in S_all
+  C_manage_room         in S_all
+  C_manage_user         in S_all
+}
+
+// ---------------------------------------------------------------- 制約
+
+rule R_actor_must_be_active {
+  doc: "無効化された利用者は状態を変える操作を実行できない"
+  kind: precondition
+  on: [ any_command ]
+  traces: [ req.REQ_01 ]
+  assert: ctx.actor == null or User[ctx.actor.id].active
+  on_violation: reject(E_INACTIVE_USER)
+}
+
+// ---------------------------------------------------------------- 機能
+
+feature F_change_user_role {
+  doc: "利用者のロールを変更する"
+  kind: command
+  actor: SysAdmin
+  capability: C_manage_user
+  traces: [ req.REQ_01 ]
+
+  input {
+    user: Ref<User>
+    role: Actor
+  }
+  subject: input.user
+
+  effect {
+    update self { role: input.role }
+    emit Ev_user_role_changed { user: self.id, from_role: self.role, to_role: input.role }
+  }
+}
+
+// ---------------------------------------------------------------- イベント
+
+event Ev_user_role_changed {
+  doc: "利用者のロールが変更された"
+  payload {
+    user:      Ref<User>
+    from_role: Actor
+    to_role:   Actor
+  }
+}
+
+// ---------------------------------------------------------------- エラー
+
+error E_INACTIVE_USER {
+  doc: "実行主体の利用者が無効化されている"
+  class: forbidden
+  severity: error
+  message: "このアカウントは利用できません"
+}

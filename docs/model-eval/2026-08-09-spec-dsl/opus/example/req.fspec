@@ -1,0 +1,99 @@
+// ============================================================================
+// req.fspec — 上流要件のアンカー
+//
+// FSPEC は要件そのものを表現しない。要件は上流の成果物にあり、ここには
+// 「仕様がどの要件に応答しているか」を追跡するための識別子だけを置く。
+// 検査 C-COV-1 により、traces されていない requirement は仕様の穴として検出される。
+// ============================================================================
+
+module req
+
+requirement REQ_01 {
+  doc: "利用者は 一般利用者 / 部門管理者 / システム管理者 の 3 種別を持つ"
+  source: "要件定義書 3.1"
+  priority: must
+}
+
+requirement REQ_02 {
+  doc: "会議室の登録・変更・廃止はシステム管理者のみが行える"
+  source: "要件定義書 3.2"
+  priority: must
+}
+
+requirement REQ_03 {
+  doc: "サブスクリプション契約は部門単位で 1 件保持する"
+  source: "要件定義書 4.1"
+  priority: must
+}
+
+requirement REQ_04 {
+  doc: "課金は月次。課金期間の終了時に当期の請求を確定し、次期間を開始する"
+  source: "要件定義書 4.2"
+  priority: must
+}
+
+requirement REQ_05 {
+  doc: "プラン変更は即時に反映し、当期の残存日数で日割りした差額を精算する"
+  source: "要件定義書 4.3"
+  priority: must
+}
+
+requirement REQ_06 {
+  doc: "解約は当期末で役務提供を終了する。役務提供終了後にかかる予約は保持しない"
+  source: "要件定義書 4.4"
+  priority: must
+}
+
+requirement REQ_07 {
+  doc: "予約にはキャンセル期限がある。期限を跨いだ取消には違約金を課金する"
+  source: "要件定義書 5.4"
+  priority: must
+}
+
+requirement REQ_08 {
+  doc: "一般利用者は会議室を時間帯指定で予約できる"
+  source: "要件定義書 5.1"
+  priority: must
+}
+
+requirement REQ_09 {
+  doc: "同一会議室で時間帯の重なる予約を作ることはできない"
+  source: "要件定義書 5.2"
+  priority: must
+}
+
+requirement REQ_10 {
+  doc: "システム管理者は重複を承知のうえで予約を強制上書きできる。既存予約は取り消される"
+  source: "要件定義書 5.3"
+  priority: must
+}
+
+requirement REQ_11 {
+  doc: "プランごとに 同時有効予約数 と 先行予約可能日数 の上限を設ける"
+  source: "要件定義書 4.5"
+  priority: must
+}
+
+requirement REQ_12 {
+  doc: "有効な契約を持たない部門は新規予約を作成できない"
+  source: "要件定義書 4.6"
+  priority: must
+}
+
+requirement REQ_13 {
+  doc: "一般利用者は自分の予約のみ、部門管理者は自部門の予約を閲覧・取消できる"
+  source: "要件定義書 3.3"
+  priority: must
+}
+
+requirement REQ_14 {
+  doc: "システム管理者は違約金を免除できる"
+  source: "要件定義書 5.5"
+  priority: should
+}
+
+requirement REQ_15 {
+  doc: "空き状況の確認のため、利用者は会議室の使用済み時間帯を参照できる"
+  source: "要件定義書 5.6"
+  priority: must
+}

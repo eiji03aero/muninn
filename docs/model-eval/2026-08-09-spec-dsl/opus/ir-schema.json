@@ -1,0 +1,485 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fspec.dev/schema/1.0/ir.json",
+  "title": "FSPEC IR 1.0",
+  "description": "FSPEC ソース群をコンパイルした正規化中間表現。ランタイムはこの形式のみを読む。数値は精度損失を避けるためすべて文字列で表現する。",
+  "type": "object",
+  "required": ["fspec_version", "ir_hash", "modules", "nodes", "edges", "indexes", "checks"],
+  "additionalProperties": false,
+  "properties": {
+    "fspec_version": { "const": "1.0" },
+    "ir_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "description": "全ノードハッシュの決定的畳み込み。同一ソースからは常に同一値。"
+    },
+    "modules": { "type": "array", "items": { "type": "string" } },
+
+    "nodes": {
+      "type": "object",
+      "description": "完全修飾 ID (module.Ident) をキーとするノード表",
+      "propertyNames": { "pattern": "^[A-Za-z_][A-Za-z0-9_]*\\.[A-Za-z_][A-Za-z0-9_]*$" },
+      "additionalProperties": { "$ref": "#/$defs/node" }
+    },
+
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "kind"],
+        "additionalProperties": false,
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "kind": {
+            "enum": ["traces", "uses_capability", "grants", "scoped_by", "extends",
+                     "has_field", "state_of", "constrains", "reads", "writes",
+                     "transitions", "emits", "triggered_by", "raises", "overridden_by",
+                     "rechecks", "calls", "param_of", "after", "applies_to"]
+          },
+          "derived": { "type": "boolean", "description": "true なら解析により導出された辺（applies_to / reads / writes など）" }
+        }
+      }
+    },
+
+    "indexes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rules_by_entity": { "$ref": "#/$defs/idIndex" },
+        "rules_by_feature": {
+          "type": "object",
+          "description": "feature/job id → フェーズ別の rule id 列。列の順序が評価順序であり、これが決定性の根拠。",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "guard": { "$ref": "#/$defs/idList" },
+              "precondition": { "$ref": "#/$defs/idList" },
+              "invariant": { "$ref": "#/$defs/idList" },
+              "postcondition": { "$ref": "#/$defs/idList" }
+            }
+          }
+        },
+        "rules_by_transition": { "$ref": "#/$defs/idIndex" },
+        "recheck_index": {
+          "type": "object",
+          "description": "entity id → そのエンティティが書き換わったときに再評価すべき rule と対象集合式",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["rule", "bind", "selector"],
+              "properties": {
+                "rule": { "type": "string" },
+                "bind": { "type": "string" },
+                "selector": { "$ref": "#/$defs/ast" }
+              }
+            }
+          }
+        },
+        "capabilities_by_actor": {
+          "type": "object",
+          "description": "extends を展開済みのアクタ→(権限, 範囲) 対応表",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["capability", "scope"],
+              "properties": {
+                "capability": { "type": "string" },
+                "scope": { "type": "string" }
+              }
+            }
+          }
+        },
+        "features_by_actor": { "$ref": "#/$defs/idIndex" },
+        "transitions_by_state": {
+          "type": "object",
+          "description": "'<lifecycle>.<state>' → 出遷移と、それを起こす主体",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["transition", "to", "triggers"],
+              "properties": {
+                "transition": { "type": "string" },
+                "to": { "type": "string" },
+                "triggers": { "$ref": "#/$defs/idList" },
+                "guards": { "$ref": "#/$defs/idList" }
+              }
+            }
+          }
+        },
+        "errors_by_feature": { "$ref": "#/$defs/idIndex" },
+        "blast": {
+          "type": "object",
+          "description": "node id → 変更時に影響を受けるノード集合（逆辺到達）。事前計算値。",
+          "additionalProperties": { "$ref": "#/$defs/idList" }
+        },
+        "derive_order": { "$ref": "#/$defs/idList" }
+      }
+    },
+
+    "checks": {
+      "type": "object",
+      "required": ["status", "results"],
+      "properties": {
+        "status": { "enum": ["pass", "warn", "fail"] },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "level", "message"],
+            "properties": {
+              "id": { "type": "string", "description": "C-01 / C-DUP / C-COV-1 など" },
+              "level": { "enum": ["ERROR", "WARN"] },
+              "message": { "type": "string" },
+              "node": { "type": "string" },
+              "loc": { "$ref": "#/$defs/loc" }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "idList": { "type": "array", "items": { "type": "string" } },
+    "idIndex": { "type": "object", "additionalProperties": { "$ref": "#/$defs/idList" } },
+
+    "loc": {
+      "type": "object",
+      "required": ["file", "line", "col"],
+      "properties": {
+        "file": { "type": "string" },
+        "line": { "type": "integer" },
+        "col": { "type": "integer" }
+      }
+    },
+
+    "node": {
+      "type": "object",
+      "required": ["kind", "module", "name", "hash"],
+      "properties": {
+        "kind": {
+          "enum": ["requirement", "param", "enum", "entity", "lifecycle", "actor",
+                   "capability", "scope", "grant", "rule", "derive", "feature",
+                   "job", "event", "error", "world", "scenario"]
+        },
+        "module": { "type": "string" },
+        "name": { "type": "string" },
+        "doc": { "type": "string" },
+        "traces": { "$ref": "#/$defs/idList" },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "正規化 AST とプロパティから決まる安定ハッシュ。fspec diff の単位。"
+        },
+        "loc": { "$ref": "#/$defs/loc" },
+
+        "props": {
+          "type": "object",
+          "description": "宣言種別固有のスカラ/列挙プロパティ（kind, class, severity, initial, terminal など）",
+          "additionalProperties": true
+        },
+        "fields": {
+          "type": "array",
+          "description": "entity / event.payload / feature.input",
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": {
+              "name": { "type": "string" },
+              "type": { "$ref": "#/$defs/type" },
+              "doc": { "type": "string" },
+              "immutable": { "type": "boolean" },
+              "default": { "$ref": "#/$defs/ast" },
+              "derived": { "$ref": "#/$defs/ast" },
+              "inverse": { "type": "string" }
+            }
+          }
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "name": { "type": "string" },
+              "doc": { "type": "string" },
+              "terminal": { "type": "boolean" }
+            }
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "from", "to"],
+            "properties": {
+              "name": { "type": "string" },
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "doc": { "type": "string" }
+            }
+          }
+        },
+        "on": {
+          "type": "array",
+          "description": "rule の適用対象セレクタ",
+          "items": {
+            "type": "object",
+            "required": ["sel"],
+            "properties": {
+              "sel": { "enum": ["entity", "feature", "transition", "any_command", "any_query", "any_feature"] },
+              "target": { "type": "string" },
+              "op": { "enum": ["create", "update", "delete"] }
+            }
+          }
+        },
+        "lets": {
+          "type": "array",
+          "description": "宣言順。参照時に遅延評価される。",
+          "items": {
+            "type": "object",
+            "required": ["name", "expr"],
+            "properties": { "name": { "type": "string" }, "expr": { "$ref": "#/$defs/ast" } }
+          }
+        },
+        "when": { "$ref": "#/$defs/ast" },
+        "assert": { "$ref": "#/$defs/ast" },
+        "value": { "$ref": "#/$defs/ast" },
+        "on_violation": {
+          "type": "array",
+          "description": "記述順。最初に when が真になったものが採用される。最後の要素は when: null（default）。",
+          "items": {
+            "type": "object",
+            "required": ["when", "disposition"],
+            "properties": {
+              "when": { "oneOf": [{ "$ref": "#/$defs/ast" }, { "type": "null" }] },
+              "disposition": { "$ref": "#/$defs/disposition" }
+            }
+          }
+        },
+        "override": {
+          "type": "object",
+          "required": ["capability", "requested_by", "effect"],
+          "properties": {
+            "doc": { "type": "string" },
+            "capability": { "type": "string" },
+            "requested_by": { "$ref": "#/$defs/ast" },
+            "effect": { "$ref": "#/$defs/effect" }
+          }
+        },
+        "recheck": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["entity", "bind", "selector"],
+            "properties": {
+              "entity": { "type": "string" },
+              "bind": { "type": "string" },
+              "selector": { "$ref": "#/$defs/ast" }
+            }
+          }
+        },
+        "params": {
+          "type": "array",
+          "description": "derive のシグネチャ",
+          "items": {
+            "type": "object",
+            "required": ["name", "type"],
+            "properties": { "name": { "type": "string" }, "type": { "$ref": "#/$defs/type" } }
+          }
+        },
+        "returns": { "$ref": "#/$defs/type" },
+        "subject": { "$ref": "#/$defs/ast" },
+        "draft": {
+          "type": "object",
+          "required": ["entity", "bind", "assigns"],
+          "properties": {
+            "entity": { "type": "string" },
+            "bind": { "type": "string" },
+            "assigns": { "type": "object", "additionalProperties": { "$ref": "#/$defs/ast" } }
+          }
+        },
+        "effect": { "$ref": "#/$defs/effect" },
+        "trigger": {
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": { "enum": ["schedule", "event", "manual"] },
+            "schedule": {
+              "type": "object",
+              "properties": {
+                "unit": { "enum": ["every", "hourly", "daily", "weekly", "monthly"] },
+                "every": { "type": "string", "description": "ISO 8601 duration" },
+                "at": { "type": "string", "description": "HH:MM[:SS]" },
+                "weekday": { "type": "string" },
+                "day": { "type": "integer" },
+                "tz": { "type": "string" }
+              }
+            },
+            "event": { "type": "string" }
+          }
+        },
+        "grants": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["capability", "scope"],
+            "properties": { "capability": { "type": "string" }, "scope": { "type": "string" } }
+          }
+        },
+        "extends": { "type": "string" },
+        "cases": {
+          "type": "array",
+          "description": "enum の場合。宣言順が正規順。",
+          "items": {
+            "type": "object",
+            "required": ["name"],
+            "properties": { "name": { "type": "string" }, "doc": { "type": "string" } }
+          }
+        },
+        "given": {
+          "type": "object",
+          "description": "world / scenario.given（from は展開済み）",
+          "properties": {
+            "now": { "type": "string" },
+            "actor": { "type": "string" },
+            "actor_id": { "type": "string" },
+            "params": { "type": "object", "additionalProperties": true },
+            "fixtures": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["bind", "entity", "assigns"],
+                "properties": {
+                  "bind": { "type": "string" },
+                  "entity": { "type": "string" },
+                  "assigns": { "type": "object", "additionalProperties": { "$ref": "#/$defs/ast" } }
+                }
+              }
+            }
+          }
+        },
+        "invoke": {
+          "type": "object",
+          "properties": {
+            "type": { "enum": ["feature", "job"] },
+            "target": { "type": "string" },
+            "args": { "type": "object", "additionalProperties": { "$ref": "#/$defs/ast" } }
+          }
+        },
+        "expects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["form"],
+            "properties": {
+              "form": { "enum": ["predicate", "rejected", "notice", "emitted", "created"] },
+              "expr": { "$ref": "#/$defs/ast" },
+              "target": { "type": "string" },
+              "where": { "$ref": "#/$defs/ast" }
+            }
+          }
+        }
+      }
+    },
+
+    "disposition": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": { "enum": ["reject", "warn", "allow", "compensate"] },
+        "error": { "type": "string" },
+        "blames": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "例: [\"input\",\"period\"]。対象 feature に当該入力がなければランタイムは無視する。"
+        },
+        "effect": { "$ref": "#/$defs/effect" }
+      }
+    },
+
+    "effect": {
+      "type": "array",
+      "description": "状態差分の宣言。すべての式は pre-state に対して評価され、差分は原子的に適用される。",
+      "items": { "$ref": "#/$defs/stmt" }
+    },
+
+    "stmt": {
+      "type": "object",
+      "required": ["s"],
+      "properties": {
+        "s": { "enum": ["let", "create", "commit", "update", "delete", "transition", "emit", "for", "if"] },
+        "name": { "type": "string" },
+        "expr": { "$ref": "#/$defs/ast" },
+        "entity": { "type": "string" },
+        "bind": { "type": "string" },
+        "target": { "$ref": "#/$defs/ast" },
+        "to": { "type": "string" },
+        "event": { "type": "string" },
+        "assigns": { "type": "object", "additionalProperties": { "$ref": "#/$defs/ast" } },
+        "src": { "$ref": "#/$defs/ast" },
+        "where": { "$ref": "#/$defs/ast" },
+        "body": { "type": "array", "items": { "$ref": "#/$defs/stmt" } },
+        "else": { "type": "array", "items": { "$ref": "#/$defs/stmt" } }
+      }
+    },
+
+    "type": {
+      "type": "object",
+      "required": ["t"],
+      "properties": {
+        "t": {
+          "enum": ["Text", "Int", "Bool", "Money", "Rational", "Decimal", "Instant", "Date",
+                   "Time", "Duration", "Timezone", "Actor", "Capability", "RoundingMode",
+                   "Id", "Ref", "List", "Interval", "State", "Enum"]
+        },
+        "of": { "oneOf": [{ "$ref": "#/$defs/type" }, { "type": "string" }] },
+        "scale": { "type": "integer" },
+        "optional": { "type": "boolean" }
+      }
+    },
+
+    "ast": {
+      "type": "object",
+      "required": ["n"],
+      "description": "式の抽象構文木。評価は全域・副作用なし・決定的。",
+      "properties": {
+        "n": { "enum": ["lit", "path", "ref", "bin", "un", "call", "derive", "compr", "quant", "if", "match", "idx", "list"] },
+        "t": { "type": "string", "description": "lit の型名" },
+        "v": { "description": "lit の値。数値・金額・有理数はすべて文字列表現。" },
+        "base": { "type": "string", "description": "path の起点: self / input / ctx / old / result / let 束縛名" },
+        "segs": { "type": "array", "items": { "type": "string" } },
+        "id": { "type": "string", "description": "ref / derive の完全修飾 ID" },
+        "op": { "type": "string" },
+        "l": { "$ref": "#/$defs/ast" },
+        "r": { "$ref": "#/$defs/ast" },
+        "e": { "$ref": "#/$defs/ast" },
+        "fn": { "type": "string", "description": "組込み関数名" },
+        "args": { "type": "array", "items": { "$ref": "#/$defs/ast" } },
+        "var": { "type": "string" },
+        "src": { "$ref": "#/$defs/ast" },
+        "where": { "oneOf": [{ "$ref": "#/$defs/ast" }, { "type": "null" }] },
+        "body": { "$ref": "#/$defs/ast" },
+        "q": { "enum": ["exists", "forall"] },
+        "c": { "$ref": "#/$defs/ast" },
+        "then": { "$ref": "#/$defs/ast" },
+        "else": { "$ref": "#/$defs/ast" },
+        "arms": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["case", "body"],
+            "properties": { "case": { "type": "string" }, "body": { "$ref": "#/$defs/ast" } }
+          }
+        },
+        "key": { "$ref": "#/$defs/ast" },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/ast" } }
+      }
+    }
+  }
+}

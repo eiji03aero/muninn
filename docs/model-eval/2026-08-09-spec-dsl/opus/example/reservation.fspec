@@ -1,0 +1,283 @@
+// ============================================================================
+// reservation.fspec — 予約
+//
+// 予約それ自体に閉じた関心事だけを置く。契約・課金と絡む制約は policy.fspec。
+// ============================================================================
+
+module reservation
+
+import req
+import common
+import identity
+import catalog
+
+// ---------------------------------------------------------------- ドメイン
+
+entity Reservation {
+  doc: "会議室の予約 1 件"
+  key: id
+  owner: organizer
+  scope_by: department
+
+  field id:            Id<Reservation>
+  field room:          Ref<catalog.Room>          { immutable: true }
+  field organizer:     Ref<identity.User>         { immutable: true }
+  field department:    Ref<identity.Department>   { derived: self.organizer.department }
+  field period:        Interval<Instant>          { immutable: true, doc: "半開区間。変更は取消と再作成で行う" }
+  field purpose:       Text
+  field status:        State<L_reservation>
+  field cancel_reason: CancelReason?
+  field cancelled_at:  Instant?
+  field created_at:    Instant                    { immutable: true }
+}
+
+enum CancelReason {
+  ByUser            { doc: "利用者本人による取消" }
+  ByAdmin           { doc: "管理者による取消" }
+  OverriddenByAdmin { doc: "管理者の強制上書きにより取消" }
+  SubscriptionEnded { doc: "契約の役務提供終了により取消" }
+}
+
+lifecycle L_reservation of Reservation.status {
+  doc: "予約の状態遷移。遷移を起こす主体は effect の transition 文から導出される"
+  initial: Confirmed
+
+  state Confirmed { doc: "確定済み。利用できる" }
+  state Cancelled { doc: "取消済み", terminal: true }
+  state Completed { doc: "利用終了", terminal: true }
+
+  transition T_cancel:   Confirmed -> Cancelled
+  transition T_complete: Confirmed -> Completed
+}
+
+// ---------------------------------------------------------------- 制約
+
+rule R_reservation_period_valid {
+  doc: "予約時間帯は空であってはならない"
+  kind: invariant
+  on: [ entity Reservation ]
+  traces: [ req.REQ_08 ]
+  assert: self.period.start < self.period.end
+  on_violation: reject(E_INVALID_PERIOD, blames: input.period)
+}
+
+rule R_reservation_not_in_past {
+  doc: "過去に開始する予約は作成できない"
+  kind: precondition
+  on: [ entity Reservation on create ]
+  traces: [ req.REQ_08 ]
+  assert: self.period.start >= ctx.now
+  on_violation: reject(E_PERIOD_IN_PAST, blames: input.period)
+}
+
+rule R_room_must_be_bookable {
+  doc: "予約受付を停止した会議室は新規に予約できない"
+  kind: precondition
+  on: [ entity Reservation on create ]
+  traces: [ req.REQ_08 ]
+  assert: self.room.bookable
+  on_violation: reject(E_ROOM_NOT_BOOKABLE, blames: input.room)
+}
+
+rule R_no_double_booking {
+  doc: "同一会議室で確定済み予約の時間帯が重なってはならない"
+  kind: invariant
+  on: [ entity Reservation ]
+  when: self.status == Confirmed
+  traces: [ req.REQ_09, req.REQ_10 ]
+
+  let conflicts = [ r for r in Reservation
+                    where r.id != self.id
+                      and r.room == self.room
+                      and r.status == Confirmed
+                      and r.period overlaps self.period ]
+
+  assert: count(conflicts) == 0
+
+  on_violation: reject(E_ROOM_CONFLICT, blames: input.period)
+
+  // 強制上書きは「別の機能」ではなく「この制約の上書き」として 1 箇所に書く。
+  // 上書き可能な機能が何本増えても、この記述は増えない。
+  override {
+    doc: "C_override_conflict を持つ主体は重複を承知で確定できる。既存予約は取り消される"
+    capability: identity.C_override_conflict
+    requested_by: input.force_override
+    effect {
+      for c in conflicts {
+        transition c to Cancelled {
+          cancel_reason: OverriddenByAdmin
+          cancelled_at:  ctx.now
+        }
+        emit Ev_reservation_overridden {
+          reservation: c.id
+          replaced_by: self.id
+          by:          ctx.actor.id
+        }
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------- 機能
+
+feature F_create_reservation {
+  doc: "会議室を予約する"
+  kind: command
+  actor: identity.Member
+  capability: identity.C_reserve
+  traces: [ req.REQ_08, req.REQ_09, req.REQ_10 ]
+
+  input {
+    room:           Ref<catalog.Room>
+    period:         Interval<Instant>
+    purpose:        Text
+    force_override: Bool = false { doc: "R_no_double_booking の上書きを要求する" }
+  }
+
+  // draft は「まだ永続化されていない候補」。rule はこれを self として評価できる。
+  draft Reservation as self {
+    room:       input.room
+    organizer:  ctx.actor.id
+    period:     input.period
+    purpose:    input.purpose
+    status:     Confirmed
+    created_at: ctx.now
+  }
+
+  effect {
+    commit self
+    emit Ev_reservation_created { reservation: self.id }
+  }
+}
+
+feature F_cancel_reservation {
+  doc: "予約を取り消す"
+  kind: command
+  actor: identity.Member
+  capability: identity.C_cancel_reservation
+  traces: [ req.REQ_07, req.REQ_13, req.REQ_14 ]
+
+  input {
+    reservation: Ref<Reservation>
+    waive_fee:   Bool = false { doc: "policy.R_cancel_before_deadline の上書き（違約金免除）を要求する" }
+  }
+  subject: input.reservation
+
+  effect {
+    let reason = if ctx.actor.id == self.organizer then ByUser else ByAdmin
+    transition self to Cancelled {
+      cancel_reason: reason
+      cancelled_at:  ctx.now
+    }
+    emit Ev_reservation_cancelled {
+      reservation: self.id
+      reason:      reason
+      by:          ctx.actor.id
+    }
+  }
+}
+
+feature F_view_reservations {
+  doc: "予約を一覧する。可視範囲は grant の scope から自動的に決まる"
+  kind: query
+  actor: identity.Member
+  capability: identity.C_view_reservation
+  traces: [ req.REQ_13 ]
+
+  input { window: Interval<Instant> }
+  returns: List<Ref<Reservation>>
+  value: [ r for r in Reservation where r.period overlaps input.window ]
+}
+
+feature F_view_room_availability {
+  doc: "会議室の使用済み時間帯を参照する。予約者情報は返さないため、範囲は S_all で与えられる"
+  kind: query
+  actor: identity.Member
+  capability: identity.C_view_room_availability
+  traces: [ req.REQ_15 ]
+
+  input {
+    room:   Ref<catalog.Room>
+    window: Interval<Instant>
+  }
+  returns: List<Interval<Instant>>
+  value: [ r.period for r in Reservation
+           where r.room == input.room
+             and r.status == Confirmed
+             and r.period overlaps input.window ]
+}
+
+// ---------------------------------------------------------------- 時間軸の振る舞い
+
+job J_complete_past_reservations {
+  doc: "利用時間帯が終了した確定済み予約を利用終了にする"
+  trigger: schedule(every PT15M)
+  traces: [ req.REQ_08 ]
+
+  effect {
+    for r in Reservation where r.status == Confirmed and r.period.end <= ctx.now {
+      transition r to Completed { }
+      emit Ev_reservation_completed { reservation: r.id }
+    }
+  }
+}
+
+// ---------------------------------------------------------------- イベント
+
+event Ev_reservation_created {
+  doc: "予約が確定した"
+  payload { reservation: Ref<Reservation> }
+}
+
+event Ev_reservation_cancelled {
+  doc: "予約が取り消された"
+  payload {
+    reservation: Ref<Reservation>
+    reason:      CancelReason
+    by:          Ref<identity.User>?
+  }
+}
+
+event Ev_reservation_overridden {
+  doc: "強制上書きにより既存予約が取り消された"
+  payload {
+    reservation: Ref<Reservation>
+    replaced_by: Ref<Reservation>
+    by:          Ref<identity.User>
+  }
+}
+
+event Ev_reservation_completed {
+  doc: "予約の利用時間帯が終了した"
+  payload { reservation: Ref<Reservation> }
+}
+
+// ---------------------------------------------------------------- エラー
+
+error E_INVALID_PERIOD {
+  doc: "予約時間帯が空または逆転している"
+  class: invalid_input
+  severity: error
+  message: "利用時間帯の指定が不正です"
+}
+
+error E_PERIOD_IN_PAST {
+  doc: "予約開始時刻が過去"
+  class: invalid_input
+  severity: error
+  message: "過去の時間帯は予約できません"
+}
+
+error E_ROOM_NOT_BOOKABLE {
+  doc: "会議室が予約受付停止中"
+  class: precondition_failed
+  severity: error
+  message: "この会議室は現在予約できません"
+}
+
+error E_ROOM_CONFLICT {
+  doc: "同一会議室・同一時間帯に確定済みの予約が存在する"
+  class: conflict
+  severity: error
+  message: "指定の時間帯には既に予約があります"
+}

@@ -1,0 +1,91 @@
+module billing
+
+// ---------------------------------------------------------------------------
+// 契約
+// ---------------------------------------------------------------------------
+
+behavior subscribe {
+  doc "プランを契約する。初月分を即時課金し、期間は 1 暦月"
+  trace "REQ-BIL-01"
+  allow member
+  allow dept_admin
+  allow system_admin
+  input { plan: ref Plan }
+  // 二重契約の禁止は rule single_active_subscription が create 時に自動検査する
+  effect {
+    let s = create Subscription {
+      owner                = caller,
+      plan                 = input.plan,
+      pending_plan         = none,
+      current_period_start = now,
+      current_period_end   = add_months(now, 1)
+    }
+    create Charge {
+      subscription = s,
+      amount       = input.plan.monthly_fee,
+      reason       = #period_fee,
+      charged_at   = now
+    }
+  }
+  output s
+}
+
+behavior change_plan {
+  doc "プラン変更。上位プラン(月額が高い)へは即時適用し残期間を日割りで課金、
+       下位プランへは次回更新時に適用する(返金・負の調整は発生させない)"
+  trace "REQ-BIL-02"
+  trace "REQ-BIL-03"
+  allow member
+  allow dept_admin
+  allow system_admin
+  input { new_plan: ref Plan }
+  require exists(active_subscriptions(caller)) error NO_ACTIVE_SUBSCRIPTION
+  let sub = the(active_subscriptions(caller))
+  require sub.status == #active error SUBSCRIPTION_NOT_ACTIVE
+  require input.new_plan != sub.plan error SAME_PLAN
+  effect {
+    when input.new_plan.monthly_fee > sub.plan.monthly_fee {
+      // 日割り額は更新前のプランで算出するため、update より先に課金する
+      create Charge {
+        subscription = sub,
+        amount       = proration_charge(sub, input.new_plan, now),
+        reason       = #proration,
+        charged_at   = now
+      }
+      update sub { plan = input.new_plan, pending_plan = none }
+    } otherwise {
+      update sub { pending_plan = input.new_plan }
+    }
+  }
+}
+
+behavior cancel_subscription {
+  doc "解約を予約する。期間末までは利用可能。期間末以降に開始する確定予約は
+       Subscription.cancel 遷移の効果で即時に自動取消される"
+  trace "REQ-BIL-04"
+  allow member
+  allow dept_admin
+  allow system_admin
+  require exists(active_subscriptions(caller)) error NO_ACTIVE_SUBSCRIPTION
+  let sub = the(active_subscriptions(caller))
+  effect {
+    transition sub.cancel
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 課金の照会
+// ---------------------------------------------------------------------------
+
+behavior my_current_period_charges {
+  doc "現在の請求期間に発生した課金の合計額"
+  allow member
+  allow dept_admin
+  allow system_admin
+  require exists(active_subscriptions(caller)) error NO_ACTIVE_SUBSCRIPTION
+  let sub = the(active_subscriptions(caller))
+  output sum(c in select c in Charge
+                  where c.subscription == sub
+                    and c.charged_at >= sub.current_period_start,
+             c.amount)
+}

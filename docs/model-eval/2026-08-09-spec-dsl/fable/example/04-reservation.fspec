@@ -1,0 +1,101 @@
+module reservation
+
+// ---------------------------------------------------------------------------
+// 予約の作成・取消
+// ---------------------------------------------------------------------------
+
+behavior create_reservation {
+  doc "会議室を予約する。時間帯の妥当性・重複禁止・契約の有効性は
+       Reservation に掛かる rule 群が create 時に自動検査する"
+  trace "REQ-RSV-01"
+  allow member
+  allow dept_admin
+  allow system_admin
+  input { room: ref Room, starts_at: DateTime, ends_at: DateTime }
+  // the() の単一性保証のための存在ガード(制約本体は rule 側にある)
+  require exists(active_subscriptions(caller)) error NO_ACTIVE_SUBSCRIPTION
+  let sub = the(active_subscriptions(caller))
+  // プラン上限は不変条件ではなく作成時のゲート(下位プランへの変更後、
+  // 既存予約が新上限を超えていても既存分は尊重される。RATIONALE §3.2)
+  require count(future_confirmed_reservations(caller)) < sub.plan.max_future_reservations
+    error PLAN_LIMIT_REACHED
+  effect {
+    let r = create Reservation {
+      room      = input.room,
+      owner     = caller,
+      starts_at = input.starts_at,
+      ends_at   = input.ends_at
+    }
+  }
+  output r
+}
+
+behavior cancel_reservation {
+  doc "予約を取り消す。キャンセル期限(cancel_deadline)を過ぎた取消には
+       会議室の時間料金全額のキャンセル料を課金する"
+  trace "REQ-RSV-04"
+  allow member     where input.target.owner == caller
+  allow dept_admin where input.target.owner.department == caller.department
+  allow system_admin
+  input { target: ref Reservation }
+  require now < input.target.starts_at error RESERVATION_ALREADY_STARTED
+  effect {
+    transition input.target.cancel
+    let fee = cancellation_charge(input.target)
+    when fee > money(0) {
+      create Charge {
+        subscription = the(active_subscriptions(input.target.owner)),
+        amount       = fee,
+        reason       = #late_cancellation,
+        charged_at   = now
+      }
+    }
+  }
+}
+
+behavior force_reserve {
+  doc "既存の確定予約を強制的に解放して予約を作成する。解放された予約は
+       #overridden 状態になる。実行は監査ログに記録される"
+  trace "REQ-RSV-03"
+  allow system_admin
+  input { room: ref Room, owner: ref User, starts_at: DateTime, ends_at: DateTime }
+  overrides no_double_booking
+  audit
+  effect {
+    foreach c in conflicting_reservations(input.room, input.starts_at, input.ends_at) {
+      transition c.force_release
+    }
+    let r = create Reservation {
+      room      = input.room,
+      owner     = input.owner,
+      starts_at = input.starts_at,
+      ends_at   = input.ends_at
+    }
+  }
+  output r
+}
+
+// ---------------------------------------------------------------------------
+// 照会(権限スコープはロールごとに異なる)
+// ---------------------------------------------------------------------------
+
+behavior list_my_reservations {
+  doc "自分の予約の一覧"
+  allow member
+  allow dept_admin
+  allow system_admin
+  output select r in Reservation where r.owner == caller
+}
+
+behavior list_department_reservations {
+  doc "自部門の利用者の予約の一覧"
+  allow dept_admin
+  output select r in Reservation
+         where r.owner.department == caller.department
+}
+
+behavior list_all_reservations {
+  doc "全予約の一覧"
+  allow system_admin
+  output select r in Reservation where true
+}

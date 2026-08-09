@@ -1,0 +1,17 @@
+module base
+
+// 仕様セット全体の通貨。Money 型の値はすべて JPY(最小単位 1 円)。
+currency JPY
+
+// デプロイ単位で調整しうる設定値。既定値は 24 時間。
+param cancellation_notice: Duration = 24h {
+  doc "予約開始の何時間前までキャンセル料なしで取り消せるか"
+  trace "REQ-RSV-04"
+}
+
+// アクター(ロール)。principal は User.role(01-domain.fspec)。
+actors {
+  member       { doc "一般利用者。自分の契約と予約を管理する" }
+  dept_admin   { doc "部門管理者。自部門の利用者の予約を管理できる" }
+  system_admin { doc "システム管理者。全予約の閲覧と強制上書きができる" }
+}

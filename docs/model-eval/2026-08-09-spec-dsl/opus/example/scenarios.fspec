@@ -1,0 +1,535 @@
+// ============================================================================
+// scenarios.fspec — 仕様に対する実行可能な具体例
+//
+// scenario は IR に載り、ランタイム／CI が LLM を介さずに実行できる。
+// 「この仕様はこう解釈される」を人間が確認する場でもあり、
+// 導出した基本設計・詳細設計の受入テストの原型でもある。
+//
+// fixture は初期状態としてそのまま採用される。初期状態に対して rule は
+// 評価されない（rule が効くのは when: の操作からである）。
+// ============================================================================
+
+module scenarios
+
+import req
+import common
+import identity
+import catalog
+import billing
+import reservation
+import policy
+
+// ---------------------------------------------------------------------------
+// 基本世界
+// ---------------------------------------------------------------------------
+
+world W_base {
+  doc: "3 ロール・1 会議室・2 プラン・有効な契約 1 件からなる基本状態"
+
+  now:      2026-05-01T10:00:00+09:00
+  actor:    identity.Member
+  actor_id: "u-1"
+
+  fixture identity.Department d1 { id: "dept-1", name: "営業部", active: true }
+  fixture identity.Department d2 { id: "dept-2", name: "開発部", active: true }
+
+  fixture identity.User u1 { id: "u-1", name: "一般利用者", department: "dept-1", role: identity.Member,    active: true }
+  fixture identity.User u2 { id: "u-2", name: "部門管理者", department: "dept-1", role: identity.DeptAdmin, active: true }
+  fixture identity.User u9 { id: "u-9", name: "システム管理者", department: "dept-1", role: identity.SysAdmin, active: true }
+
+  fixture catalog.Room r1 { id: "room-1", name: "大会議室", capacity: 12, hourly_rate: 3000 JPY, bookable: true }
+
+  fixture billing.Plan pb {
+    id: "plan-basic", code: "BASIC", name: "ベーシック"
+    monthly_price: 10000 JPY, max_active_reservations: 2, max_advance_days: 14, rank: 1
+  }
+  fixture billing.Plan ps {
+    id: "plan-std", code: "STD", name: "スタンダード"
+    monthly_price: 30000 JPY, max_active_reservations: 20, max_advance_days: 30, rank: 2
+  }
+
+  fixture billing.Subscription sub1 {
+    id: "sub-1", department: "dept-1", plan: "plan-std", status: Active
+    current_period: interval(2026-05-01T00:00:00+09:00, 2026-06-01T00:00:00+09:00)
+    cancel_requested_at: null, service_end: null
+    created_at: 2026-01-01T00:00:00+09:00
+  }
+
+  fixture billing.Invoice inv1 {
+    id: "inv-1", department: "dept-1"
+    period: interval(2026-05-01T00:00:00+09:00, 2026-06-01T00:00:00+09:00)
+    status: Open, issued_at: null
+  }
+}
+
+world W_with_reservation {
+  doc: "W_base に、5/1 14:00-16:00 の確定済み予約を 1 件加えた状態"
+  from: W_base
+
+  fixture reservation.Reservation res1 {
+    id: "res-1", room: "room-1", organizer: "u-1"
+    period: interval(2026-05-01T14:00:00+09:00, 2026-05-01T16:00:00+09:00)
+    purpose: "定例会", status: Confirmed
+    cancel_reason: null, cancelled_at: null
+    created_at: 2026-04-01T00:00:00+09:00
+  }
+}
+
+// ---------------------------------------------------------------------------
+// キャンセル期限（REQ_07 / REQ_14）
+// ---------------------------------------------------------------------------
+
+scenario SC_cancel_before_deadline_is_free {
+  doc: "期限内の取消には違約金が発生しない"
+  traces: [ req.REQ_07 ]
+  given {
+    from: W_with_reservation
+    now: 2026-04-29T10:00:00+09:00     // 期限 = 2026-04-30T14:00+09:00 より前
+  }
+  when: reservation.F_cancel_reservation { reservation: "res-1" }
+  then {
+    expect reservation.Reservation["res-1"].status == Cancelled
+    expect reservation.Reservation["res-1"].cancel_reason == ByUser
+    expect count([ l for l in billing.InvoiceLine where l.kind == LateCancellationFee ]) == 0
+    expect emitted reservation.Ev_reservation_cancelled
+  }
+}
+
+scenario SC_cancel_after_deadline_charges_fee {
+  doc: "期限を跨いだ取消は成立するが、違約金が当期請求に計上される（3000 JPY/h × 2h × 0.5 = 3000 JPY）"
+  traces: [ req.REQ_07 ]
+  given {
+    from: W_with_reservation
+    now: 2026-05-01T10:00:00+09:00     // 期限 = 2026-04-30T14:00+09:00 を超過
+  }
+  when: reservation.F_cancel_reservation { reservation: "res-1" }
+  then {
+    expect reservation.Reservation["res-1"].status == Cancelled
+    expect notice policy.E_LATE_CANCELLATION
+    expect created billing.InvoiceLine where kind == LateCancellationFee and amount == 3000 JPY
+    expect the([ l for l in billing.InvoiceLine where l.kind == LateCancellationFee ]).invoice == "inv-1"
+  }
+}
+
+scenario SC_sysadmin_waives_late_fee {
+  doc: "システム管理者は違約金を免除できる。免除時は明細も notice も発生しない"
+  traces: [ req.REQ_14 ]
+  given {
+    from: W_with_reservation
+    now: 2026-05-01T10:00:00+09:00
+    actor: identity.SysAdmin
+    actor_id: "u-9"
+  }
+  when: reservation.F_cancel_reservation { reservation: "res-1", waive_fee: true }
+  then {
+    expect reservation.Reservation["res-1"].status == Cancelled
+    expect reservation.Reservation["res-1"].cancel_reason == ByAdmin
+    expect count([ l for l in billing.InvoiceLine where l.kind == LateCancellationFee ]) == 0
+    expect emitted billing.Ev_fee_waived where waived_amount == 3000 JPY
+  }
+}
+
+scenario SC_member_cannot_waive_late_fee {
+  doc: "一般利用者が免除を要求しても C_waive_charge を持たないため違約金は計上される"
+  traces: [ req.REQ_14 ]
+  given {
+    from: W_with_reservation
+    now: 2026-05-01T10:00:00+09:00
+  }
+  when: reservation.F_cancel_reservation { reservation: "res-1", waive_fee: true }
+  then {
+    expect notice policy.E_LATE_CANCELLATION
+    expect created billing.InvoiceLine where amount == 3000 JPY
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 重複予約と強制上書き（REQ_09 / REQ_10）
+// ---------------------------------------------------------------------------
+
+scenario SC_double_booking_rejected {
+  doc: "時間帯が重なる予約は拒否される"
+  traces: [ req.REQ_09 ]
+  given { from: W_with_reservation }
+  when: reservation.F_create_reservation {
+    room: "room-1"
+    period: interval(2026-05-01T15:00:00+09:00, 2026-05-01T17:00:00+09:00)
+    purpose: "打合せ"
+  }
+  then {
+    expect rejected reservation.E_ROOM_CONFLICT
+    expect reservation.Reservation["res-1"].status == Confirmed
+  }
+}
+
+scenario SC_member_cannot_override_conflict {
+  doc: "一般利用者が上書きを要求しても C_override_conflict を持たないため拒否される"
+  traces: [ req.REQ_10 ]
+  given { from: W_with_reservation }
+  when: reservation.F_create_reservation {
+    room: "room-1"
+    period: interval(2026-05-01T15:00:00+09:00, 2026-05-01T17:00:00+09:00)
+    purpose: "打合せ"
+    force_override: true
+  }
+  then {
+    expect rejected reservation.E_ROOM_CONFLICT
+  }
+}
+
+scenario SC_sysadmin_override_replaces_existing {
+  doc: "システム管理者は重複を上書きできる。既存予約は OverriddenByAdmin で取り消され、違約金は発生しない"
+  traces: [ req.REQ_10 ]
+  given {
+    from: W_with_reservation
+    actor: identity.SysAdmin
+    actor_id: "u-9"
+  }
+  when: reservation.F_create_reservation {
+    room: "room-1"
+    period: interval(2026-05-01T15:00:00+09:00, 2026-05-01T17:00:00+09:00)
+    purpose: "役員会"
+    force_override: true
+  }
+  then {
+    expect reservation.Reservation["res-1"].status == Cancelled
+    expect reservation.Reservation["res-1"].cancel_reason == OverriddenByAdmin
+    expect count([ r for r in reservation.Reservation where r.status == Confirmed ]) == 1
+    expect emitted reservation.Ev_reservation_overridden
+    expect count([ l for l in billing.InvoiceLine where l.kind == LateCancellationFee ]) == 0
+  }
+}
+
+// ---------------------------------------------------------------------------
+// プラン変更と日割り（REQ_05 / REQ_11）
+// ---------------------------------------------------------------------------
+
+scenario SC_plan_upgrade_is_prorated {
+  doc: "5/11 に BASIC→STD へ上位変更。残存 21/31 日。(30000-10000)×21/31 = 13548.387… → 13548 JPY"
+  traces: [ req.REQ_05 ]
+  given {
+    from: W_base
+    now: 2026-05-11T10:00:00+09:00
+    actor: identity.DeptAdmin
+    actor_id: "u-2"
+    fixture billing.Subscription sub1 {
+      id: "sub-1", department: "dept-1", plan: "plan-basic", status: Active
+      current_period: interval(2026-05-01T00:00:00+09:00, 2026-06-01T00:00:00+09:00)
+      cancel_requested_at: null, service_end: null
+      created_at: 2026-01-01T00:00:00+09:00
+    }
+  }
+  when: billing.F_change_plan { subscription: "sub-1", new_plan: "plan-std" }
+  then {
+    expect billing.Subscription["sub-1"].plan == "plan-std"
+    expect created billing.InvoiceLine where kind == ProrationCharge and amount == 13548 JPY
+    expect emitted billing.Ev_plan_changed where proration == 13548 JPY
+  }
+}
+
+scenario SC_plan_downgrade_credits {
+  doc: "5/11 に STD→BASIC へ下位変更。差額は負値の控除明細として当期請求に計上される（返金はしない）"
+  traces: [ req.REQ_05 ]
+  given {
+    from: W_base
+    now: 2026-05-11T10:00:00+09:00
+    actor: identity.DeptAdmin
+    actor_id: "u-2"
+  }
+  when: billing.F_change_plan { subscription: "sub-1", new_plan: "plan-basic" }
+  then {
+    expect billing.Subscription["sub-1"].plan == "plan-basic"
+    expect created billing.InvoiceLine where kind == ProrationCredit and amount == -13548 JPY
+  }
+}
+
+scenario SC_downgrade_blocked_by_advance_limit {
+  doc: "既存予約が変更後プランの先行予約可能日数を超えている場合、下位変更は拒否される"
+  traces: [ req.REQ_05, req.REQ_11 ]
+  given {
+    from: W_base
+    now: 2026-05-11T10:00:00+09:00
+    actor: identity.DeptAdmin
+    actor_id: "u-2"
+    fixture reservation.Reservation res_far {
+      id: "res-far", room: "room-1", organizer: "u-1"
+      period: interval(2026-05-31T10:00:00+09:00, 2026-05-31T11:00:00+09:00)   // 20 日先
+      purpose: "月次報告", status: Confirmed
+      cancel_reason: null, cancelled_at: null
+      created_at: 2026-05-01T00:00:00+09:00
+    }
+  }
+  when: billing.F_change_plan { subscription: "sub-1", new_plan: "plan-basic" }   // max_advance_days = 14
+  then {
+    expect rejected policy.E_PLAN_LIMIT_EXCEEDED
+    expect billing.Subscription["sub-1"].plan == "plan-std"
+    expect count([ l for l in billing.InvoiceLine ]) == 0
+  }
+}
+
+scenario SC_quota_blocks_new_reservation {
+  doc: "BASIC の同時有効予約数上限 2 に達している部門は 3 件目を作成できない"
+  traces: [ req.REQ_11 ]
+  given {
+    from: W_base
+    fixture billing.Subscription sub1 {
+      id: "sub-1", department: "dept-1", plan: "plan-basic", status: Active
+      current_period: interval(2026-05-01T00:00:00+09:00, 2026-06-01T00:00:00+09:00)
+      cancel_requested_at: null, service_end: null
+      created_at: 2026-01-01T00:00:00+09:00
+    }
+    fixture reservation.Reservation resa {
+      id: "res-a", room: "room-1", organizer: "u-1"
+      period: interval(2026-05-02T10:00:00+09:00, 2026-05-02T11:00:00+09:00)
+      purpose: "A", status: Confirmed, cancel_reason: null, cancelled_at: null
+      created_at: 2026-05-01T00:00:00+09:00
+    }
+    fixture reservation.Reservation resb {
+      id: "res-b", room: "room-1", organizer: "u-1"
+      period: interval(2026-05-03T10:00:00+09:00, 2026-05-03T11:00:00+09:00)
+      purpose: "B", status: Confirmed, cancel_reason: null, cancelled_at: null
+      created_at: 2026-05-01T00:00:00+09:00
+    }
+  }
+  when: reservation.F_create_reservation {
+    room: "room-1"
+    period: interval(2026-05-04T10:00:00+09:00, 2026-05-04T11:00:00+09:00)
+    purpose: "C"
+  }
+  then {
+    expect rejected policy.E_RESERVATION_QUOTA_EXCEEDED
+    expect count([ r for r in reservation.Reservation where r.status == Confirmed ]) == 2
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 解約と、解約後の予約の扱い（REQ_06 / REQ_12）
+// ---------------------------------------------------------------------------
+
+scenario SC_cancellation_drops_reservations_after_service_end {
+  doc: "解約すると役務提供終了時刻を跨ぐ予約だけが自動取消される。終了前の予約は残る"
+  traces: [ req.REQ_06 ]
+  given {
+    from: W_base
+    now: 2026-05-11T10:00:00+09:00
+    actor: identity.DeptAdmin
+    actor_id: "u-2"
+    fixture reservation.Reservation res_in {
+      id: "res-in", room: "room-1", organizer: "u-1"
+      period: interval(2026-05-20T10:00:00+09:00, 2026-05-20T11:00:00+09:00)
+      purpose: "期間内", status: Confirmed, cancel_reason: null, cancelled_at: null
+      created_at: 2026-05-01T00:00:00+09:00
+    }
+    fixture reservation.Reservation res_out {
+      id: "res-out", room: "room-1", organizer: "u-1"
+      period: interval(2026-06-05T10:00:00+09:00, 2026-06-05T11:00:00+09:00)
+      purpose: "期間外", status: Confirmed, cancel_reason: null, cancelled_at: null
+      created_at: 2026-05-01T00:00:00+09:00
+    }
+  }
+  when: billing.F_cancel_subscription { subscription: "sub-1" }
+  then {
+    expect billing.Subscription["sub-1"].status == Cancelling
+    expect billing.Subscription["sub-1"].service_end == 2026-06-01T00:00:00+09:00
+    expect reservation.Reservation["res-in"].status == Confirmed
+    expect reservation.Reservation["res-out"].status == Cancelled
+    expect reservation.Reservation["res-out"].cancel_reason == SubscriptionEnded
+    expect notice policy.E_RESERVATION_ENDED_BY_CANCELLATION
+    // 自動取消には違約金を課さない（R_cancel_before_deadline は F_cancel_reservation にのみ束縛される）
+    expect count([ l for l in billing.InvoiceLine where l.kind == LateCancellationFee ]) == 0
+  }
+}
+
+scenario SC_reservation_beyond_service_end_rejected {
+  doc: "解約申込済みの契約では、役務提供終了後にかかる予約を新規作成できない"
+  traces: [ req.REQ_06 ]
+  given {
+    from: W_base
+    now: 2026-05-11T10:00:00+09:00
+    fixture billing.Subscription sub1 {
+      id: "sub-1", department: "dept-1", plan: "plan-std", status: Cancelling
+      current_period: interval(2026-05-01T00:00:00+09:00, 2026-06-01T00:00:00+09:00)
+      cancel_requested_at: 2026-05-10T00:00:00+09:00
+      service_end: 2026-06-01T00:00:00+09:00
+      created_at: 2026-01-01T00:00:00+09:00
+    }
+  }
+  when: reservation.F_create_reservation {
+    room: "room-1"
+    period: interval(2026-06-02T10:00:00+09:00, 2026-06-02T11:00:00+09:00)
+    purpose: "終了後"
+  }
+  then {
+    expect rejected policy.E_BEYOND_SERVICE_END
+  }
+}
+
+scenario SC_reservation_within_service_end_allowed {
+  doc: "解約申込済みでも、役務提供終了前の予約は作成できる"
+  traces: [ req.REQ_06, req.REQ_12 ]
+  given {
+    from: W_base
+    now: 2026-05-11T10:00:00+09:00
+    fixture billing.Subscription sub1 {
+      id: "sub-1", department: "dept-1", plan: "plan-std", status: Cancelling
+      current_period: interval(2026-05-01T00:00:00+09:00, 2026-06-01T00:00:00+09:00)
+      cancel_requested_at: 2026-05-10T00:00:00+09:00
+      service_end: 2026-06-01T00:00:00+09:00
+      created_at: 2026-01-01T00:00:00+09:00
+    }
+  }
+  when: reservation.F_create_reservation {
+    room: "room-1"
+    period: interval(2026-05-25T10:00:00+09:00, 2026-05-25T11:00:00+09:00)
+    purpose: "終了前"
+  }
+  then {
+    expect count([ r for r in reservation.Reservation where r.status == Confirmed ]) == 1
+    expect emitted reservation.Ev_reservation_created
+  }
+}
+
+scenario SC_ended_subscription_blocks_reservation {
+  doc: "役務提供が終了した契約の部門は新規予約を作成できない"
+  traces: [ req.REQ_12 ]
+  given {
+    from: W_base
+    fixture billing.Subscription sub1 {
+      id: "sub-1", department: "dept-1", plan: "plan-std", status: Ended
+      current_period: interval(2026-04-01T00:00:00+09:00, 2026-05-01T00:00:00+09:00)
+      cancel_requested_at: 2026-04-10T00:00:00+09:00
+      service_end: 2026-05-01T00:00:00+09:00
+      created_at: 2026-01-01T00:00:00+09:00
+    }
+  }
+  when: reservation.F_create_reservation {
+    room: "room-1"
+    period: interval(2026-05-02T10:00:00+09:00, 2026-05-02T11:00:00+09:00)
+    purpose: "契約終了後"
+  }
+  then {
+    expect rejected policy.E_NO_ACTIVE_SUBSCRIPTION
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 権限と可視範囲（REQ_01 / REQ_13）
+// ---------------------------------------------------------------------------
+
+scenario SC_member_cannot_change_plan {
+  doc: "一般利用者は C_change_plan を持たない"
+  traces: [ req.REQ_01 ]
+  given { from: W_base }
+  when: billing.F_change_plan { subscription: "sub-1", new_plan: "plan-basic" }
+  then {
+    expect rejected E_FORBIDDEN
+    expect billing.Subscription["sub-1"].plan == "plan-std"
+  }
+}
+
+scenario SC_member_sees_only_own_reservations {
+  doc: "一般利用者の一覧には自分の予約だけが出る（grant Member { C_view_reservation in S_own } の帰結）"
+  traces: [ req.REQ_13 ]
+  given {
+    from: W_with_reservation
+    fixture reservation.Reservation res_other {
+      id: "res-other", room: "room-1", organizer: "u-2"
+      period: interval(2026-05-02T10:00:00+09:00, 2026-05-02T11:00:00+09:00)
+      purpose: "他人の予約", status: Confirmed, cancel_reason: null, cancelled_at: null
+      created_at: 2026-05-01T00:00:00+09:00
+    }
+  }
+  when: reservation.F_view_reservations {
+    window: interval(2026-05-01T00:00:00+09:00, 2026-06-01T00:00:00+09:00)
+  }
+  then {
+    expect count(result) == 1
+    expect the(result).id == "res-1"
+  }
+}
+
+scenario SC_dept_admin_sees_department_reservations {
+  doc: "部門管理者の一覧には自部門の予約が出る。他部門の予約は出ない"
+  traces: [ req.REQ_13 ]
+  given {
+    from: W_with_reservation
+    actor: identity.DeptAdmin
+    actor_id: "u-2"
+    fixture identity.User u3 { id: "u-3", name: "他部門利用者", department: "dept-2", role: identity.Member, active: true }
+    fixture reservation.Reservation res_dept2 {
+      id: "res-dept2", room: "room-1", organizer: "u-3"
+      period: interval(2026-05-02T10:00:00+09:00, 2026-05-02T11:00:00+09:00)
+      purpose: "他部門", status: Confirmed, cancel_reason: null, cancelled_at: null
+      created_at: 2026-05-01T00:00:00+09:00
+    }
+  }
+  when: reservation.F_view_reservations {
+    window: interval(2026-05-01T00:00:00+09:00, 2026-06-01T00:00:00+09:00)
+  }
+  then {
+    expect count(result) == 1
+    expect the(result).id == "res-1"
+  }
+}
+
+scenario SC_availability_is_visible_across_users {
+  doc: "空き状況照会は予約者情報を返さないため、他人の予約による使用済み時間帯も見える"
+  traces: [ req.REQ_15 ]
+  given {
+    from: W_with_reservation
+    actor: identity.DeptAdmin
+    actor_id: "u-2"
+  }
+  when: reservation.F_view_room_availability {
+    room: "room-1"
+    window: interval(2026-05-01T00:00:00+09:00, 2026-05-02T00:00:00+09:00)
+  }
+  then {
+    expect count(result) == 1
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 月次締め（REQ_04 / REQ_06）
+// ---------------------------------------------------------------------------
+
+scenario SC_billing_period_closes_and_rolls {
+  doc: "課金期間が終了すると当期請求が確定し、次期間と次期請求・基本料金明細が作られる"
+  traces: [ req.REQ_04 ]
+  given {
+    from: W_base
+    now: 2026-06-01T03:00:00+09:00
+  }
+  when: job billing.J_close_billing_period
+  then {
+    expect billing.Invoice["inv-1"].status == Issued
+    expect billing.Subscription["sub-1"].current_period
+           == interval(2026-06-01T00:00:00+09:00, 2026-07-01T00:00:00+09:00)
+    expect count([ i for i in billing.Invoice where i.status == Open ]) == 1
+    expect created billing.InvoiceLine where kind == SubscriptionFee and amount == 30000 JPY
+    expect emitted billing.Ev_invoice_issued
+  }
+}
+
+scenario SC_cancelling_subscription_ends_at_period_close {
+  doc: "解約申込済みの契約は期間終了時に Ended になり、次期間は開始されない"
+  traces: [ req.REQ_06 ]
+  given {
+    from: W_base
+    now: 2026-06-01T03:00:00+09:00
+    fixture billing.Subscription sub1 {
+      id: "sub-1", department: "dept-1", plan: "plan-std", status: Cancelling
+      current_period: interval(2026-05-01T00:00:00+09:00, 2026-06-01T00:00:00+09:00)
+      cancel_requested_at: 2026-05-10T00:00:00+09:00
+      service_end: 2026-06-01T00:00:00+09:00
+      created_at: 2026-01-01T00:00:00+09:00
+    }
+  }
+  when: job billing.J_close_billing_period
+  then {
+    expect billing.Subscription["sub-1"].status == Ended
+    expect billing.Invoice["inv-1"].status == Issued
+    expect count([ i for i in billing.Invoice where i.status == Open ]) == 0
+    expect emitted billing.Ev_subscription_ended
+  }
+}
