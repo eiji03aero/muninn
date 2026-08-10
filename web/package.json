@@ -6,6 +6,7 @@
   "description": "muninn のブラウザ用ビューア（follows / notes / moc を閲覧する派生サイト）。正本は ../ のmarkdown。",
   "scripts": {
     "build:data": "node scripts/build-data.mjs",
+    "img": "node scripts/compress-image.mjs",
     "dev": "npm run build:data && vite",
     "build": "npm run build:data && vite build",
     "preview": "vite preview"
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^6",
     "gray-matter": "^4",
+    "sharp": "^0.35.3",
     "vite": "^8",
     "vite-plugin-pwa": "^1"
   }
