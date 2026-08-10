@@ -3,6 +3,7 @@ title: グアテマラ オリエンテ ナチュラル / caférrant
 kind: logentry
 topic: coffee-beans
 created: 2026-08-10
+image: images/guatemala-oriente-natural-caferrant.webp
 fields:
   roaster: caférrant
   origin: グアテマラ オリエンテ
