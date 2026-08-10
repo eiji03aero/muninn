@@ -1,4 +1,13 @@
-:root { color-scheme: dark; }
+:root {
+  color-scheme: dark;
+  /* 全面共通のベース書体。ここに置く理由は DESIGN.md 原則13（比べるのは構造であって書体ではない）。
+     もともと font-family はどこにも宣言されておらず、日報と親指ひとつはブラウザ既定（＝セリフ／明朝）
+     に依存していた。その見た目を正とし、ブラウザ差で揺れないよう明示スタックに固定したもの。 */
+  --font-base: Times, "Times New Roman", "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", serif;
+  /* 意味として等幅であるべきもの（コード・キーヒント・桁を揃える数値）だけが使う。
+     面のアイデンティティとしての書体には使わない。 */
+  --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
+}
 /* height:100% で固定するとページがビューポート高に閉じ込められ、position:sticky が
    1画面分で剥がれてしまう。min-height にしてコンテンツで伸ばす（sticky が最後まで粘る）。 */
 html { height: 100%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; touch-action: manipulation; }
@@ -9,8 +18,12 @@ body {
   -webkit-tap-highlight-color: transparent;
   color: #f2f5ff;
   background: #090a14;
+  font-family: var(--font-base);
   -webkit-font-smoothing: antialiased;
 }
+/* フォームコントロールは既定では font を継承しない。継承させないと
+   ベース書体を揃えても入力欄だけ別書体になる。 */
+input, textarea, button, select { font-family: inherit; }
 /* アンビエント背景は固定レイヤーにする。body に background-attachment:fixed を敷くと
    iOS Safari が無視して1画面分しか出ずスクロールで流れるため、fixed の擬似要素で全面固定。 */
 body::before {

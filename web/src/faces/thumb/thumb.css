@@ -21,7 +21,6 @@
   --ok: #94e2a8;
   --fuzz: #93b2e8;
   --warn: #ff9a76;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   position: fixed;
   inset: 0;
@@ -88,7 +87,7 @@
 [data-face="thumb"] .tb-ul { margin: .2em 0 .9em 1.05em; font-size: 12.5px; line-height: 1.85; color: #c9d0da; }
 [data-face="thumb"] .tb-ul li { margin-bottom: .35em; }
 [data-face="thumb"] .tb-pre {
-  font-family: var(--mono); font-size: 11px; line-height: 1.7; color: var(--dim);
+  font-family: var(--font-mono); font-size: 11px; line-height: 1.7; color: var(--dim);
   white-space: pre-wrap; word-break: break-word; margin: 0;
 }
 
@@ -104,7 +103,7 @@
 [data-face="thumb"] .tb-md ol { list-style: decimal; }
 [data-face="thumb"] .tb-md li { margin-bottom: .35em; }
 [data-face="thumb"] .tb-md strong { color: var(--ink); font-weight: 700; }
-[data-face="thumb"] .tb-md code { font-family: var(--mono); font-size: 12px; color: var(--path); }
+[data-face="thumb"] .tb-md code { font-family: var(--font-mono); font-size: 12px; color: var(--path); }
 [data-face="thumb"] .tb-md blockquote { border-left: 2px solid var(--line2); padding-left: 10px; margin: .5em 0; color: var(--dim); }
 [data-face="thumb"] .tb-md hr { border: 0; border-top: 1px solid var(--line); margin: 1em 0; }
 [data-face="thumb"] .tb-md table { width: 100%; border-collapse: collapse; font-size: 11.5px; display: block; overflow-x: auto; }
@@ -141,7 +140,7 @@
   background: rgba(255, 196, 107, .15); border-right: 1px solid rgba(255, 196, 107, .4);
 }
 [data-face="thumb"] .tb-barn { position: relative; font-size: 12px; white-space: nowrap; }
-[data-face="thumb"] .tb-barc { position: relative; margin-left: auto; font-size: 11px; color: var(--dim); font-family: var(--mono); }
+[data-face="thumb"] .tb-barc { position: relative; margin-left: auto; font-size: 11px; color: var(--dim); font-family: var(--font-mono); }
 [data-face="thumb"] .tb-bar.is-on { background: rgba(255, 196, 107, .1); box-shadow: inset 0 0 0 1px var(--hud); }
 [data-face="thumb"] .tb-bar.is-on .tb-barn { color: var(--hud); font-weight: 700; }
 [data-face="thumb"] .tb-bar.is-other .tb-fill { background: rgba(255, 255, 255, .06); border-right-color: var(--line2); }
@@ -172,7 +171,7 @@
   box-shadow: inset 2px 0 0 var(--path); margin: 0 -8px; padding-left: 8px; padding-right: 8px;
 }
 [data-face="thumb"] .tb-pathb { flex: 1; min-width: 0; }
-[data-face="thumb"] .tb-arrow { color: var(--dimmer); font-size: 11px; flex: none; font-family: var(--mono); }
+[data-face="thumb"] .tb-arrow { color: var(--dimmer); font-size: 11px; flex: none; font-family: var(--font-mono); }
 [data-face="thumb"] .tb-why { font-size: 11.5px; line-height: 1.65; color: var(--path); }
 [data-face="thumb"] .tb-to { font-size: 12px; line-height: 1.6; color: var(--ink); margin-top: 4px; }
 [data-face="thumb"] .tb-tokind { color: var(--dimmer); font-size: 10px; }
@@ -181,9 +180,9 @@
 [data-face="thumb"] .tb-mets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
 [data-face="thumb"] .tb-met { border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; background: #0a0c0f; min-width: 0; }
 [data-face="thumb"] .tb-metk { font-size: 10px; color: var(--dimmer); margin-bottom: 3px; }
-[data-face="thumb"] .tb-metv { font-size: 17px; font-family: var(--mono); font-variant-numeric: tabular-nums; word-break: break-word; }
+[data-face="thumb"] .tb-metv { font-size: 17px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; word-break: break-word; }
 [data-face="thumb"] .tb-metv.is-sm { font-size: 13px; font-family: inherit; }
-[data-face="thumb"] .tb-metd { font-size: 10.5px; margin-top: 2px; font-family: var(--mono); color: var(--dimmer); }
+[data-face="thumb"] .tb-metd { font-size: 10.5px; margin-top: 2px; font-family: var(--font-mono); color: var(--dimmer); }
 [data-face="thumb"] .tb-metd.is-good { color: var(--ok); }
 [data-face="thumb"] .tb-metd.is-bad { color: var(--warn); }
 
@@ -307,7 +306,7 @@
   border-color: var(--line2); background: rgba(255, 255, 255, .02);
 }
 [data-face="thumb"] .tb-legend span { white-space: nowrap; }
-[data-face="thumb"] .tb-legend b { color: var(--dim); font-weight: 400; font-family: var(--mono); }
+[data-face="thumb"] .tb-legend b { color: var(--dim); font-weight: 400; font-family: var(--font-mono); }
 [data-face="thumb"] .tb-legend .is-cur { color: var(--hud); }
 
 [data-face="thumb"] .tb-foot { display: flex; align-items: center; gap: 6px; margin-top: auto; min-height: 44px; }
@@ -315,7 +314,7 @@
 /* 道具（設定への導線を含む）は絶対に押し出さない。詰まったら先にカウンタを削る */
 [data-face="thumb"] .tb-counter {
   flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis;
-  font-size: 10px; color: var(--dimmer); font-family: var(--mono); letter-spacing: .05em; white-space: nowrap;
+  font-size: 10px; color: var(--dimmer); font-family: var(--font-mono); letter-spacing: .05em; white-space: nowrap;
 }
 [data-face="thumb"] .tb-undo { flex: 0 1 auto; min-width: 0; overflow: hidden; }
 [data-face="thumb"] .tb-undo {
@@ -405,7 +404,7 @@
   padding: 9px 14px; min-height: 44px; display: flex; align-items: center; gap: 7px;
   white-space: nowrap; box-shadow: 0 6px 20px rgba(0, 0, 0, .6);
 }
-[data-face="thumb"] .tb-wdir { font-family: var(--mono); font-size: 13px; color: var(--dimmer); }
+[data-face="thumb"] .tb-wdir { font-family: var(--font-mono); font-size: 13px; color: var(--dimmer); }
 [data-face="thumb"] .tb-wlb { font-size: 13px; font-weight: 700; }
 [data-face="thumb"] .tb-wedge.is-hot {
   border-color: var(--hud); background: rgba(255, 196, 107, .2); box-shadow: 0 0 0 4px rgba(255, 196, 107, .14);

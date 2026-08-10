@@ -3,7 +3,11 @@
 
    日報のグラス（backdrop-filter）は**1箇所も使わない**。縦スクロールするカード全部に
    backdrop-filter を付けるとモバイルで確実に落ちる、という線を最初から踏まない設計にしてある。
-   等幅寄りの高密度＋ラテン/数字だけ等幅の混植（和文グリフが弱い等幅フォントの回避）。 */
+
+   書体はこの面では指定しない（DESIGN.md 原則13）。以前はここで等幅優先の独自スタックを
+   組んでいたが、書体は比較対象の設計変数から外し、index.css の --font-base に一本化した。
+   この面の密度は font-size / line-height / 余白で作る。等幅を使ってよいのは
+   「意味として等幅であるもの」（伝票のプリフォーマット・キーヒント）だけで、--font-mono を使う。 */
 
 [data-face="field"] {
   --f-bg: #0c0d0f;
@@ -20,8 +24,6 @@
   --f-accentbg: #1d1710;
   --f-good: #7fd1a3;
   --f-warn: #e9736b;
-  --f-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;
-  --f-jp: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
 
   position: fixed;
   top: 0;
@@ -33,7 +35,6 @@
   box-sizing: border-box;
   background: var(--f-bg);
   color: var(--f-fg);
-  font-family: var(--f-mono), var(--f-jp);
   font-size: 14px;
   line-height: 1.5;
   overscroll-behavior: none;
@@ -136,7 +137,7 @@
   border: none;
   outline: none;
   color: var(--f-fg);
-  font-family: var(--f-mono), var(--f-jp);
+  font-family: inherit;
   font-size: 17px;
   line-height: 1.2;
   padding: 10px 0;
@@ -169,7 +170,7 @@
 [data-face="field"] .ff-rowbody { flex: 1; min-width: 0; }
 [data-face="field"] .ff-ttl {
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  font-family: var(--f-jp); font-size: 13.5px; line-height: 1.35; color: var(--f-fg);
+  font-size: 13.5px; line-height: 1.35; color: var(--f-fg);
 }
 [data-face="field"] .ff-sub {
   display: block; font-size: 10.5px; color: var(--f-dim2); margin-top: 2px;
@@ -191,7 +192,7 @@
 [data-face="field"] .ff-bar:active { background: var(--f-bg3); }
 [data-face="field"] .ff-bar.sel { background: #1b1d22; box-shadow: inset 3px 0 0 var(--f-accent); }
 [data-face="field"] .ff-bl {
-  width: 104px; flex: none; font-family: var(--f-jp); font-size: 12px; color: var(--f-fg2);
+  width: 104px; flex: none; font-size: 12px; color: var(--f-fg2);
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 [data-face="field"] .ff-bb { flex: 1; height: 12px; background: #16181c; position: relative; }
@@ -212,34 +213,34 @@
 [data-face="field"] .ff-block:active { background: var(--f-bg3); }
 [data-face="field"] .ff-block.sel { box-shadow: inset 3px 0 0 var(--f-accent); }
 [data-face="field"] .ff-bh { display: block; font-size: 10px; letter-spacing: .14em; color: var(--f-dim2); margin-bottom: 6px; }
-[data-face="field"] .ff-bt { display: block; font-family: var(--f-jp); font-size: 13.5px; line-height: 1.45; color: var(--f-fg); }
+[data-face="field"] .ff-bt { display: block; font-size: 13.5px; line-height: 1.45; color: var(--f-fg); }
 [data-face="field"] .ff-bx {
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-  font-family: var(--f-jp); font-size: 11.5px; line-height: 1.6; color: var(--f-dim); margin-top: 4px;
+  font-size: 11.5px; line-height: 1.6; color: var(--f-dim); margin-top: 4px;
 }
 [data-face="field"] .ff-warn {
-  font-family: var(--f-jp); font-size: 11.5px; line-height: 1.6; color: var(--f-warn); margin: 4px 0 0;
+  font-size: 11.5px; line-height: 1.6; color: var(--f-warn); margin: 4px 0 0;
 }
 
 [data-face="field"] .ff-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 [data-face="field"] .ff-chip {
   border: 1px solid var(--f-line2); border-radius: 3px; padding: 5px 10px;
-  font-family: var(--f-jp); font-size: 11px; color: var(--f-dim); min-height: 44px;
+  font-size: 11px; color: var(--f-dim); min-height: 44px;
 }
 [data-face="field"] .ff-chip:active { color: var(--f-accent); border-color: var(--f-accent2); }
 [data-face="field"] .ff-recent {
   display: block; width: 100%; text-align: left; padding: 6px 0; min-height: 44px;
-  font-family: var(--f-jp); font-size: 12px; color: var(--f-dim);
+  font-size: 12px; color: var(--f-dim);
 }
-[data-face="field"] .ff-tmpl { font-family: var(--f-jp); font-size: 11.5px; color: var(--f-dim2); padding: 3px 0; }
-[data-face="field"] .ff-notetext { font-family: var(--f-jp); font-size: 11.5px; color: var(--f-dim); padding: 6px 14px; }
+[data-face="field"] .ff-tmpl { font-size: 11.5px; color: var(--f-dim2); padding: 3px 0; }
+[data-face="field"] .ff-notetext { font-size: 11.5px; color: var(--f-dim); padding: 6px 14px; }
 
 /* 数値行 */
 [data-face="field"] .ff-metric,
 [data-face="field"] .fd-metric { display: flex; align-items: center; gap: 8px; padding: 3px 0; font-size: 12px; }
 [data-face="field"] .ff-metric-key,
 [data-face="field"] .fd-metric-key {
-  flex: 1; color: var(--f-dim); font-family: var(--f-jp); font-size: 11.5px;
+  flex: 1; color: var(--f-dim); font-size: 11.5px;
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 [data-face="field"] .ff-metric-spark,
@@ -262,21 +263,21 @@
 [data-face="field"] .ff-dots { display: flex; gap: 4px; }
 [data-face="field"] .ff-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--f-line2); display: block; }
 [data-face="field"] .ff-dots i.on { background: var(--f-accent); }
-[data-face="field"] .ff-q { font-family: var(--f-jp); font-size: 15px; line-height: 1.62; padding: 14px 14px 12px; color: var(--f-fg); }
+[data-face="field"] .ff-q { font-size: 15px; line-height: 1.62; padding: 14px 14px 12px; color: var(--f-fg); }
 [data-face="field"] .ff-a { padding: 12px 14px; border-top: 1px dashed var(--f-line2); }
-[data-face="field"] .ff-at { font-family: var(--f-jp); font-size: 14px; line-height: 1.5; color: var(--f-accent); }
+[data-face="field"] .ff-at { font-size: 14px; line-height: 1.5; color: var(--f-accent); }
 /* 答えは冒頭だけ見せる。切れ端が「描画の失敗」に見えないよう、下端をぼかして続きを示す
    （続きは「ぜんぶ読む」で開ける） */
 [data-face="field"] .ff-ax {
   position: relative;
-  font-family: var(--f-jp); font-size: 12px; line-height: 1.65; color: var(--f-fg2);
+  font-size: 12px; line-height: 1.65; color: var(--f-fg2);
   margin-top: 8px; max-height: 132px; overflow: hidden;
   -webkit-mask-image: linear-gradient(#000 78%, transparent);
   mask-image: linear-gradient(#000 78%, transparent);
 }
 [data-face="field"] .ff-ax .md { font-size: 12px; color: var(--f-fg2); }
 [data-face="field"] .ff-memo {
-  font-family: var(--f-jp); font-size: 11px; color: var(--f-accent2);
+  font-size: 11px; color: var(--f-accent2);
   padding: 0 14px 10px;
 }
 [data-face="field"] .ff-memo b { color: var(--f-accent); }
@@ -284,7 +285,7 @@
 [data-face="field"] .ff-cacts { display: flex; gap: 1px; background: var(--f-line); border-top: 1px solid var(--f-line); }
 [data-face="field"] .ff-cacts button {
   flex: 1; min-height: 48px; background: var(--f-bg3); color: var(--f-fg2);
-  font-size: 13px; font-family: var(--f-jp);
+  font-size: 13px;
 }
 [data-face="field"] .ff-cacts button:active { background: #22262c; }
 [data-face="field"] .ff-cacts button.p { color: var(--f-accent); }
@@ -294,23 +295,23 @@
 [data-face="field"] .ff-undo {
   display: flex; align-items: center; gap: 8px; padding: 0 12px 0 14px; min-height: 44px;
   background: #191b1f; border-bottom: 1px solid var(--f-line);
-  font-family: var(--f-jp); font-size: 11.5px; color: var(--f-dim);
+  font-size: 11.5px; color: var(--f-dim);
 }
 [data-face="field"] .ff-undo button {
-  color: var(--f-accent); font-size: 12.5px; font-family: var(--f-jp);
+  color: var(--f-accent); font-size: 12.5px;
   min-height: 44px; display: flex; align-items: center; padding: 0 4px;
 }
 
 /* ---------- 依頼・伝票 ---------- */
 [data-face="field"] .ff-pre {
-  font-family: var(--f-mono), var(--f-jp); font-size: 12.5px; line-height: 1.7; color: var(--f-accent);
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; color: var(--f-accent);
   background: #131519; border: 1px solid var(--f-line2); padding: 11px 12px; margin: 10px 12px;
   white-space: pre-wrap; word-break: break-word; border-radius: 2px;
 }
 [data-face="field"] .ff-acts { display: flex; gap: 8px; padding: 0 12px 10px; }
 [data-face="field"] .ff-acts button {
   flex: 1; min-height: 46px; border: 1px solid var(--f-line2); border-radius: 3px;
-  font-size: 13px; font-family: var(--f-jp); color: var(--f-fg2);
+  font-size: 13px; color: var(--f-fg2);
 }
 [data-face="field"] .ff-acts button.pri { border-color: var(--f-accent2); color: var(--f-accent); background: var(--f-accentbg); }
 [data-face="field"] .ff-slip {
@@ -318,14 +319,14 @@
   border-bottom: 1px solid rgba(35, 39, 45, .7);
 }
 [data-face="field"] .ff-slip-t {
-  flex: 1; font-family: var(--f-jp); font-size: 12.5px; line-height: 1.5; color: var(--f-fg2); word-break: break-word;
+  flex: 1; font-size: 12.5px; line-height: 1.5; color: var(--f-fg2); word-break: break-word;
 }
 [data-face="field"] .ff-slip-x { width: 44px; height: 44px; flex: none; color: var(--f-dim2); font-size: 14px; }
 
 /* ---------- 使い方 ---------- */
-[data-face="field"] .ff-help { padding: 0 14px 12px; font-family: var(--f-jp); font-size: 12.5px; line-height: 1.9; color: var(--f-fg2); }
+[data-face="field"] .ff-help { padding: 0 14px 12px; font-size: 12.5px; line-height: 1.9; color: var(--f-fg2); }
 [data-face="field"] .ff-help-row { display: flex; gap: 10px; padding: 3px 0; }
-[data-face="field"] .ff-help-k { color: var(--f-accent); min-width: 76px; font-family: var(--f-mono); flex: none; }
+[data-face="field"] .ff-help-k { color: var(--f-accent); min-width: 76px; font-family: var(--font-mono); flex: none; }
 [data-face="field"] .ff-help-p {
   color: var(--f-dim); margin-top: 10px; border-top: 1px solid var(--f-line); padding-top: 10px;
 }
@@ -333,7 +334,7 @@
 /* ---------- 読む面 ---------- */
 [data-face="field"] .ff-art { padding: 16px 16px 58px; }
 [data-face="field"] .ff-art h1 {
-  font-family: var(--f-jp); font-size: 18px; line-height: 1.45; margin: 0 0 8px;
+  font-size: 18px; line-height: 1.45; margin: 0 0 8px;
   font-weight: 600; letter-spacing: .01em; color: var(--f-fg);
 }
 [data-face="field"] .ff-meta,
@@ -342,20 +343,20 @@
   font-size: 10px; color: var(--f-dim2); margin: 0 0 14px;
 }
 [data-face="field"] .fd-chip { border: 1px solid var(--f-line2); border-radius: 3px; padding: 1px 5px; }
-[data-face="field"] .ff-bd { font-family: var(--f-jp); font-size: 13.5px; line-height: 1.85; color: var(--f-fg2); }
+[data-face="field"] .ff-bd { font-size: 13.5px; line-height: 1.85; color: var(--f-fg2); }
 [data-face="field"] .ff-bd .md { font-size: 13.5px; color: var(--f-fg2); }
 [data-face="field"] .ff-bd .md a { color: var(--f-accent); border-bottom-color: var(--f-accent2); }
 [data-face="field"] .ff-bd .md strong { color: var(--f-fg); }
-[data-face="field"] .fd-lede { font-family: var(--f-jp); font-size: 13px; line-height: 1.8; margin: 10px 0 4px; }
+[data-face="field"] .fd-lede { font-size: 13px; line-height: 1.8; margin: 10px 0 4px; }
 [data-face="field"] .fd-lede b { color: var(--f-fg); }
-[data-face="field"] .fd-dim { color: var(--f-dim); font-family: var(--f-jp); font-size: 12.5px; }
+[data-face="field"] .fd-dim { color: var(--f-dim); font-size: 12.5px; }
 [data-face="field"] .fd-list { margin: 6px 0; padding-left: 18px; list-style: disc; }
-[data-face="field"] .fd-list li { margin: 4px 0; font-family: var(--f-jp); font-size: 12.5px; line-height: 1.7; }
+[data-face="field"] .fd-list li { margin: 4px 0; font-size: 12.5px; line-height: 1.7; }
 [data-face="field"] .fd-ordered { list-style: decimal; }
 /* 順路の各段は「押すもの」なので、地の文のリンクと違って44pxの高さを持たせる */
 [data-face="field"] .fd-link {
   display: inline-flex; align-items: center; min-height: 44px; text-align: left;
-  font-family: var(--f-jp); font-size: 12.5px;
+  font-size: 12.5px;
   color: var(--f-accent); border-bottom: 1px dotted var(--f-accent2);
 }
 [data-face="field"] .fd-route { margin-top: 12px; }
@@ -368,8 +369,8 @@
 }
 [data-face="field"] .ff-out.wide { padding: 10px 14px; }
 [data-face="field"] .ff-out:active { background: var(--f-bg3); }
-[data-face="field"] .ff-ot { display: block; font-family: var(--f-jp); font-size: 12.5px; color: var(--f-accent); }
-[data-face="field"] .ff-or { display: block; font-family: var(--f-jp); font-size: 11px; color: var(--f-dim); line-height: 1.5; margin-top: 2px; }
+[data-face="field"] .ff-ot { display: block; font-size: 12.5px; color: var(--f-accent); }
+[data-face="field"] .ff-or { display: block; font-size: 11px; color: var(--f-dim); line-height: 1.5; margin-top: 2px; }
 [data-face="field"] .ff-artacts { padding: 16px 0 0; }
 
 /* ---------- riser（覗く / ここへ来る道） ---------- */
@@ -391,19 +392,19 @@
 [data-face="field"] .ff-rhead button.amber { color: var(--f-accent2); }
 [data-face="field"] .ff-rbody { overflow-y: auto; padding: 4px 0 8px; }
 [data-face="field"] .ff-peek { padding: 12px 14px; }
-[data-face="field"] .ff-pt { font-family: var(--f-jp); font-size: 14px; line-height: 1.45; color: var(--f-fg); }
+[data-face="field"] .ff-pt { font-size: 14px; line-height: 1.45; color: var(--f-fg); }
 [data-face="field"] .ff-pr {
-  font-family: var(--f-jp); font-size: 11.5px; color: var(--f-accent2); line-height: 1.55;
+  font-size: 11.5px; color: var(--f-accent2); line-height: 1.55;
   margin-top: 6px; padding-left: 9px; border-left: 2px solid var(--f-accent2);
 }
 [data-face="field"] .ff-px {
-  font-family: var(--f-jp); font-size: 11.5px; color: var(--f-dim); line-height: 1.65; margin-top: 8px;
+  font-size: 11.5px; color: var(--f-dim); line-height: 1.65; margin-top: 8px;
   display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
 }
 [data-face="field"] .ff-pa { display: flex; gap: 8px; margin-top: 12px; }
 [data-face="field"] .ff-pa button {
   flex: 1; min-height: 44px; border: 1px solid var(--f-line2); border-radius: 3px;
-  font-size: 13px; font-family: var(--f-jp);
+  font-size: 13px;
 }
 [data-face="field"] .ff-pa button.pri { border-color: var(--f-accent2); color: var(--f-accent); background: var(--f-accentbg); }
 
@@ -412,11 +413,11 @@
 [data-face="field"] .ff-toast {
   position: relative; flex: none; margin: 0 12px 10px; z-index: 20;
   background: #20242a; border: 1px solid var(--f-line2); border-radius: 3px;
-  padding: 11px 12px 13px; font-family: var(--f-jp); font-size: 12.5px; color: var(--f-fg);
+  padding: 11px 12px 13px; font-size: 12.5px; color: var(--f-fg);
   display: flex; align-items: center; gap: 10px; overflow: hidden;
 }
 [data-face="field"] .ff-toast button {
-  color: var(--f-accent); font-size: 13px; flex: none; font-family: var(--f-jp);
+  color: var(--f-accent); font-size: 13px; flex: none;
   min-height: 44px; display: flex; align-items: center; padding: 0 4px;
 }
 /* 猶予が目に見えること自体が安全装置。transform だけで描く */
@@ -437,40 +438,40 @@
   background: var(--f-bg2); padding: 20px 20px 16px; border-radius: 4px;
 }
 [data-face="field"] .ff-introbox h2 {
-  font-family: var(--f-jp); font-size: 15px; margin: 0 0 12px; color: var(--f-accent); letter-spacing: .02em;
+  font-size: 15px; margin: 0 0 12px; color: var(--f-accent); letter-spacing: .02em;
 }
 [data-face="field"] .ff-introbox p {
-  font-family: var(--f-jp); font-size: 12.5px; line-height: 1.85; color: var(--f-fg2); margin: 0 0 8px;
+  font-size: 12.5px; line-height: 1.85; color: var(--f-fg2); margin: 0 0 8px;
 }
 [data-face="field"] .ff-introbox b { color: var(--f-fg); }
 [data-face="field"] .ff-introbox .kb { color: var(--f-accent); }
 [data-face="field"] .ff-introbox button {
   width: 100%; min-height: 46px; margin-top: 6px; border: 1px solid var(--f-accent2);
   color: var(--f-accent); background: var(--f-accentbg); border-radius: 3px;
-  font-size: 13.5px; font-family: var(--f-jp);
+  font-size: 13.5px;
 }
 [data-face="field"] .ff-fig {
   display: flex; align-items: center; gap: 10px; background: #101216;
   border: 1px solid var(--f-line); padding: 12px 10px; margin: 12px 0;
 }
 [data-face="field"] .ff-figside {
-  flex: none; width: 74px; font-family: var(--f-jp); font-size: 9.5px; line-height: 1.5;
+  flex: none; width: 74px; font-size: 9.5px; line-height: 1.5;
   color: var(--f-dim2); text-align: right;
 }
 [data-face="field"] .ff-figside.r { text-align: left; }
 [data-face="field"] .ff-figcol { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 [data-face="field"] .ff-figrow {
-  font-family: var(--f-jp); font-size: 10px; padding: 4px 8px; border: 1px solid var(--f-line); color: var(--f-dim2);
+  font-size: 10px; padding: 4px 8px; border: 1px solid var(--f-line); color: var(--f-dim2);
 }
 [data-face="field"] .ff-figrow.d2 { color: var(--f-dim); }
 [data-face="field"] .ff-figrow.d1 { color: var(--f-fg2); border-color: var(--f-line2); }
 [data-face="field"] .ff-figrow.d0 { color: var(--f-fg); border-color: var(--f-accent2); background: var(--f-accentbg); }
 [data-face="field"] .ff-figfield {
-  font-family: var(--f-jp); font-size: 10px; padding: 6px 8px; margin-top: 5px;
+  font-size: 10px; padding: 6px 8px; margin-top: 5px;
   border: 1px solid var(--f-accent2); color: var(--f-accent); background: #171208;
 }
 [data-face="field"] .ff-figkb {
-  font-family: var(--f-jp); font-size: 9px; padding: 9px 8px; color: #4a4f56; text-align: center;
+  font-size: 9px; padding: 9px 8px; color: #4a4f56; text-align: center;
   background: repeating-linear-gradient(45deg, #16181c, #16181c 4px, #1c1f24 4px, #1c1f24 8px);
 }
 
