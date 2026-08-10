@@ -26,6 +26,7 @@ tags: [moc]
 - [[skincare-layer-water-based-before-oil-based]] — スキンケアは水性→油性の順（例: ナイアシンアミド→レチノール）
 - [[skincare-moisturizing-is-three-roles-humectant-emollient-occlusive]] — 保湿は「与える・補う・閉じる」の3役割。化粧水だけでは完成しない
 - [[humectants-need-occlusive-seal-or-they-dry-skin-in-low-humidity]] — HAは蓋がないと低湿度でかえって肌の水を奪う（TEWL）
+- [[pores-hidden-after-waking-and-washing-are-temporarily-masked-not-improved]] — 寝起き/洗顔直後に毛穴が消えるのは一時的マスク、数時間後が素の肌
 - [[my-skincare-pore-plan-keep-sunscreen-niacinamide-add-retinol]] — 私の毛穴ケア方針（現行の評価と次の一手）
 - [[skincare-pores/profile|スキンケア（毛穴を目立たなくする）]] `[follow/goal]` — 毛穴ケアを定点観測するフォロー（`follows/skincare-pores/`）
 
