@@ -20,3 +20,4 @@ tags: [sports/golf]
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — 最下点をボール手前、振り抜きをその先に作るイメージと一致
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 同じアッパーの狙いを体重移動側で作る（圧は前・上体は後ろ）。これは構え側
 - [[golf-driver-address-connection-without-tension-relax-into-low-trail-shoulder]] — 腕/肩の力加減の補足（連結は残しテンションだけ抜く、緩めは右肩を下へ）
+- [[golf-driver-posture-knee-flex-and-forward-bend-shallower-than-iron-deep-bend-blocks-upward-strike]] — 同じアドレスの"姿勢"側（膝の曲げ・上体の前傾）。※こちらの「前傾なし」はシャフトの傾きの意味で別物

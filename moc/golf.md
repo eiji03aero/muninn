@@ -24,6 +24,8 @@ tags: [moc]
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — ドライバー。ハンドファーストにせず前傾なしで構えてアッパーに打つ
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアン（対比）。軽いハンドファーストでダウンブロー
 - [[golf-driver-address-connection-without-tension-relax-into-low-trail-shoulder]] — ドライバーの腕/肩の力加減。連結は残しテンションだけ抜く、緩めは右肩を下へ
+- [[golf-driver-posture-knee-flex-and-forward-bend-shallower-than-iron-deep-bend-blocks-upward-strike]] — 姿勢の基本。膝15〜25°/上体の前傾25〜30°（アイアンより浅い）。突っ張り膝＝深い前傾＋地面反力の伸び代を失う
+- [[golf-my-driver-setup-locked-knees-and-35deg-forward-bend-fix-hinge-from-hips-flex-knees]] — 自己診断。突っ張り膝＋前傾35°でアッパー・打点・地面反力を同時に損失。股関節から折る→右肩を下げる→脱力の順で是正
 - [[golf-my-3u-hybrid-address-ball-forward-of-center-ball-first-sole-flat]] — 3U（ハイブリッド）の構え。ボールはセンターやや前・ボールファースト・ソールは平ら（トウ浮かせない）
 
 ## ダウンブロー・番手別の打ち分け（入射角）

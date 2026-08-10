@@ -19,3 +19,4 @@ tags: [sports/golf]
 - [[golf-dont-lock-lead-arm-in-backswing]] — 半径の再現性（固めない）。アドレスのクランプも同じ再現性の話
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 右肩を低く＝上体を残してアッパーに打つ準備
 - [[golf-clubhead-speed-is-a-chain-output-not-arm-speed-remove-brakes]] — 力み＝ブレーキ。だからクランプを緩める
+- [[golf-my-driver-setup-locked-knees-and-35deg-forward-bend-fix-hinge-from-hips-flex-knees]] — 「右肩を下へ」を含む構えの是正手順（突っ張り膝・深い前傾の自己診断）
