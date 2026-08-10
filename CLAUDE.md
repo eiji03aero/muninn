@@ -33,6 +33,7 @@ docs/             # 設計資料と作業項目
                   #   web-renewal/        = 現行実装の経緯（現状分析・3案コンペ・両審査・ワイヤーフレーム）
                   #   web-uiux-experiment/= 定石を壊す3案の実験（8分野リサーチ・触れるモック・審査）
                   #   pbi/                = これから作るもの。着手前にここを見る
+                  #   model-eval/         = モデル・effort の比較実験（課題文・採点キット・生出力）
 .claude/skills/   # 作業手順（mn-capture / mn-research / mn-process-inbox / mn-regen-moc / mn-review / mn-follow / mn-collect / mn-brief / mn-learn / mn-log）
 ```
 
