@@ -2,7 +2,7 @@
 follow: argentina-nt
 kind: collect
 cadence: weekly
-updated: 2026-07-24
+updated: 2026-08-10
 watchlist:
   - lionel-messi
   - emiliano-martinez
@@ -34,3 +34,5 @@ sources:
 
 - 2026-07-24: 起票。deep_dive = エンソ・フェルナンデス / フリアン・アルバレス。日程は AFA 公式を当てにするが、W杯直後で次戦未確定の見込み。
 - 2026-07-24: 初回収集を実行。deep_dive 2名のフォーム/clips更新、日程は未確定で見送り。詳細は `sessions/2026-07-24-collect.md`。
+- 2026-08-10: 2回目の収集。オタメンディの代表引退（確定）を反映しノート化、決勝の退場者の誤記を訂正。移籍3件は未成立で changelog どまり、日程は中国遠征が流動化し引き続き未確定。詳細は `sessions/2026-08-10-collect.md`。
+- 2026-08-10: 次回は8月末の欧州移籍市場閉幕後を狙う（エンソ/フリアン/ロメロの帰趨がまとめて確定するため）。オタメンディは代表引退したが、クラブでの動向は watchlist に残して追う。
