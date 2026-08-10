@@ -10,14 +10,17 @@
 // 出力形式は <dst> の拡張子で決まる（.webp 推奨 / .jpg も可）。
 import sharp from 'sharp';
 import { statSync, mkdirSync } from 'node:fs';
-import { dirname, extname } from 'node:path';
+import { dirname, extname, resolve } from 'node:path';
 
 const args = process.argv.slice(2);
 const opt = (name, def) => {
   const hit = args.find((a) => a.startsWith(`--${name}=`));
   return hit ? Number(hit.split('=')[1]) : def;
 };
-const [src, dst] = args.filter((a) => !a.startsWith('--'));
+// npm --prefix web は cwd を web/ に変えるので、相対パスは「npm を叩いた場所」から解決する
+// （そうしないと logs/... がリポジトリ直下ではなく web/logs/... に落ちる。実際にやらかした）
+const base = process.env.INIT_CWD || process.cwd();
+const [src, dst] = args.filter((a) => !a.startsWith('--')).map((p) => resolve(base, p));
 
 if (!src || !dst) {
   console.error('usage: npm --prefix web run img -- <src> <dst> [--max=1280] [--quality=72]');
