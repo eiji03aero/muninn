@@ -5,6 +5,7 @@ kind: entity                 # 追う対象の構成要素（人/チーム/モ�
 follow: <所属するフォロー名（例: argentina-nt）>
 tags: [<フォローと同じ第1階層タグ 例: sports/football>]
 status: active               # 対象に応じて（例: active / injured / inactive）
+generation: next             # 任意。世代の区別（例: next=次世代の注目株）。collect の prospects で追加された対象に付ける
 updated: YYYY-MM-DD          # 最終更新日（ドシエは時系列で変化する）
 ---
 
