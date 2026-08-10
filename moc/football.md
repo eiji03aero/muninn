@@ -16,6 +16,7 @@ tags: [moc]
 - [[la-scaloneta-three-consecutive-majors]] — スカローニ体制の黄金期（Copa2021→W杯2022→Copa2024）。愛称「ラ・スカロネータ」。
 - [[argentina-record-16-copa-america-titles]] — Copa América 最多16回優勝（2024はコロンビアに1-0）。
 - [[argentina-2026-world-cup-runners-up]] — 2026 W杯準優勝（決勝スペインに0-1・延長）。連覇を逃す。
+- [[otamendi-retired-from-argentina-after-2026-world-cup]] — 大会後の世代交代第一歩。17年・139キャップの守備リーダーが代表引退。
 - [[messi-all-time-world-cup-top-scorer]] — メッシが2026で通算W杯得点王＆シルバーボール。
 - [[argentina-badge-three-stars-1978-1986-2022]] — エンブレム3つ星の意味。1986＝マラドーナ、2022＝メッシ。
 
