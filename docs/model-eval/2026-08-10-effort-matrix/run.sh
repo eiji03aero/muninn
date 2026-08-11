@@ -13,7 +13,9 @@
 set -uo pipefail
 
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO="$(cd "$KIT/../../.." && pwd)"
+# タスクBはリポジトリ内で走るので、キットをリポジトリ外へ退避してから回せるように
+# リポジトリパスを上書きできるようにしてある（採点キットを読まれるのを防ぐため）。
+REPO="${MUNINN_REPO:-$(cd "$KIT/../../.." && pwd)}"
 RUNS="$KIT/runs"
 RAW="$RUNS/raw"
 METRICS="$RUNS/metrics.csv"
