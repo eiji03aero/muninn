@@ -1,4 +1,4 @@
-# モデル × effort 比較実験（2026-08-10）
+# モデル × effort 比較実験（2026-08-11）
 
 `{sonnet, opus} × {medium, high, xhigh} × {タスクA, タスクB}` = **12ケース**。
 同じ入力を与えて出力を比べ、**モデルの特性と effort の使い分け**を掴むのが目的。
@@ -53,7 +53,7 @@ xhigh が同じ設定で回っていた、ということになる。`Not applie
 `rubric-b.md` が見つかる可能性はゼロではない。気になるなら、走らせる前に
 
 ```bash
-git stash push -- docs/model-eval/2026-08-10-effort-matrix
+git stash push -- docs/model-eval/2026-08-11-effort-matrix
 ```
 
 でキットを退避し、採点時に `git stash pop` で戻す。
