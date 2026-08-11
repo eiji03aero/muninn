@@ -19,3 +19,4 @@ tags: [dev/llm]
 
 - [[claude-fable-5-costs-double-opus-5-per-token]] — 単価が2倍でも総額が逆転しうる前提となる事実
 - [[zettelkasten-one-note-one-idea]] — 「何を記録すると決めるか」が後の判断を規定する点で同じ構造
+- [[llm-eval-verifiable-axes-discriminate]] — 続編。基準に入れ忘れる話から一歩進んで、そもそもどんな軸なら差が出るかの答え

@@ -27,6 +27,10 @@ muninn の入口。テーマごとのMOCはここから辿る。
 - [[cliche-overused-not-necessarily-old]] — クリシェの意味（使い古されて陳腐が核）
 - [[claude-fable-5-costs-double-opus-5-per-token]] — Fable 5 と Opus 5 の単価差（総額は別）
 - [[llm-comparison-forgotten-criteria-flip-the-verdict]] — モデル比較の設計上の落とし穴
+- [[llm-eval-verifiable-axes-discriminate]] — 差が出るのは照合できる軸だけ。自前の正誤判定は天井に張り付く
+- [[llm-effort-differs-by-model-tier]] — effort が増やすものはモデルで違う（探索のスイッチ／深さの調整）
+- [[higher-tier-model-may-skip-research]] — 上位モデルでも effort が低いと調査を丸ごと省くことがある
+- [[claude-code-effort-flag-batch-eval]] — `--model` / `--effort` でモデル×effort を非対話に回す
 
 ## フォロー（follows/）
 
