@@ -1,0 +1,2 @@
+case,task,model,effort,duration_s,output_tokens,cache_read_tokens,cost_usd,num_turns,chars,stray_files
+a-sonnet-medium,a,sonnet,medium,30,2473,24624,0.11220419999999999,1,2572,0
