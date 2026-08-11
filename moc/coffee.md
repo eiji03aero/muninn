@@ -8,7 +8,8 @@ tags: [moc]
 
 ## 味が決まる要因
 
-- [[natural-process-in-humid-climates-risks-musty-earthy-defects]] — 精製方法の向き不向きは産地の気候で決まる。雨の多い土地のナチュラルはカビ由来の土っぽさが出やすい
+- [[natural-process-brings-sweetness-body-and-fruit-versus-clean-washed]] — 精製は味の方向を選ぶスイッチ。ナチュラル＝甘み・ボディ・果実感／ウォッシュト＝クリーンな酸
+- [[natural-process-in-humid-climates-risks-musty-earthy-defects]] — その裏側。精製の向き不向きは産地の気候で決まり、雨の多い土地のナチュラルはカビ由来の土っぽさが出やすい
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 焙煎後の劣化。脂質酸化とCO2抜けで平坦・紙っぽくなる。飲み頃は焙煎後7〜21日
 
 ## 味わい方・評価のしかた

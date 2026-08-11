@@ -17,5 +17,6 @@ srs:
 つまりナチュラルで「華やかな果実味」が出るか「埃っぽさ」が出るかは、製法そのものより**乾燥をどれだけ管理できたか**の差である。
 
 ## Links
+- [[natural-process-brings-sweetness-body-and-fruit-versus-clean-washed]] — 成功したナチュラルの側。同じ製法の表と裏
 - [[coffee-aroma-is-weak-when-cold-because-volatiles-need-heat]] — 同じ豆でも温度で香りの立ち方が変わる。欠点臭かどうかを判断するならホットで確かめる
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 「埃っぽさ」の別の容疑者。精製由来か経時劣化かは切り分けが要る
