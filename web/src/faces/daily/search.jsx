@@ -65,7 +65,11 @@ export function Search() {
     <>
       <AppBar title="探す" back={false} subtitle="覚えていることから引く">
         <Box mt="3">
-          <Input autoFocus placeholder="本文もタグも横断して探す" value={q} onChange={(e) => setQ(e.target.value)}
+          {/* autoFocus を付けない。PWA standalone では開いた瞬間にソフトキーボードが立ち上がり、
+              下端固定のタブがキーボードの上へ押し上げられて「探すだけタブの位置が違う」状態になる。
+              入力欄は画面の一番目立つ位置にあるので、打ちたいときに触れば足りる。
+              （Safari タブでは autoFocus が無視されるため、この差は standalone でだけ出ていた） */}
+          <Input placeholder="本文もタグも横断して探す" value={q} onChange={(e) => setQ(e.target.value)}
             color={C.ink} bg="rgba(255,255,255,.05)" border="1px solid" borderColor={C.line}
             borderRadius="14px" _placeholder={{ color: C.faint }}
             _focus={{ borderColor: C.sky, outline: 'none' }} />
