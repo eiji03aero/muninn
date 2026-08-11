@@ -1,9 +1,14 @@
 :root {
   color-scheme: dark;
   /* 全面共通のベース書体。ここに置く理由は DESIGN.md 原則13（比べるのは構造であって書体ではない）。
-     もともと font-family はどこにも宣言されておらず、日報と親指ひとつはブラウザ既定（＝セリフ／明朝）
-     に依存していた。その見た目を正とし、ブラウザ差で揺れないよう明示スタックに固定したもの。 */
-  --font-base: Times, "Times New Roman", "Hiragino Mincho ProN", "Yu Mincho", YuMincho, "Noto Serif JP", serif;
+     ⚠️ ゴシック（サンセリフ）であること。明朝に倒してはいけない。
+     刷新前は main.jsx で ChakraProvider がアプリ全体を包んでいて、Chakra のリセットが
+     サンセリフを供給していた（だから index.css に font-family が無かった）。Chakra を
+     日報の中だけに閉じた際、「宣言が無い＝ブラウザ既定＝明朝が正」と取り違えて Times/明朝を
+     焼き込み、3面すべてが明朝になる事故を起こした。実際の元の姿はサンセリフである。
+     モック（mock-a / mock-b）も両方ヒラギノ角ゴ系を指定していた。 */
+  --font-base: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+               "Yu Gothic", YuGothic, "Noto Sans JP", system-ui, sans-serif;
   /* 意味として等幅であるべきもの（コード・キーヒント・桁を揃える数値）だけが使う。
      面のアイデンティティとしての書体には使わない。 */
   --font-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas, monospace;

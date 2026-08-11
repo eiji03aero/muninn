@@ -1,7 +1,7 @@
 // 面「日報」の見た目の部品（グラス・ボトムタブ・カード）。**この面の中だけで使う**。
 // 面A・面Bはグラスもボトムタブも使わないので、ここを共有部品にしてはいけない。
 // 面をまたいで意味が同じもの（本文の描画・数値の解釈・相対日・コピー）は ../../shared/ にある。
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Flex, HStack, VStack, Heading, Text, Button, Spinner } from '@chakra-ui/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../../lib/ctx.js';
@@ -17,10 +17,11 @@ export { relDay, copyText } from '../../shared/util.js';
 
 // ---------------- ページ枠 ----------------
 // ボトムタブぶんの余白を必ず確保する（safe-area 込み）。
+// タブの実高は minH 56px ＋ safe-area。最後の要素が隠れないよう余裕を足した値にする。
 export function Page({ children, maxW = '720px' }) {
   return (
     <Box maxW={maxW} mx="auto" px="4" py="4"
-      style={{ paddingBottom: 'calc(84px + env(safe-area-inset-bottom))' }}>
+      style={{ paddingBottom: 'calc(96px + env(safe-area-inset-bottom))' }}>
       {children}
     </Box>
   );
@@ -56,21 +57,47 @@ const TABS = [
   { to: '/desk', label: 'デスク', icon: '✎', match: (p) => p.startsWith('/desk') },
 ];
 
+// ソフトキーボードに食われている高さ。
+// iOS Safari はキーボードが出てもレイアウトビューポート（window.innerHeight）を変えず、
+// ビジュアルビューポートだけが縮む。position:fixed はレイアウト側に貼り付くので、
+// 何もしないとタブがキーボードの裏へ回り、ページがずれた分だけ画面の途中に浮いて見える。
+// （日報で入力欄を持つのは「探す」だけなので、この事故はその画面でだけ起きていた）
+// ビジュアルビューポートの下端との差だけ持ち上げて、見えている領域の下端に貼り直す。
+function useKeyboardInset() {
+  const [inset, setInset] = useState(0);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return undefined;
+    const update = () => setInset(Math.max(0, Math.round(window.innerHeight - (vv.height + vv.offsetTop))));
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => { vv.removeEventListener('resize', update); vv.removeEventListener('scroll', update); };
+  }, []);
+  return inset;
+}
+
 export function BottomTabs() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+  const kb = useKeyboardInset();
   return (
     <Box className="glass-bar" position="fixed" bottom="0" left="0" right="0" zIndex="30"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)', borderBottom: 'none', borderTop: `1px solid ${C.line}` }}>
+      style={{
+        paddingBottom: 'env(safe-area-inset-bottom)', borderBottom: 'none', borderTop: `1px solid ${C.line}`,
+        // transform だけで動かす（レイアウトを起こさない・原則: transform/opacity のみ）
+        transform: kb ? `translateY(-${kb}px)` : undefined,
+      }}>
       <Flex maxW="720px" mx="auto">
         {TABS.map((t) => {
           const on = t.match(pathname);
           return (
-            <Box as="button" key={t.to} flex="1" py="2.5" onClick={() => navigate(t.to)}
+            <Box as="button" key={t.to} flex="1" py="2" minH="56px" onClick={() => navigate(t.to)}
               className="press" textAlign="center" position="relative"
               aria-current={on ? 'page' : undefined}>
-              <Text fontSize="15px" lineHeight="1.1" color={on ? C.ink : C.faint}>{t.icon}</Text>
-              <Text fontSize="10px" mt="0.5" fontWeight={on ? '700' : '500'} color={on ? C.ink : C.faint}>
+              <Text fontSize="22px" lineHeight="1.15" color={on ? C.ink : C.faint}>{t.icon}</Text>
+              <Text fontSize="11.5px" mt="1" lineHeight="1.1" fontWeight={on ? '700' : '500'}
+                color={on ? C.ink : C.faint}>
                 {t.label}
               </Text>
               {on && (

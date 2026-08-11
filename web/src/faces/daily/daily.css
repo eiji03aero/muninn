@@ -2,6 +2,16 @@
    この面が選ばれているときだけ効くよう、すべて [data-face="daily"] の下に閉じる。
    3つの面は見た目を揃えないのが目的なので、素材が面の外へ漏れると実験そのものが濁る。 */
 
+/* Chakra は見出しに独自の書体スタック（Inter …）を当てるため、放っておくと
+   「見出しだけサンセリフ、本文はベース書体」という混在が face の中で起きる。
+   原則13（書体は全面共通で1つに固定する）を守るため、この面の中は見出しも
+   ベース書体に揃える。Chakra のクラス指定より詳細度を1つ高くして上書きする。 */
+[data-face="daily"],
+[data-face="daily"] h1,
+[data-face="daily"] h2,
+[data-face="daily"] h3,
+[data-face="daily"] h4 { font-family: var(--font-base); }
+
 [data-face="daily"] .glass {
   background: linear-gradient(160deg, rgba(255,255,255,.09), rgba(255,255,255,.03));
   border: 1px solid rgba(255,255,255,.12);
