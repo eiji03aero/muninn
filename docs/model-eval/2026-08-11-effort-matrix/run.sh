@@ -7,6 +7,10 @@
 #   ./run.sh a sonnet medium   1ケースだけ（動作確認用）
 #   ./run.sh blind        採点用に runs/*.md を匿名化して runs/blind/ に置く
 #
+#   REPS=5 ./run.sh c opus medium   同一条件を5回まわす（-r2 -r3 … が付く）
+#     n=1 の観測が性質か偶然かを分けるための反復。num_turns は JSON から
+#     自動で取れるので、採点なしで metrics.csv を見るだけで分散が分かる。
+#
 # 各ケースは claude -p の新規セッション。--model / --effort を起動時フラグで渡すので
 # `/effort` が Not applied になる問題は起きない。
 
@@ -23,6 +27,11 @@ METRICS="$RUNS/metrics.csv"
 TASKS=(a b c d)
 MODELS=(sonnet opus)
 EFFORTS=(medium high xhigh)
+
+# 同一条件を何回回すか。REPS=5 で 1〜5回目まで（既にあるものは飛ばす）。
+# n=1 の観測が性質なのか偶然なのかを分離するために使う。2回目以降は
+# ファイル名に -r2 -r3 … が付き、metrics.csv には別行として積まれる。
+REPS="${REPS:-1}"
 
 # リポジトリ内で走らせる必要があるタスク（正本の markdown と実装を読ませるもの）。
 # ここに無いタスクは $HOME 外の使い捨てディレクトリで走る＝キットもユーザー CLAUDE.md も
@@ -63,8 +72,9 @@ SCRATCH="$(mktemp -d)"
 trap 'rm -rf "$SCRATCH"' EXIT
 
 run_case() {
-  local task="$1" model="$2" effort="$3"
+  local task="$1" model="$2" effort="$3" rep="${4:-1}"
   local name="${task}-${model}-${effort}"
+  [[ "$rep" -gt 1 ]] && name="${name}-r${rep}"
   local out="$RUNS/$name.md" rawf="$RAW/$name.json"
   local workdir prompt
 
@@ -129,7 +139,9 @@ for task in "${TASKS[@]}"; do
     [[ -n "$WANT_MODEL" && "$WANT_MODEL" != "$model" ]] && continue
     for effort in "${EFFORTS[@]}"; do
       [[ -n "$WANT_EFFORT" && "$WANT_EFFORT" != "$effort" ]] && continue
-      run_case "$task" "$model" "$effort"
+      for rep in $(seq 1 "$REPS"); do
+        run_case "$task" "$model" "$effort" "$rep"
+      done
     done
   done
 done
