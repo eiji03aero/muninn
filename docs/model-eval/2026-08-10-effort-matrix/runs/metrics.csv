@@ -11,3 +11,15 @@ b-sonnet-xhigh,b,sonnet,xhigh,217,14055,664052,0.7319886,12,3454,0
 b-opus-medium,b,opus,medium,201,9911,490769,1.0006845,11,5268,0
 b-opus-high,b,opus,high,172,9066,233608,0.8269839999999999,9,5052,0
 b-opus-xhigh,b,opus,xhigh,304,16963,456194,1.300237,16,4818,0
+c-sonnet-medium,c,sonnet,medium,145,12395,179438,0.4842404,9,4113,0
+c-sonnet-high,c,sonnet,high,199,17843,184726,0.6310288,13,5798,0
+c-sonnet-xhigh,c,sonnet,xhigh,325,27666,485541,1.0674613,21,4000,0
+c-opus-medium,c,opus,medium,126,6571,16173,0.24722149999999998,1,4925,0
+c-opus-high,c,opus,high,293,22311,272588,1.2677360000000002,21,7588,0
+c-opus-xhigh,c,opus,xhigh,540,41219,416862,2.044592,33,10012,0
+d-sonnet-medium,d,sonnet,medium,71,5048,24624,0.1478472,1,2709,0
+d-sonnet-high,d,sonnet,high,114,8372,24624,0.1976892,1,4085,0
+d-sonnet-xhigh,d,sonnet,xhigh,160,11787,24624,0.24896820000000003,1,4904,0
+d-opus-medium,d,opus,medium,168,9082,16173,0.3115665,1,7570,0
+d-opus-high,d,opus,high,212,11429,16173,0.3702115,1,8668,0
+d-opus-xhigh,d,opus,xhigh,282,16649,16173,0.5008015,1,8113,0

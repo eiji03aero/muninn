@@ -20,8 +20,14 @@ RUNS="$KIT/runs"
 RAW="$RUNS/raw"
 METRICS="$RUNS/metrics.csv"
 
+TASKS=(a b c d)
 MODELS=(sonnet opus)
 EFFORTS=(medium high xhigh)
+
+# リポジトリ内で走らせる必要があるタスク（正本の markdown と実装を読ませるもの）。
+# ここに無いタスクは $HOME 外の使い捨てディレクトリで走る＝キットもユーザー CLAUDE.md も
+# 読み込まれず、条件が完全に揃う。
+task_needs_repo() { [[ "$1" == "b" ]]; }
 
 # ---------- 匿名化モード ----------
 if [[ "${1:-}" == "blind" ]]; then
@@ -67,11 +73,11 @@ run_case() {
     return
   fi
 
-  if [[ "$task" == "a" ]]; then
-    workdir="$SCRATCH/$name"    # ケース専用の空ディレクトリ。ツール不要・キット混入なし
-    mkdir -p "$workdir"
-  else
+  if task_needs_repo "$task"; then
     workdir="$REPO"             # CLAUDE.md と web/DESIGN.md を読ませる
+  else
+    workdir="$SCRATCH/$name"    # ケース専用の空ディレクトリ。キット混入なし
+    mkdir -p "$workdir"
   fi
   prompt="$(cat "$KIT/task-${task}.md")"
 
@@ -95,7 +101,7 @@ run_case() {
 
   # 指示に反してファイルを作ったケースは、その事実ごと保全する（指示追従の材料になる）
   local stray=0
-  if [[ "$task" == "a" ]] && [[ -n "$(ls -A "$workdir" 2>/dev/null)" ]]; then
+  if ! task_needs_repo "$task" && [[ -n "$(ls -A "$workdir" 2>/dev/null)" ]]; then
     mkdir -p "$RUNS/work"
     cp -R "$workdir" "$RUNS/work/$name"
     stray=$(find "$workdir" -type f | wc -l | tr -d ' ')
@@ -117,7 +123,7 @@ run_case() {
   echo "  ✓ ${dur}s  model=${got_model:-?}  out_tok=$(jq -r '[.modelUsage//{}|.[]|.outputTokens//0]|add//0' "$rawf")  stray_files=$stray  → $out"
 }
 
-for task in a b; do
+for task in "${TASKS[@]}"; do
   [[ -n "$WANT_TASK" && "$WANT_TASK" != "$task" ]] && continue
   for model in "${MODELS[@]}"; do
     [[ -n "$WANT_MODEL" && "$WANT_MODEL" != "$model" ]] && continue
