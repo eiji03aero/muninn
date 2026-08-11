@@ -1,2 +1,7 @@
 case,task,model,effort,duration_s,output_tokens,cache_read_tokens,cost_usd,num_turns,chars,stray_files
 a-sonnet-medium,a,sonnet,medium,30,2473,24624,0.11220419999999999,1,2572,0
+a-sonnet-high,a,sonnet,high,76,6978,24624,0.1797432,1,2531,0
+a-sonnet-xhigh,a,sonnet,xhigh,96,8779,24624,0.2068122,1,2368,0
+a-opus-medium,a,opus,medium,40,2629,16173,0.15518149999999997,1,3447,0
+a-opus-high,a,opus,high,51,3445,16173,0.1755515,1,3610,0
+a-opus-xhigh,a,opus,xhigh,93,6310,16173,0.2472665,1,3990,0
