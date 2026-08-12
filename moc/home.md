@@ -14,6 +14,7 @@ muninn の入口。テーマごとのMOCはここから辿る。
 - [[middle-east]] — 中東情勢（イスラエル・米国 対 イラン、レバノン情勢）
 - [[science]] — 科学・宇宙論（宇宙の形成と構成）
 - [[coffee]] — コーヒー（精製と気候、焙煎後の劣化、香りと温度）
+- [[dev-frontend]] — フロントエンド（宣言的UI、状態の置き場所、The Elm Architecture）
 
 ## 学習アトラス（atlas/）
 
@@ -21,6 +22,7 @@ muninn の入口。テーマごとのMOCはここから辿る。
 
 - [[philosophy|哲学（知識アトラス）]] — 神話から理性へ、古代ギリシアから認識論まで。概念グラフを順路でたどる（`atlas/philosophy/`）
 - [[mathematics|数学（知識アトラス）]] — 数学の全体地図。6分野を「日常／裏側／レンズ」の距離つきで一周し、地図の外側まで見る（`atlas/mathematics/`）
+- [[ui-architecture|UIアーキテクチャ（知識アトラス）]] — 「状態を画面へ写す問題」に対する Reactのモデル と The Elm Architecture の二つの答えを読み、指標ごとに比較する（`atlas/ui-architecture/`）
 
 ## 未分類
 
