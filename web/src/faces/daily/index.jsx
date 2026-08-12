@@ -11,6 +11,7 @@ import { tagToParam } from '../../lib/graph.js';
 import { Note, Follow, Player } from './pages.jsx';
 import { Edition } from './edition.jsx';
 import { Shelf, ShelfBoard } from './shelf.jsx';
+import { Series } from './series.jsx';
 import { Search } from './search.jsx';
 import { Desk } from './desk.jsx';
 import { Atlas, Concept } from './atlas.jsx';
@@ -65,6 +66,7 @@ export default function DailyRoot() {
           <ScrollManager />
           <Routes>
             <Route path="/" element={<Edition />} />
+            <Route path="/series" element={<Series />} />
             <Route path="/shelf" element={<Shelf />} />
             <Route path="/shelf/:tag" element={<ShelfBoard />} />
             <Route path="/search" element={<Search />} />
@@ -78,9 +80,9 @@ export default function DailyRoot() {
             <Route path="/log/:topic" element={<LogTopic />} />
             <Route path="/log/:topic/entry/:slug" element={<LogEntry />} />
 
-            {/* 廃止した3ルート */}
+            {/* 廃止した3ルート。/logs は記録帖の索引だったので、その役目を継いだ「続きもの」へ送る */}
             <Route path="/notes" element={<Navigate to="/shelf" replace state={{ legacy: 'notes' }} />} />
-            <Route path="/logs" element={<Navigate to="/shelf" replace state={{ legacy: 'logs' }} />} />
+            <Route path="/logs" element={<Navigate to="/series" replace state={{ legacy: 'logs' }} />} />
             <Route path="/moc/:slug" element={<LegacyMoc graph={graph} />} />
 
             {/* 設定は shell の持ち物。ここで受け止めておかないと下の `*` が入口へ書き戻し、

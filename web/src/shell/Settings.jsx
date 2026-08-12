@@ -21,11 +21,11 @@ export function Settings({ faceId, onPick, onClose }) {
     <div className="mn-shell">
       <div className="sh-page">
         <div className="sh-head">
-          <h1 className="sh-title">面のかたち</h1>
+          <h1 className="sh-title">画面のかたち</h1>
           <button className="sh-close" onClick={onClose}>閉じる</button>
         </div>
 
-        <div className="sh-slot">読む面を選ぶ</div>
+        <div className="sh-slot">読むときの画面を選ぶ</div>
         <div className="sh-faces">
           {FACES.map((f) => {
             const on = f.id === faceId;
@@ -49,16 +49,17 @@ export function Settings({ faceId, onPick, onClose }) {
         <div className="sh-slot">この3つについて</div>
         <div className="sh-note">
           <p>
-            かたちの違う3つの面を<strong>同時に持っているのは実験</strong>で、
+            読むもの（記事・章・記録）はどれも同じで、変わるのは<strong>並べ方と操作のしかた</strong>だけ。
+            かたちの違う3つを<strong>同時に持っているのは実験</strong>で、
             {TRIAL_UNTIL.replace(/^\d{4}-/, '').replace('-', '/')} までに<strong>1つに絞る</strong>。
           </p>
           <p>
             決め手は上に出ている<strong>使った日数と再読の枚数</strong>——
             気に入ったと言うかどうかではなく、実際にどれを開いて何枚読んだかで決める。
-            絞ったあと、選ばれなかった面はここから消える。
+            絞ったあと、選ばれなかったかたちはここから消える。
           </p>
           <p>
-            読んだ記録・溜めた依頼は面をまたいで1つなので、
+            読んだ記録・溜めた依頼はかたちをまたいで1つなので、
             どれに切り替えても積み上げは失われない。
           </p>
         </div>

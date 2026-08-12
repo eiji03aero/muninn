@@ -131,7 +131,7 @@ export function Intro({ hand, onClose, onSettings }) {
         原点・帯の候補・「行き先を選ぶ」はすべてボタンです。
       </p>
       <div className="tb-introbtns">
-        <button type="button" className="tb-introsub" onClick={onSettings}>面のかたちを選ぶ</button>
+        <button type="button" className="tb-introsub" onClick={onSettings}>画面のかたちを選ぶ</button>
         <button type="button" className="tb-introgo" onClick={onClose}>はじめる</button>
       </div>
     </div>

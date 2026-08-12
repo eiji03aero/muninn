@@ -12,7 +12,7 @@ import { C, tint } from '../../shared/theme.js';
 const CAN_DO = [
   {
     title: '覚える',
-    desc: '調べた事実を1枚ずつに分けて貯め、期日が来たら面に出す',
+    desc: '調べた事実を1枚ずつに分けて貯め、期日が来たら今日の紙面に出す',
     example: '/mn 〜について調べて、notes に記録して',
   },
   {
@@ -82,7 +82,8 @@ export function Desk() {
 
   return (
     <>
-      <AppBar title="デスク" back={false} subtitle="投げると、こうなる" />
+      {/* タブ名（依頼）とページ名を揃える。別名にすると「押した先が違う場所に見える」 */}
+      <AppBar title="依頼" back={false} subtitle="Claude に渡す言葉をつくる" />
       <Page>
         <VStack align="stretch" gap="6">
 
@@ -184,16 +185,16 @@ export function Desk() {
             </Card>
           </Box>
 
-          {/* 読む面のかたちは3つある。どの面からも設定に戻れないと「試したら二度と戻せない」が
+          {/* 画面のかたちは3つある。どのかたちからも設定に戻れないと「試したら二度と戻せない」が
               起きるので、この面の非常口はここ（常に下のタブから1タップで来られる場所）に置く。 */}
           <Box>
-            <Slot>読む面</Slot>
+            <Slot>画面のかたち</Slot>
             <Card onClick={openSettings}>
               <Flex align="center" justify="space-between" gap="3">
                 <Box>
-                  <Text fontSize="sm" color={C.ink} fontWeight="700">面のかたち</Text>
+                  <Text fontSize="sm" color={C.ink} fontWeight="700">かたちを替える</Text>
                   <Text fontSize="xs" color={C.muted} mt="1" lineHeight="1.7">
-                    いまは「{face.label}」。他のかたちに替えられる
+                    いまは「{face.label}」。並べ方と操作のちがう別のかたちに替えられる
                   </Text>
                 </Box>
                 <Text fontSize="sm" color={C.faint} flexShrink="0">›</Text>

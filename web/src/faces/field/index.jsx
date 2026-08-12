@@ -364,7 +364,7 @@ export default function FieldRoot({ initialTarget }) {
           <span><b>&gt;</b> 頼む</span>
           <span><b>?</b> 使い方</span>
           <span className="ff-sp" />
-          <button type="button" className="ff-gear" onClick={openSettings}><span>面のかたち</span></button>
+          <button type="button" className="ff-gear" onClick={openSettings}><span>画面のかたち</span></button>
           <span className="ff-state">{st.word}</span>
         </div>
         <div className="ff-inputrow">

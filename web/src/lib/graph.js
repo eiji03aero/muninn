@@ -180,8 +180,14 @@ export function buildGraph(site, idx) {
 }
 
 // タグの表示名。階層タグの末端を日本語に寄せる（画面に内部語彙を出さないため）
+// 未登録のタグは末端をそのまま出すので、英語の slug（frontend / math …）が画面に出てしまう。
+// テーマの見出しは読者が選ぶための名前なので、使われているタグは日本語を用意しておく。
 const TAG_JA = {
   'sports/golf': 'ゴルフ', 'sports/football': 'サッカー',
+  'dev/frontend': 'フロントエンド', 'dev/llm': 'LLM',
+  math: '数学', 'math/algebra': '代数', 'math/analysis': '解析', 'math/discrete': '離散数学',
+  'math/foundations': '数学の基礎', 'math/geometry': '幾何', 'math/probability': '確率',
+  'food/coffee': 'コーヒー', 'log/model-eval': 'モデル比較',
   'health/skincare': '肌', 'health/nutrition': '栄養', 'health/hair': '髪',
   'health/stress': 'ストレス', 'health/bathing': '入浴', 'health/sleep': '睡眠',
   'science/cosmology': '宇宙論', 'geopolitics/middle-east': '中東',

@@ -5,6 +5,8 @@
 // この配列から1行消して faces/<id>/ を rm するだけで終わる状態を保つこと。
 //
 // label / hint は**読者に見せる語**。`モードA` `案B` のような開発上の呼び名は画面に出さない。
+// 画面に出すときの概念名は「画面のかたち」。`面` はコードとこの中だけの内部語彙にする
+// （読者には日報タブの ▣面 と衝突して読めなかった。web/DESIGN.md §4）。
 import { lazy } from 'react';
 import { todayISO } from '../lib/recall.js';
 
@@ -17,7 +19,7 @@ export const FACES = [
   {
     id: 'daily',
     label: '日報',
-    hint: '今日の紙面を上から読む。いまのかたち',
+    hint: '今日の紙面を上から読み、下のタブで横に移る。いまのかたち',
     // この面は自前のルータで URL を書き換えながら動く。shell が hash を追いかけると
     // 面の移動のたびに shell まで再描画されるので、追わない。
     ownsUrl: true,
@@ -33,7 +35,7 @@ export const FACES = [
   {
     id: 'field',
     label: '一本の欄',
-    hint: '下の欄に打つと面が変わる。タブは無い',
+    hint: '下の欄に打つと中身が変わる。タブは無い',
     ownsUrl: false,
     Root: lazy(() => import('../faces/field/index.jsx')),
   },

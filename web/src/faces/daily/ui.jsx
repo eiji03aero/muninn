@@ -50,11 +50,16 @@ export function AppBar({ title, subtitle, back = true, children }) {
 // ---------------- ボトムタブ ----------------
 // 現状最大の構造欠陥（グローバルナビが無く、横移動が戻る/ホームだけ）を埋める。
 // タブ名がそのまま「muninn でできること」の要約になっている。
+//
+// 名前は**比喩ではなく、押す前に中身が分かる言葉**にする。
+// 「面」「棚」「デスク」は作り手の内輪の比喩で、読者には押してみるまで中身が分からなかった。
+// 比喩を画面から追い出したぶん、面のかたちの呼び名（→「画面のかたち」）とも衝突しなくなる。
 const TABS = [
-  { to: '/', label: '面', icon: '▣', match: (p) => p === '/' },
-  { to: '/shelf', label: '棚', icon: '▤', match: (p) => p.startsWith('/shelf') },
+  { to: '/', label: '今日', icon: '▣', match: (p) => p === '/' },
+  { to: '/series', label: '続きもの', icon: '▤', match: (p) => p.startsWith('/series') },
+  { to: '/shelf', label: 'テーマ', icon: '▦', match: (p) => p.startsWith('/shelf') },
   { to: '/search', label: '探す', icon: '⌕', match: (p) => p.startsWith('/search') },
-  { to: '/desk', label: 'デスク', icon: '✎', match: (p) => p.startsWith('/desk') },
+  { to: '/desk', label: '依頼', icon: '✎', match: (p) => p.startsWith('/desk') },
 ];
 
 // ソフトキーボードに食われている高さ。
@@ -96,8 +101,9 @@ export function BottomTabs() {
               className="press" textAlign="center" position="relative"
               aria-current={on ? 'page' : undefined}>
               <Text fontSize="22px" lineHeight="1.15" color={on ? C.ink : C.faint}>{t.icon}</Text>
-              <Text fontSize="11.5px" mt="1" lineHeight="1.1" fontWeight={on ? '700' : '500'}
-                color={on ? C.ink : C.faint}>
+              {/* 5枠あるので、狭い端末で「続きもの」が2行に折れないよう nowrap で押さえる */}
+              <Text fontSize="11px" mt="1" lineHeight="1.1" fontWeight={on ? '700' : '500'}
+                whiteSpace="nowrap" color={on ? C.ink : C.faint}>
                 {t.label}
               </Text>
               {on && (
@@ -177,7 +183,7 @@ export function NotFound({ what }) {
   return (
     <Center>
       <Text color={C.muted}>{what} が見つからないのだ</Text>
-      <Button colorPalette="blue" onClick={() => navigate('/')}>面へ</Button>
+      <Button colorPalette="blue" onClick={() => navigate('/')}>今日へ</Button>
     </Center>
   );
 }

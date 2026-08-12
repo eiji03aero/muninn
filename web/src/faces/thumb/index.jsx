@@ -399,7 +399,7 @@ export default function ThumbRoot({ initialTarget }) {
                 <button type="button" aria-label="この画面の使い方をもう一度読む" onClick={() => setIntro(true)}>
                   <span aria-hidden="true">?</span>
                 </button>
-                <button type="button" aria-label="設定をひらく（読む面のかたちを選ぶ）" onClick={openSettings}>
+                <button type="button" aria-label="設定をひらく（画面のかたちを選ぶ）" onClick={openSettings}>
                   <span aria-hidden="true">⚙</span>
                 </button>
               </div>

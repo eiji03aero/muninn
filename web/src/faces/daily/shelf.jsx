@@ -92,7 +92,9 @@ function InventoryMap({ tags, onOpen, onOther }) {
   );
 }
 
-// ---------------- 棚 ----------------
+// ---------------- テーマ（在庫の俯瞰。旧「棚」） ----------------
+// 画面に出す名前は「テーマ」。棚はコードとこの文書の中だけの呼び名にする——
+// 読者にとって「棚」は押すまで中身が分からない比喩で、第一階層がタグ＝テーマである事実を隠していた。
 export function Shelf() {
   const navigate = useNavigate();
   const { site, graph, shadow } = useData();
@@ -124,7 +126,7 @@ export function Shelf() {
 
   return (
     <>
-      <AppBar title="棚" back={false}
+      <AppBar title="テーマ" back={false}
         subtitle={`${site.notes.length}記事 · ${(site.atlases || []).reduce((s, a) => s + a.concepts.length, 0)}章 · ${site.follows.reduce((s, f) => s + f.sessions.length, 0)}観測 · ${(site.logtopics || []).reduce((s, t) => s + t.entries.length, 0)}記録`} />
       <Page>
         <VStack align="stretch" gap="6">
@@ -211,7 +213,7 @@ export function Shelf() {
   );
 }
 
-// ---------------- 棚板（タグ横断） ----------------
+// ---------------- テーマ1枚（タグ横断。旧「棚板」） ----------------
 export function ShelfBoard() {
   const navigate = useNavigate();
   const { graph } = useData();
@@ -219,7 +221,7 @@ export function ShelfBoard() {
   const tag = paramToTag(param);
   const entry = graph.tagIndex.get(tag);
   const today = todayISO();
-  if (!entry) return <NotFound what="棚板" />;
+  if (!entry) return <NotFound what="このテーマ" />;
 
   const bundles = graph.bundles.filter((b) => b.tag === tag);
   const follows = entry.nodes.filter((n) => n.type === 'follow');
@@ -264,7 +266,7 @@ export function ShelfBoard() {
 
           {follows.length > 0 && (
             <Box>
-              <Slot>この棚の観測</Slot>
+              <Slot>このテーマの観測</Slot>
               <VStack align="stretch" gap="3">
                 {follows.map((n) => {
                   const f = n.ref;
@@ -311,7 +313,7 @@ export function ShelfBoard() {
           )}
 
           <Box>
-            <Slot count={rest.length}>この棚のすべて</Slot>
+            <Slot count={rest.length}>このテーマのすべて</Slot>
             <VStack align="stretch" gap="2">
               {rest.map((n) => (
                 <Card key={n.route} onClick={() => navigate(n.route)}>

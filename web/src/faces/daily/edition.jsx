@@ -204,7 +204,7 @@ export function RecallCard({ note, index, total, onDone }) {
   );
 }
 
-// ---------------- 面 ----------------
+// ---------------- 今日の紙面 ----------------
 export function Edition() {
   const navigate = useNavigate();
   const { site, graph, shadow, reads, refresh } = useData();
@@ -267,7 +267,11 @@ export function Edition() {
 
           {ed.chapter && (
             <Box>
-              <Slot>連載</Slot>
+              <Slot action={
+                <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
+                  _hover={{ color: C.ink, bg: 'transparent' }}
+                  onClick={() => navigate('/series')}>続きもの ›</Button>
+              }>連載</Slot>
               <Card onClick={() => navigate(`/atlas/${ed.chapter.atlas.slug}/concept/${ed.chapter.concept.slug}?route=${ed.chapter.route.id}`)}>
                 <Text fontSize="xs" color={C.faint}>{cleanTitle(ed.chapter.atlas.title)} — {ed.chapter.route.label}</Text>
                 <Text fontSize="sm" color={C.ink} fontWeight="700" mt="1" mb="3">
@@ -295,7 +299,7 @@ export function Edition() {
                   {ed.feature.bundle.tag && (
                     <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
                       _hover={{ color: C.ink, bg: 'transparent' }}
-                      onClick={() => navigate(`/shelf/${tagToParam(ed.feature.bundle.tag)}`)}>棚へ ›</Button>
+                      onClick={() => navigate(`/shelf/${tagToParam(ed.feature.bundle.tag)}`)}>テーマへ ›</Button>
                   )}
                 </HStack>
                 <VStack align="stretch" gap="0">
@@ -316,7 +320,11 @@ export function Edition() {
 
           {ed.records.length > 0 && (
             <Box>
-              <Slot>記録</Slot>
+              <Slot action={
+                <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
+                  _hover={{ color: C.ink, bg: 'transparent' }}
+                  onClick={() => navigate('/series')}>続きもの ›</Button>
+              }>記録</Slot>
               <VStack align="stretch" gap="3">
                 {ed.records.map((r, i) =>
                   r.type === 'series' ? (
@@ -359,7 +367,7 @@ export function Edition() {
               <Text fontSize="xs" color={C.muted} lineHeight="1.7">
                 {ed.inventory.notes}記事 / {ed.inventory.concepts}章 / {ed.inventory.sessions}観測 / {ed.inventory.entries}記録
               </Text>
-              <Text fontSize="sm" color={C.faint} flexShrink="0">棚 ›</Text>
+              <Text fontSize="sm" color={C.faint} flexShrink="0">テーマ ›</Text>
             </Flex>
           </Box>
 
