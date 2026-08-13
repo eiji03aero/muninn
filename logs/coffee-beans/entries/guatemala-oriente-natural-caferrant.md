@@ -2,7 +2,7 @@
 title: グアテマラ オリエンテ ナチュラル / caférrant
 kind: logentry
 topic: coffee-beans
-created: 2026-08-10
+created: 2026-08-11
 image: images/guatemala-oriente-natural-caferrant.webp
 fields:
   roaster: caférrant
@@ -11,7 +11,7 @@ fields:
   rating: 2
   flavor: [埃っぽい, 酸味, スッキリ]
   rebuy: false
-  tasted_on: 2026-08-10
+  tasted_on: 2026-08-11
 ---
 
 香りがちょっと独特。旅行先のちょっと古びた美術館の埃くささのようなイメージ。
