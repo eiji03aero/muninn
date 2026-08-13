@@ -48,6 +48,7 @@ tags: [moc]
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — ダウン。地面から順に動き、前足への圧移動が回転に先行する
 - [[golf-my-driver-transition-feel-hips-lead-chest-delayed-drop-arms-to-p6-then-open-and-release]] — 切り返しの操作モデル。マイルストーンはトップ→P6。腰リード＋胸遅れ＋腕落としでP6→開きつつ解放。軌道はなぞれない(Feel≠Real)
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — ドライバー特有。圧は前・上体は後ろに残してアッパーに打つ
+- [[golf-downswing-trail-side-bend-is-fundamental-emerges-from-pressure-and-rotation-not-added]] — トレイル側屈は基本＝傾いた軸で回ることの正体。圧移動＋回転の結果で足すものではない。不足＝スティープ/過剰＝潜り
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — 診断。フィニッシュのそり返りは後ろ足残りのサインで飛距離・ミート・腰にマイナス
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 矯正方針。切り返しで先に圧を前足へ→前脚を支柱に立ち上がる
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — 振り抜きのイメージ。インパクト後の通過点でクラブ位置を確認して振り抜く

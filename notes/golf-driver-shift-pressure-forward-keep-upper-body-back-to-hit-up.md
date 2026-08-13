@@ -22,3 +22,4 @@ srs:
 - [[golf-finish-leaning-back-means-hanging-back-loses-power-and-shifts-low-point]] — 対比。「上体を残す」と混同しがちな"後ろ足残り（ハングバック）"はNGという話
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 圧を前足へ移してポストアップする具体動作
 - [[golf-driver-draw-lower-body-opens-upper-stays-closed-right-shoulder-down]] — 右肩を下へ・上体を残す動きはドロー（インから）とも一致
+- [[golf-downswing-trail-side-bend-is-fundamental-emerges-from-pressure-and-rotation-not-added]] — 「上体を残す」を側屈という一般概念で捉えた版（腕の通り道・不足/過剰の両方向）
