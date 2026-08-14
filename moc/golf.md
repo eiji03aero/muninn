@@ -15,6 +15,7 @@ tags: [moc]
 
 ## フェース管理（向き・スクエアに返す）
 
+- [[golf-ball-flight-start-line-is-mostly-face-curve-is-face-minus-path-tolerance-asymmetry]] — 法則（D-プレーン）。打ち出し≒フェース（約85%）／曲がり＝フェースと軌道の差。許容差はフェース1〜2度・軌道は数度＝精度はフェースへ
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — 原理。フェースの開閉はコックの方向ではなくリード手首の掌背屈・前腕回旋で決まる
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアンのセットアップ〜テークアウェイの具体策。スクエア＋軽いハンドファースト＋リード手首フラット
 - [[golf-slice-comes-from-open-face-not-hand-lead]] — 切り分け。スライスは手の先行ではなくフェースが開いていることが原因
@@ -56,6 +57,7 @@ tags: [moc]
 - [[golf-my-p6-is-stuck-under-open-face-cupped-lead-wrist-fix-causes-not-pose]] — 自己診断。自分のP6は潜り＋開き＋カップ＝スタックの指紋。ポーズでなく手首掌屈＋潜らせないで直す
 - [[golf-swing-is-not-a-single-plane-kwon-functional-swing-plane-clubhead-plane-hands-tighter-circle-shaft-cone]] — 理論。スイングは単一平面でない（Kwon FSP）。ヘッド＝平面/手＝内側の小円/シャフト＝円錐。初期シャフト平面に戻らない
 - [[golf-why-downswing-shallows-not-single-plane-reproducibility-from-sequence-not-fixed-plane]] — なぜ二段が定石か。別円で1枚を通らない／シャローは順序の副産物／再現性は面の固定でなく順序の反復。単一面はモー/ブライソンの少数派流派
+- [[golf-my-plane-is-a-result-not-a-target-severity-depends-on-control-model-invest-precision-in-face]] — プレーンは乗せる対象でなく結果。シビアさは制御モデル次第（腕で乗せに行くと多変数）。精度はフェースに投資する
 - [[golf-my-swing-theory-revision-single-plane-to-two-tier-mortar-cone-retain-lag-to-p6-then-release]] — 自分の改訂。単一平面→二段/すり鉢。9→3は手が内側の小円・ヘッドは安定平面。ラグはP6まで保持し9→3で解放
 - [[golf-driver-draw-lower-body-opens-upper-stays-closed-right-shoulder-down]] — ドローの体の使い方。下半身は開く/上半身は閉じて我慢/右肩は下へ/リード股関節を抜く
 

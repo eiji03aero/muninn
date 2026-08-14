@@ -30,3 +30,4 @@ srs:
 - [[golf-pros-share-body-led-sequence-individual-differences-are-feel-and-release-style]] — プロのリリーススタイルの差（ボウイング/ローテーション）はこの手首・前腕の使い方の違い
 - [[golf-driver-grip-secure-but-relaxed-stable-lead-wrist-no-flip]] — 実用。このフェース軸（掌屈背屈）を安定させフリップさせないグリップ/手首の意識
 - [[golf-connection-turn-body-fully-but-keep-arms-in-front-not-restrict-turn-no-fixed-angles]] — 手首の対。掌屈の普遍性（普遍はフラット・掌屈は矯正）はここの追記が正本、体側はコネクション
+- [[golf-ball-flight-start-line-is-mostly-face-curve-is-face-minus-path-tolerance-asymmetry]] — なぜフェース向きに精度を割くべきか（打ち出しの約85%を支配・許容差1〜2度）
