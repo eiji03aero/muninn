@@ -9,6 +9,8 @@ tags: [moc]
 ## ダフり対策（参照ジオメトリの維持）
 
 - [[golf-fat-shots-from-losing-address-reference-geometry]] — 統一仮説。ダフりは最下点の基準を本番までに失うことから起きる
+- [[golf-low-point-shaft-kick-and-speed-peak-are-three-separate-knobs-with-different-causes]] — 因果の分離。最下点＝弧の中心（幾何）／キック＝手元の減速／速度ピーク＝インパクト至近。混同しない
+- [[golf-my-low-point-is-too-far-forward-from-sliding-keep-chest-back-and-extend-past-the-ball]] — 自己診断。最下点がボールより先＝スライド。潜りも同一原因。処方は上体を残す＋一直線は通過点で
 - [[golf-hover-clubhead-at-address-calibrates-low-point]] — 手首側の基準。アドレスでヘッドを1mm浮かせる
 - [[golf-dont-lock-lead-arm-in-backswing]] — 腕（半径）側の基準。リード腕を伸ばし切って固めない
 - [[golf-shallow-backswing-hand-and-shaft-in-line-reduces-fat]] — 入射角・プレーン側の基準。シャフトを立てすぎず手の甲とシャフトを一直線にしてシャローに上げる
@@ -19,6 +21,7 @@ tags: [moc]
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — 原理。フェースの開閉はコックの方向ではなくリード手首の掌背屈・前腕回旋で決まる
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアンのセットアップ〜テークアウェイの具体策。スクエア＋軽いハンドファースト＋リード手首フラット
 - [[golf-slice-comes-from-open-face-not-hand-lead]] — 切り分け。スライスは手の先行ではなくフェースが開いていることが原因
+- [[golf-tolerance-is-asymmetric-path-plane-few-degrees-face-one-or-two-invest-precision-in-face]] — 許容差の非対称。プレーンは数度の幅／フェースは1〜2度。精度はフェースに投資し、初期設定で決める
 
 ## アドレス（クラブ別の構え）
 
