@@ -10,7 +10,6 @@ tags: [moc]
 
 - [[golf-fat-shots-from-losing-address-reference-geometry]] — 統一仮説。ダフりは最下点の基準を本番までに失うことから起きる
 - [[golf-low-point-shaft-kick-and-speed-peak-are-three-separate-knobs-with-different-causes]] — 因果の分離。最下点＝弧の中心（幾何）／キック＝手元の減速／速度ピーク＝インパクト至近。混同しない
-- [[golf-my-low-point-is-too-far-forward-from-sliding-keep-chest-back-and-extend-past-the-ball]] — 自己診断。最下点がボールより先＝スライド。潜りも同一原因。処方は上体を残す＋一直線は通過点で
 - [[golf-hover-clubhead-at-address-calibrates-low-point]] — 手首側の基準。アドレスでヘッドを1mm浮かせる
 - [[golf-dont-lock-lead-arm-in-backswing]] — 腕（半径）側の基準。リード腕を伸ばし切って固めない
 - [[golf-shallow-backswing-hand-and-shaft-in-line-reduces-fat]] — 入射角・プレーン側の基準。シャフトを立てすぎず手の甲とシャフトを一直線にしてシャローに上げる

@@ -19,7 +19,7 @@ tags: [sports/golf]
 
 ※P6は個人差があり多少のアンダー/カップは一流にもいる。ただし**自分は3点が揃い、既知のフック・ミート問題と因果が繋がっている**ので、良性のクセでなく**修正方向の失敗形**。
 
-**側屈（サイドベンド）についての但し書き**（2026-08-08 更新・当初の見立てを訂正）: ダウンのトレイル側屈は基本（→ [[golf-downswing-trail-side-bend-is-fundamental-emerges-from-pressure-and-rotation-not-added]]）。当初「自分は過剰側リスクなので足すな」と書いたが、**その後「最下点がボールより先に来ている」と判明し、方向は逆＝側屈が足りない（スライドしている）**と分かった → [[golf-my-low-point-is-too-far-forward-from-sliding-keep-chest-back-and-extend-past-the-ball]]。**避けるべきは「圧移動なしに肩を落とす＝ハングバック」で、側屈そのものではない**。必要なのは**圧は前足・頭と胸はその場に残す**（＝側屈が結果として出る）。
+**側屈（サイドベンド）についての但し書き**: ダウンのトレイル側屈は基本（→ [[golf-downswing-trail-side-bend-is-fundamental-emerges-from-pressure-and-rotation-not-added]]）。**避けるべきは「圧移動なしに肩を落とす／頭を右へ倒す＝ハングバック」であって、側屈そのものではない**。自分は潜り（スタック）側の症状があるので、**能動的に"足す"より、圧移動＋回転を正して適量が自然に出る**状態にするのが筋（＋腕は胸の前）。※側屈が過剰なのか不足なのかは**未確定**——判定には最下点の位置（インパクトで頭がアドレスより目標側へ動いていないか）の実測が要る。
 
 ## Links
 - [[golf-halfway-down-p6-square-checkpoint-shaft-parallel-face-matches-spine-flat-lead-wrist]] — 比較の基準（教科書のP6合図）。本ノートはその自己診断（逆になっている）
