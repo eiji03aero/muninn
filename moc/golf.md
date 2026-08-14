@@ -20,7 +20,6 @@ tags: [moc]
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — 原理。フェースの開閉はコックの方向ではなくリード手首の掌背屈・前腕回旋で決まる
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアンのセットアップ〜テークアウェイの具体策。スクエア＋軽いハンドファースト＋リード手首フラット
 - [[golf-slice-comes-from-open-face-not-hand-lead]] — 切り分け。スライスは手の先行ではなくフェースが開いていることが原因
-- [[golf-tolerance-is-asymmetric-path-plane-few-degrees-face-one-or-two-invest-precision-in-face]] — 許容差の非対称。プレーンは数度の幅／フェースは1〜2度。精度はフェースに投資し、初期設定で決める
 
 ## アドレス（クラブ別の構え）
 
