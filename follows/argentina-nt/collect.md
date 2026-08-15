@@ -2,7 +2,7 @@
 follow: argentina-nt
 kind: collect
 cadence: weekly
-updated: 2026-08-10
+updated: 2026-08-15
 watchlist:
   - lionel-messi
   - emiliano-martinez
@@ -14,6 +14,7 @@ watchlist:
   - alexis-mac-allister
   - julian-alvarez
   - lautaro-martinez
+  - giuliano-simeone
 deep_dive:
   - enzo-fernandez
   - julian-alvarez
@@ -32,6 +33,8 @@ prospects:
     - nico-paz
     - franco-mastantuono
     - valentin-barco
+    - giuliano-simeone
+    - santiago-castro
 sources:
   schedule: "https://www.afa.com.ar/es/pages/seleccion-mayor-masculina"
   notes: "英語一次ソース優先。未確定の日程・数字・移籍は書かない"
@@ -49,3 +52,6 @@ sources:
 - 2026-08-10: 次回は8月末の欧州移籍市場閉幕後を狙う（エンソ/フリアン/ロメロの帰趨がまとめて確定するため）。オタメンディは代表引退したが、クラブでの動向は watchlist に残して追う。
 - 2026-08-10: `prospects` を有効化（理由: watchlist は現主力の固定リストなので、世代交代局面で「今の注目株」を発見する軸がなかった）。条件は23歳以下・欧州5大リーグ＋国内、代表招集か主力化でドシエ化。既知3名（ニコ・パス/マスタントゥオーノ/バルコ）を known に登録。
 - 2026-08-10: 次世代3名のドシエを新設。deep_dive は現状エンソ/フリアンのまま（次世代を深掘りに回すかは、9月招集の結果を見てから判断する）。
+- 2026-08-15: 収集を実行。ロメロのアトレティコ移籍とエンソの残留が確定、フリアンは継続中。詳細は `sessions/2026-08-15-collect.md`。
+- 2026-08-15: `prospects` の初回運用で G.シメオネ / S.カストロ をドシエ化し known に追加。G.シメオネは代表14キャップ・W杯メンバーの実績があったため watchlist にも追加した（発見の軸がなければ取りこぼしていた例）。
+- 2026-08-15: 課題 — `scope` を欧州5大リーグ＋国内に絞った結果、代表歴のあるプレスティアンニ（ベンフィカ）が範囲外で落ちた。「代表招集歴があればリーグ不問で拾う」例外を入れるか次回検討する。
