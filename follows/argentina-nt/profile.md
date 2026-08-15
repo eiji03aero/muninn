@@ -53,7 +53,7 @@ rivals:
 
 - [[lionel-messi]] — 主将・全設計の中心（Inter Miami）
 - [[emiliano-martinez]] — 守護神ディブ、PK戦の胆力（Aston Villa）
-- [[cristian-romero]] — 前に出る守備の背骨（Tottenham）
+- [[cristian-romero]] — 前に出る守備の背骨（Atlético Madrid／2026-08にトッテナムから移籍）
 - [[lisandro-martinez]] — 左利きCB、負傷を要観察（Man Utd）
 - [[nicolas-otamendi]] — 最年長の守備リーダー（Benfica）**※2026-07に代表引退**
 - [[rodrigo-de-paul]] — メッシの盾"モトルシート"（Inter Miami）
@@ -65,10 +65,12 @@ rivals:
 **次世代（`generation: next`）** — メッシ後を担う候補。収集で継続的に注目株を追う。
 
 - [[nico-paz]] — 左利きのトップ下。セリエA最優秀MF、現状の最有力（Como）
+- [[giuliano-simeone]] — 走力と守備貢献で枠を取る右ウイング。すでに代表14キャップ・W杯メンバー（Atlético Madrid）
 - [[franco-mastantuono]] — 18歳の左利きアタッカー。負傷とW杯落選から仕切り直し（Fiorentina／レアルからレンタル）
 - [[valentin-barco]] — 左SBと中盤を兼ねる可変性。W杯メンバー最年少（Chelsea）
+- [[santiago-castro]] — セリエAで主力を張る21歳CF。代表の帰属は未確定（Bologna）
 
-*未ドシエ（必要になったら `/mn` で追加）*: モリーナ／タリアフィコ（SB）、G.シメオネ／ガルナチョ／エチェベリ（次世代候補）。T.アルマダは2026-08にアトレティコからリーベルへ移籍し欧州から後退。ディ・マリアは2024コパ後に代表引退。
+*未ドシエ（必要になったら `/mn` で追加）*: モリーナ／タリアフィコ（SB）、ガルナチョ／エチェベリ／プレスティアンニ／スビアブレ（次世代候補）。T.アルマダは2026-08にアトレティコからリーベルへ移籍し欧州から後退。ディ・マリアは2024コパ後に代表引退。
 
 ## 変遷タイムライン
 
