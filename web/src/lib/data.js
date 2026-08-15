@@ -1,5 +1,7 @@
-import { b64ToBytes, b64urlToBytes, bytesToB64url, decryptSite, deriveCK, unwrapCK } from './crypto.js';
-import { assertPrf } from './webauthn.js';
+import {
+  b64ToBytes, b64urlToBytes, bytesToB64url, decryptSite, deriveCK, unwrapCK, wrapCK,
+} from './crypto.js';
+import { assertPrf, registerPrf } from './webauthn.js';
 
 // 本番は site.enc.json（AES暗号）を解錠、dev は site.json（平文）を読む。
 // 解錠の手段は2つあり、どちらも同じコンテンツ鍵 CK にたどり着く:
@@ -92,4 +94,36 @@ export async function unlockWithPasskey(lock) {
 
   const ck = await unwrapCK(secret, slot.wrapped);
   return await decryptSite(lock.payload, ck);
+}
+
+/**
+ * この端末のパスキーを鍵スロットとして登録する。返り値の JSON を正本（web/keyslots.json）に
+ * 載せると他の端末にも効くが、載せる前からこの端末では使える（addLocalSlot）。
+ *
+ * パスワードの正しさを**先に復号して**確かめるのが要点。ここを飛ばすと、打ち間違いのまま
+ * 「開かないスロット」を作って、登録が成功したように見えてしまう。
+ */
+export async function enrollPasskey(lock, password, label, onStep = () => {}) {
+  if (!lock?.keyslots?.prfSalt) throw new Error('鍵スロットの定義が読めない（keyslots.json）');
+
+  onStep('パスワードを確かめている…');
+  const ck = await deriveCK(password, lock.payload.kdf);
+  try {
+    await decryptSite(lock.payload, ck);
+  } catch {
+    throw new Error('パスワードが違うのだ');
+  }
+
+  onStep('パスキーを作る。Face ID を見せてくれ');
+  const { rawId, secret } = await registerPrf(b64ToBytes(lock.keyslots.prfSalt));
+  const slot = {
+    id: (label || 'device').trim().toLowerCase().replace(/\s+/g, '-') || 'device',
+    type: 'prf',
+    label: (label || 'device').trim() || 'device',
+    credentialId: bytesToB64url(rawId),
+    wrapped: await wrapCK(secret, ck),
+    created: new Date().toISOString().slice(0, 10),
+  };
+  addLocalSlot(slot);
+  return slot;
 }

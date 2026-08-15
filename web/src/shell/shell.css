@@ -91,6 +91,23 @@
   cursor: pointer;
 }
 .mn-shell .sh-link:hover { color: var(--sh-muted); }
+.mn-shell .sh-link:disabled { opacity: .5; }
+
+/* 登録結果の JSON（そのまま Claude に渡すもの）。読むためではなく写すための欄 */
+.mn-shell .sh-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  min-height: 8rem;
+  padding: .55rem .75rem;
+  text-align: left;
+  color: var(--sh-ink);
+  background: rgba(255, 255, 255, .05);
+  border: 1px solid var(--sh-line);
+  border-radius: 14px;
+  outline: none;
+  resize: vertical;
+}
+.mn-shell .sh-hint { font-size: .75rem; color: var(--sh-faint); margin: 0; line-height: 1.7; }
 
 /* ---- 読み込み中 ---- */
 .mn-shell .sh-spinner {
