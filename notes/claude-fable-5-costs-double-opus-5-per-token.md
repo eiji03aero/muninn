@@ -3,6 +3,7 @@ title: Claude Fable 5 のトークン単価は Opus 5 のちょうど2倍
 created: 2026-08-09
 kind: knowledge
 tags: [dev/llm]
+recall: "Claude Fable 5 と Opus 5 のトークン単価の関係は（入出力それぞれ）。単価が2倍なら総額も2倍になるか、ならないとすればなぜか。単価だけでモデルを選ぶと何を誤るか。"
 srs:
   last: null
   interval: 0

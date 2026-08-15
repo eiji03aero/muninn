@@ -3,6 +3,7 @@ title: 線形代数は推薦・画像認識・3D・生成AIを動かす裏方で
 created: 2026-08-11
 kind: knowledge
 tags: [math/algebra]
+recall: "線形代数が応用量で群を抜くと言えるのは、どんな例が挙がるからか。日常との距離でいうとどの分類に入るか。その分類の存在を忘れて「日常で使うか」だけで測ると何を取りこぼすか。"
 srs:
   last: null
   interval: 0

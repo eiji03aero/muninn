@@ -3,6 +3,7 @@ title: ヒアルロン酸などのヒューメクタントは蓋(油)がない�
 created: 2026-08-04
 kind: knowledge
 tags: [health/skincare]
+recall: "ヒューメクタントが低湿度で逆効果になる仕組みを、水をどこから引く話として説明せよ。TEWL とは何か。「HAの化粧水を塗ったのに乾く」の対策は何で、何ではないか。"
 srs:
   last: null
   interval: 0

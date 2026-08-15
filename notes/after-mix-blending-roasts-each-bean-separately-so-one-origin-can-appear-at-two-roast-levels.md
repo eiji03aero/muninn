@@ -3,6 +3,7 @@ title: アフターミックスは豆ごとに別々に焙煎してから混ぜ�
 created: 2026-08-13
 kind: knowledge
 tags: [food/coffee]
+recall: "プレミックスとアフターミックスの違いと、それぞれの得失は。アフターミックスにしかできないことは何か。袋に焙煎度の内訳が書かれていたら、そこから何が読めるか。"
 srs:
   last: null
   interval: 0

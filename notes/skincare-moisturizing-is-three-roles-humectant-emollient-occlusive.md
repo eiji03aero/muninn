@@ -3,6 +3,7 @@ title: 保湿は「与える(ヒューメクタント)・補う(エモリエン�
 created: 2026-08-04
 kind: knowledge
 tags: [health/skincare]
+recall: "保湿を構成する3つの役割と、それぞれの代表成分・担当することは何か。化粧水だけでは保湿が完成しないのはなぜか。「保水が足りない」と感じたとき、実際に足すべきは何か。"
 srs:
   last: null
   interval: 0

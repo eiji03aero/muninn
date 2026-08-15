@@ -3,6 +3,7 @@ title: 五次以上の方程式に一般の解の公式は存在せず、ガロ�
 created: 2026-08-11
 kind: knowledge
 tags: [math/algebra]
+recall: "五次以上の方程式について19世紀に示されたことは何で、「まだ見つかっていない」とどう違うか。ガロアの示し方のどこが画期的だったか。この例は何の実例として語られるか。"
 srs:
   last: null
   interval: 0

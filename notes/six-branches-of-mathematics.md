@@ -3,6 +3,7 @@ title: 数学の地図は「数と構造・変化と極限・離散と計算・�
 created: 2026-08-11
 kind: knowledge
 tags: [math]
+recall: "数学を対象で切った6つの分野を挙げよ。全体を貫く軸として対にして覚えるべき2分野は。この地図に付く注意点2つ（唯一の正解か／日常との距離）は何か。"
 srs:
   last: null
   interval: 0
