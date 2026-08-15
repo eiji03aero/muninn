@@ -8,5 +8,14 @@
     "salt": "Npr6X+MBWuTylNBSpaVoxw=="
   },
   "prfSalt": "vt+1VFE2cKMYexrdM59mLd6NZ1NO+rm+YoTgbafs2u0=",
-  "slots": []
+  "slots": [
+    {
+      "id": "eiji-iphone-16",
+      "type": "prf",
+      "label": "Eiji iPhone 16",
+      "credentialId": "dI9dzMLy98F-LwpHVDmpN_BniTA",
+      "wrapped": "zanK35oFkRr9s1TuypRgl/qBauI70pFGb12gnDNQiM2m3MYxNy2RLGZKTM3IiLiztq9i6Oaxg0tm/1Eo",
+      "created": "2026-08-15"
+    }
+  ]
 }
