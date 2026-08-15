@@ -5,5 +5,7 @@ public/site.json
 public/site.enc.json
 # 生成物（build-data.mjs が logs/*/images から公開用にコピーする画像。正本は logs/ 側）
 public/log-media/
+# 生成物（build-data.mjs が atlas/*/assets から公開用にコピーするSVG図版。正本は atlas/ 側）
+public/atlas-media/
 # playwright-cli の作業ファイル
 .playwright-cli/

@@ -198,6 +198,14 @@ const follows = (existsSync(followsDir) ? readdirSync(followsDir, { withFileType
   .filter(Boolean);
 
 // ---------- atlases（学習アトラス） ----------
+// 図版: atlas/<topic>/assets/*.svg を public/atlas-media/<topic>/ へコピーし、本文中の
+// `](assets/x.svg)` を `](atlas-media/<topic>/x.svg)` に書き換えて渡す（logs の画像と同じ型）。
+// **SVG しか置けない**のは規約「バイナリはコミットしない」を build 側で担保するため。
+// ベクタ図はテキストで diff が取れるので、写真・動画とは扱いを分ける。
+const ATLAS_MEDIA = join(OUT, 'atlas-media');
+if (existsSync(ATLAS_MEDIA)) rmSync(ATLAS_MEDIA, { recursive: true, force: true });
+const ASSET_RE = /(!\[[^\]]*\]\()assets\/([^)\s]+)/g;
+
 const atlasDir = join(ROOT, 'atlas');
 const atlases = (existsSync(atlasDir) ? readdirSync(atlasDir, { withFileTypes: true }) : [])
   .filter((d) => d.isDirectory())
@@ -208,6 +216,26 @@ const atlases = (existsSync(atlasDir) ? readdirSync(atlasDir, { withFileTypes: t
     const { data: af, body: abody } = read(atlasPath);
     if (af.kind !== 'atlas') fail(`${d.name}/atlas`, `kind は atlas であるべき（実際: ${af.kind}）`);
     const slug = af.slug || d.name;
+
+    // 図版を公開先へコピーする（SVG のみ許可）
+    const assetsDir = join(dir, 'assets');
+    const assets = new Set();
+    if (existsSync(assetsDir)) {
+      for (const f of readdirSync(assetsDir)) {
+        if (f.startsWith('.')) continue;
+        if (!f.endsWith('.svg')) { fail(`${d.name}/assets`, `SVG 以外は置けない（バイナリ禁止）: ${f}`); continue; }
+        const destDir = join(ATLAS_MEDIA, slug);
+        mkdirSync(destDir, { recursive: true });
+        copyFileSync(join(assetsDir, f), join(destDir, f));
+        assets.add(f);
+      }
+    }
+    // 本文の assets/ 参照を公開URLへ書き換える。実在しない参照はビルドを落とす（＝壊れた図の砦）
+    const media = (label, text) => (text || '').replace(ASSET_RE, (m, head, fname) => {
+      const name = decodeURIComponent(fname);
+      if (!assets.has(name)) { fail(label, `図版が存在しない: assets/${name}`); return m; }
+      return `${head}atlas-media/${slug}/${name}`;
+    });
 
     const concepts = mdFiles(join(dir, 'concepts')).map((cp) => {
       const { data, body } = read(cp);
@@ -224,7 +252,7 @@ const atlases = (existsSync(atlasDir) ? readdirSync(atlasDir, { withFileTypes: t
           leadsTo: arrOf(e['leads-to']), elaborates: arrOf(e.elaborates),
         },
         notes: arrOf(data.notes), tags: data.tags || [],
-        body, links: wikiTargets(body),
+        body: media(`${d.name}/concepts/${cslug}`, body), links: wikiTargets(body),
       };
     });
 
@@ -244,7 +272,7 @@ const atlases = (existsSync(atlasDir) ? readdirSync(atlasDir, { withFileTypes: t
 
     return {
       slug, title: af.title || slug, tags: af.tags || [],
-      routes, body: abody, links: wikiTargets(abody), concepts,
+      routes, body: media(`${d.name}/atlas`, abody), links: wikiTargets(abody), concepts,
     };
   })
   .filter(Boolean);
