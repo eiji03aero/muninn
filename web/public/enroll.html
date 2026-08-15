@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>muninn — 端末を登録</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; padding: max(1.5rem, env(safe-area-inset-top)) 1.25rem 3rem;
+    background: #090a14; color: #f2f5ff; line-height: 1.8;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+  }
+  main { max-width: 34rem; margin: 0 auto; }
+  h1 { font-size: 1.125rem; letter-spacing: .2em; font-weight: 700; margin: 0 0 .25rem; }
+  p.lede { color: #97a0c4; font-size: .8125rem; margin: 0 0 1.5rem; }
+  ol { color: #97a0c4; font-size: .8125rem; padding-left: 1.25rem; margin: 0 0 1.5rem; }
+  label { display: block; font-size: 11px; letter-spacing: .14em; color: #6b7091; margin-bottom: .375rem; }
+  input, button, textarea {
+    width: 100%; box-sizing: border-box; font-size: 16px; min-height: 44px;
+    border-radius: 14px; font-family: inherit;
+  }
+  input, textarea {
+    padding: .55rem .75rem; color: #f2f5ff; background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.12); outline: none;
+  }
+  input:focus, textarea:focus { border-color: #6ec1ff; }
+  textarea { min-height: 9rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+  button {
+    margin-top: .75rem; border: none; font-weight: 700; color: #08111f; cursor: pointer;
+    background: linear-gradient(120deg, #6ec1ff, #b79bff);
+  }
+  button.ghost { background: rgba(255,255,255,.05); color: #f2f5ff; border: 1px solid rgba(255,255,255,.12); }
+  button:disabled { opacity: .6; }
+  .field { margin-bottom: 1rem; }
+  #msg { font-size: .8125rem; margin: 1rem 0 0; white-space: pre-wrap; }
+  .ok { color: #7ee0a8; } .ng { color: #ff7aa8; } .wait { color: #97a0c4; }
+  #out { display: none; margin-top: 1.5rem; }
+  .note {
+    margin-top: 2rem; padding: .9rem 1rem; font-size: .8125rem; color: #97a0c4;
+    border: 1px solid rgba(255,255,255,.12); border-radius: 14px;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>muninn</h1>
+  <p class="lede">この端末のパスキーを鍵スロットに登録する。以後この端末では Face ID だけでサイトが開く。</p>
+  <ol>
+    <li>パスワードを1回だけ入れる（本文の鍵をここで取り出す）</li>
+    <li>パスキーを作り、その鍵で本文の鍵を包む</li>
+    <li>出てきた JSON を Claude に渡す（正本に載せると他の端末にも同期される）</li>
+  </ol>
+
+  <div class="field">
+    <label for="pw">パスワード</label>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="password">
+  </div>
+  <div class="field">
+    <label for="tag">この端末の名前（記録用）</label>
+    <input id="tag" type="text" placeholder="iPhone" value="iPhone">
+  </div>
+  <button id="go">パスキーを作って登録する</button>
+  <p id="msg" class="wait"></p>
+
+  <div id="out">
+    <div class="field">
+      <label for="json">これを Claude に渡す（この端末ではもう使える状態になっている）</label>
+      <textarea id="json" readonly></textarea>
+    </div>
+    <button id="copy" class="ghost">コピーする</button>
+  </div>
+
+  <p class="note">
+    ここで作られるのは「本文の鍵を包んだもの」で、包みを解けるのはこの端末のパスキーだけ。
+    JSON を公開しても本文は読めない。逆に、パスワードは今後も非常口として有効なままなので、
+    強くて長いものに変えておくほど安全になる（普段は打たないので長さで妥協する理由がもう無い）。
+  </p>
+</main>
+
+<script type="module">
+// 意図的に src/lib/crypto.js と重複させている。このページは「アプリが開けないときにも
+// 単体で動く非常口」なので、バンドルにも React にも依存させない。
+// 仕様を変えるときは src/lib/crypto.js と対で直すこと（info 文字列・HKDF・iv||ct の並び）。
+const enc = new TextEncoder();
+const b64ToBytes = (b) => Uint8Array.from(atob(b), (c) => c.charCodeAt(0));
+const bytesToB64 = (b) => btoa(String.fromCharCode(...new Uint8Array(b)));
+const bytesToB64url = (b) => bytesToB64(b).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+
+const $ = (id) => document.getElementById(id);
+const say = (text, cls) => { $('msg').textContent = text; $('msg').className = cls; };
+
+async function deriveCK(password, kdf) {
+  const base = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt: b64ToBytes(kdf.salt), iterations: kdf.iters, hash: kdf.hash || 'SHA-256' },
+    base, 256);
+  return new Uint8Array(bits);
+}
+
+async function wrappingKey(secret) {
+  const ikm = await crypto.subtle.importKey('raw', secret, 'HKDF', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'HKDF', hash: 'SHA-256', salt: new Uint8Array(0), info: enc.encode('muninn/keyslot/v2') },
+    ikm, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
+}
+
+async function wrapCK(secret, ck) {
+  const kw = await wrappingKey(secret);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, kw, ck);
+  const out = new Uint8Array(12 + ct.byteLength);
+  out.set(iv); out.set(new Uint8Array(ct), 12);
+  return bytesToB64(out);
+}
+
+const prfOut = (c) => c?.getClientExtensionResults?.()?.prf?.results?.first || null;
+
+async function makePasskey(prfSalt) {
+  const cred = await navigator.credentials.create({ publicKey: {
+    challenge: crypto.getRandomValues(new Uint8Array(32)),
+    rp: { name: 'muninn' },
+    user: { id: enc.encode('muninn-site'), name: 'muninn', displayName: 'muninn' },
+    pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+    authenticatorSelection: { residentKey: 'required', userVerification: 'required' },
+    extensions: { prf: { eval: { first: prfSalt } } },
+  }});
+  if (!cred) throw new Error('パスキーを作成できなかった');
+  if (cred.getClientExtensionResults?.()?.prf?.enabled === false) {
+    throw new Error('この端末のパスキーは PRF に対応していない。Face ID では開けない');
+  }
+  const direct = prfOut(cred);
+  if (direct) return { rawId: cred.rawId, secret: direct };
+
+  // create が PRF の出力を返さない実装のためのフォールバック。作った鍵を名指しで引き直す。
+  say('パスキーを作った。もう一度だけ Face ID を見せてくれ（鍵の取り出し）', 'wait');
+  const got = await navigator.credentials.get({ publicKey: {
+    challenge: crypto.getRandomValues(new Uint8Array(32)),
+    userVerification: 'required',
+    allowCredentials: [{ type: 'public-key', id: cred.rawId }],
+    extensions: { prf: { eval: { first: prfSalt } } },
+  }});
+  const secret = prfOut(got);
+  if (!secret) throw new Error('この環境ではパスキーから鍵を取り出せない（PRF 非対応）');
+  return { rawId: got.rawId, secret };
+}
+
+$('go').onclick = async () => {
+  const btn = $('go');
+  btn.disabled = true;
+  try {
+    if (!window.PublicKeyCredential) throw new Error('このブラウザは WebAuthn に対応していない');
+
+    say('鍵スロットを読んでいる…', 'wait');
+    const keyslots = await (await fetch('./keyslots.json', { cache: 'no-store' })).json();
+    const payload = await (await fetch('./site.enc.json', { cache: 'no-store' })).json();
+
+    // 先にパスワードの正しさを確かめる。ここを飛ばすと、打ち間違いのまま
+    // 「開かないスロット」を作って登録が完了したように見えてしまう。
+    say('パスワードを確かめている…', 'wait');
+    const ck = await deriveCK($('pw').value, keyslots.kdf);
+    const key = await crypto.subtle.importKey('raw', ck, 'AES-GCM', false, ['decrypt']);
+    try {
+      await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv: b64ToBytes(payload.iv) }, key, b64ToBytes(payload.ct));
+    } catch { throw new Error('パスワードが違う'); }
+
+    say('パスキーを作る。Face ID を見せてくれ', 'wait');
+    const { rawId, secret } = await makePasskey(b64ToBytes(keyslots.prfSalt));
+
+    const slot = {
+      id: ($('tag').value || 'device').trim().toLowerCase().replace(/\s+/g, '-'),
+      type: 'prf',
+      label: $('tag').value || 'device',
+      credentialId: bytesToB64url(rawId),
+      wrapped: await wrapCK(secret, ck),
+      created: new Date().toISOString().slice(0, 10),
+    };
+
+    // 正本に載るのは Claude がコミットしてから。それを待たずにこの端末で使えるようにしておく。
+    const KEY = 'mn.keyslots.local';
+    let local = [];
+    try { local = JSON.parse(localStorage.getItem(KEY) || '[]'); } catch { local = []; }
+    if (!Array.isArray(local)) local = [];
+    localStorage.setItem(KEY, JSON.stringify(
+      [...local.filter((s) => s.credentialId !== slot.credentialId), slot]));
+
+    $('json').value = JSON.stringify(slot, null, 2);
+    $('out').style.display = 'block';
+    say('登録できた。この端末はもう Face ID で開く', 'ok');
+  } catch (e) {
+    const cancelled = e?.name === 'NotAllowedError' || e?.name === 'AbortError';
+    say(cancelled ? '中断した' : ('失敗: ' + (e?.message || e)), cancelled ? 'wait' : 'ng');
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+$('copy').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText($('json').value);
+    $('copy').textContent = 'コピーした';
+  } catch {
+    $('json').select();
+  }
+};
+</script>
+</body>
+</html>

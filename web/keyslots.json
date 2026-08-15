@@ -1,0 +1,12 @@
+{
+  "_": "muninn の鍵スロット（正本）。LUKS のキースロットと同じ発想で、コンテンツ鍵 CK を複数の手段で開けるようにする。ここは公開される（暗号文と同じく誰でも読める）が、slots の中身は CK を包んだものなので、パスキーかパスワードが無ければ開かない。scripts/build-data.mjs が public/ へ複写する。",
+  "v": 2,
+  "kdf": {
+    "name": "PBKDF2",
+    "hash": "SHA-256",
+    "iters": 200000,
+    "salt": "Npr6X+MBWuTylNBSpaVoxw=="
+  },
+  "prfSalt": "vt+1VFE2cKMYexrdM59mLd6NZ1NO+rm+YoTgbafs2u0=",
+  "slots": []
+}

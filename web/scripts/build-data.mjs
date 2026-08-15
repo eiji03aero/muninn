@@ -6,6 +6,7 @@
 // frontmatter を構造化データとして採り、body は生markdownのまま渡す（クライアントで描画）。
 // 出力: web/public/site.json（平文, dev）。環境変数 MN_SITE_PASSWORD があれば
 //        web/public/site.enc.json（AES-256-GCM 暗号化, 本番）のみを出力する。
+//        あわせて web/keyslots.json（鍵スロットの正本）を public/ へ複写する。
 //
 // 依存: gray-matter（frontmatterのYAML解析）。Node標準の crypto で暗号化。
 import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs';
@@ -406,20 +407,30 @@ mkdirSync(OUT, { recursive: true });
 // 平文と暗号文が同居しないようクリーンにする
 for (const f of ['site.json', 'site.enc.json']) { const p = join(OUT, f); if (existsSync(p)) rmSync(p); }
 
+// ---------- 鍵スロット ----------
+// コンテンツ鍵 CK = PBKDF2(MN_SITE_PASSWORD, salt)。**salt は web/keyslots.json に固定して持つ**。
+// ビルドごとにランダム生成すると CK が毎回変わり、CK を包んで作ったパスキーのスロットが
+// 次の push で全部無効になる（＝Face ID で開けなくなる）。ここが固定であることが前提条件。
+const KEYSLOTS_SRC = join(WEB, 'keyslots.json');
+const keyslots = existsSync(KEYSLOTS_SRC) ? JSON.parse(readFileSync(KEYSLOTS_SRC, 'utf8')) : null;
+if (keyslots) writeFileSync(join(OUT, 'keyslots.json'), JSON.stringify(keyslots));
+
 const password = process.env.MN_SITE_PASSWORD;
 if (password) {
-  const salt = randomBytes(16), iv = randomBytes(12);
-  const iters = 200000;
-  const key = pbkdf2Sync(password, salt, iters, 32, 'sha256');
+  if (!keyslots) console.warn('⚠️  web/keyslots.json が無い。salt をこのビルド限りで生成する（パスキーでは開けなくなる）');
+  const kdf = keyslots?.kdf
+    || { name: 'PBKDF2', hash: 'SHA-256', iters: 200000, salt: randomBytes(16).toString('base64') };
+  const salt = Buffer.from(kdf.salt, 'base64'), iv = randomBytes(12);
+  const key = pbkdf2Sync(password, salt, kdf.iters, 32, 'sha256');
   const cipher = createCipheriv('aes-256-gcm', key, iv);
   const ct = Buffer.concat([cipher.update(json, 'utf8'), cipher.final()]);
   const payload = {
-    v: 1, kdf: { name: 'PBKDF2', hash: 'SHA-256', iters, salt: salt.toString('base64') },
+    v: 2, kdf,
     iv: iv.toString('base64'),
     ct: Buffer.concat([ct, cipher.getAuthTag()]).toString('base64'), // ct||tag（WebCrypto互換）
   };
   writeFileSync(join(OUT, 'site.enc.json'), JSON.stringify(payload));
-  console.log(`🔒 site.enc.json を出力（暗号化）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length}`);
+  console.log(`🔒 site.enc.json を出力（暗号化 / 鍵スロット ${keyslots?.slots?.length ?? 0}）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length}`);
 } else {
   writeFileSync(join(OUT, 'site.json'), json);
   console.log(`📄 site.json を出力（平文/dev）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length}`);

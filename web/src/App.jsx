@@ -12,18 +12,18 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { DataCtx } from './lib/ctx.js';
 import { ShellCtx } from './shell/ctx.js';
-import { loadSite } from './lib/data.js';
+import { loadSite, unlockWithPasskey, unlockWithPassword } from './lib/data.js';
 import { buildIndex } from './lib/wiki.js';
 import { buildGraph } from './lib/graph.js';
 import { loadShadow, loadRead, setLogSource } from './lib/recall.js';
 import { faceById, loadFaceId, saveFaceId, touchFace } from './shell/face.js';
 import { currentPath, setPath, parseTarget, SETTINGS_PATH } from './shell/hash.js';
 import { Settings } from './shell/Settings.jsx';
-import { PasswordGate, ShellLoading, ShellError } from './shell/Gate.jsx';
+import { LockGate, ShellLoading, ShellError } from './shell/Gate.jsx';
 import './shell/shell.css';
 
 export default function App() {
-  const [state, setState] = useState({ status: 'loading', site: null, idx: null, error: '' });
+  const [state, setState] = useState({ status: 'loading', site: null, idx: null, error: '', lock: null });
   const [tick, setTick] = useState(0);
   const [faceId, setFaceId] = useState(loadFaceId);
   // 設定は「面の代わりに出す」。面の上に重ねると、面のルータが `#/settings` を
@@ -35,10 +35,10 @@ export default function App() {
   const returnPath = useRef('/');
 
   useEffect(() => {
-    loadSite(null)
-      .then((s) => setState({ status: 'ready', site: s, idx: buildIndex(s), error: '' }))
+    loadSite()
+      .then((s) => setState({ status: 'ready', site: s, idx: buildIndex(s), error: '', lock: null }))
       .catch((e) => {
-        if (e.code === 'PASSWORD_REQUIRED') setState((p) => ({ ...p, status: 'needpass' }));
+        if (e.code === 'LOCKED') setState((p) => ({ ...p, status: 'locked', lock: e.lock }));
         else setState((p) => ({ ...p, status: 'error', error: String(e.message || e) }));
       });
   }, []);
@@ -63,12 +63,18 @@ export default function App() {
     if (inSettings && currentPath() !== SETTINGS_PATH) setPath(SETTINGS_PATH);
   }, [inSettings]);
 
-  const submitPass = async (pw) => {
+  // 解錠は2経路（Face ID / パスワード）あるが、成功したあとに起きることは同じ。
+  // 失敗メッセージだけを経路ごとに変える——Face ID は「違う」ではなく「取れなかった」が起きるため。
+  const unlock = async (run, fallbackMessage) => {
     try {
-      const s = await loadSite(pw);
-      setState({ status: 'ready', site: s, idx: buildIndex(s), error: '' });
-    } catch {
-      setState((p) => ({ ...p, status: 'needpass', error: 'パスワードが違うのだ' }));
+      const s = await run(state.lock);
+      setState((p) => ({ ...p, status: 'ready', site: s, idx: buildIndex(s), error: '' }));
+    } catch (e) {
+      // ユーザーが自分でシートを閉じたときは失敗として騒がない
+      const cancelled = e?.name === 'NotAllowedError' || e?.name === 'AbortError';
+      setState((p) => ({
+        ...p, status: 'locked', error: cancelled ? '' : (e?.message || fallbackMessage),
+      }));
     }
   };
 
@@ -135,7 +141,16 @@ export default function App() {
   );
 
   if (state.status === 'loading') return <ShellLoading />;
-  if (state.status === 'needpass') return <PasswordGate onSubmit={submitPass} error={state.error} />;
+  if (state.status === 'locked') {
+    return (
+      <LockGate
+        lock={state.lock}
+        error={state.error}
+        onPasskey={() => unlock((l) => unlockWithPasskey(l), '鍵を取り出せなかったのだ')}
+        onPassword={(pw) => unlock((l) => unlockWithPassword(l, pw), 'パスワードが違うのだ')}
+      />
+    );
+  }
   if (state.status === 'error') return <ShellError message={state.error} />;
 
   return (
