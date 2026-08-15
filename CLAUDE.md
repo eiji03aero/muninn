@@ -60,6 +60,7 @@ title: 内容を言い切るタイトル
 created: YYYY-MM-DD
 kind: knowledge
 tags: [dev/react]
+recall: "このノートで思い出したいことを問いの形で。"
 srs:
   last: null
   interval: 0
@@ -73,7 +74,9 @@ srs:
 - [[related-note]] — なぜ関連するか一言
 ```
 
-`kind` と `srs` の意味は「種別（kind）とクイズによる定着」を参照。`insight` ノートでは `srs` ブロックごと省略する。
+`kind` と `srs` の意味は「種別（kind）とクイズによる定着」を参照。`insight` ノートでは `recall` と `srs` ブロックごと省略する。
+
+`recall` は**想起の問い**（サイトの想起カードがタイトルを伏せてこれだけを見せる）。`kind: knowledge` には必ず付ける——**付け忘れるとサイト側が degrade 表示に落ちる**（`web/DESIGN.md` §9）。
 
 ## リンク規約
 

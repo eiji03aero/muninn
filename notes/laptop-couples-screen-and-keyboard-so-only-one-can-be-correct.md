@@ -3,6 +3,7 @@ title: ノートPCは画面とキーボードが剛結されているため、�
 created: 2026-08-15
 kind: knowledge
 tags: [ergonomics/workspace]
+recall: "ノートPCが人間工学的に両立不可能なのはなぜか。分離できないとき、画面とキーボードのどちらの高さを優先すべきで、それはなぜか。その状態をどう扱うべきか。"
 srs:
   last: null
   interval: 0

@@ -3,6 +3,7 @@ title: 椎間板は成人ではほぼ無血管で、栄養の出入りを荷重�
 created: 2026-08-15
 kind: knowledge
 tags: [ergonomics/workspace]
+recall: "椎間板は栄養と老廃物の出入りを何に頼っているか。そこから、同じ姿勢で固まることの害を「圧が高い」以外の言葉でどう説明できるか。"
 srs:
   last: null
   interval: 0

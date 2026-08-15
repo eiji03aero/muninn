@@ -3,6 +3,7 @@ title: 弱い力でも数時間続く負荷は、強い力を短時間かける�
 created: 2026-08-15
 kind: knowledge
 tags: [ergonomics/workspace]
+recall: "シンデレラ仮説とは何か。運動単位の動員順序のどの性質から出てくるか。ここから導かれる、直感に反する実務的な結論は何か。"
 srs:
   last: null
   interval: 0

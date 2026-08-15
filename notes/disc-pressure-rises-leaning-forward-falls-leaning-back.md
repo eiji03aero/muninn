@@ -3,6 +3,7 @@ title: 椎間板内圧は前傾で上がり背もたれに預けると下がる�
 created: 2026-08-15
 kind: knowledge
 tags: [ergonomics/workspace]
+recall: "「座位は立位より腰に悪い」は確定した知見か。Nachemson と Wilke で何が食い違ったか。この研究群から一貫して読み取れる差はどちらの軸か、そこから出る実務的な指針は何か。"
 srs:
   last: null
   interval: 0

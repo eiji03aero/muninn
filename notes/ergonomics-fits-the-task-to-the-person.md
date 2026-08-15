@@ -3,6 +3,7 @@ title: 人間工学は人を道具に合わせるのではなく、道具と作�
 created: 2026-08-15
 kind: knowledge
 tags: [ergonomics]
+recall: "人間工学の立場を一行で言うと何か。「正しい姿勢を心がける」がこの分野の解にならないのはなぜか。IEAの定義が「快適さのため」だけの分野ではないと示しているのはどの部分か。"
 srs:
   last: null
   interval: 0

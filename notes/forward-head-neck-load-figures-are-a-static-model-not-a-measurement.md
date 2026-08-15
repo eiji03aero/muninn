@@ -3,6 +3,7 @@ title: 「首の前傾15°で12kg、60°で27kg」は実測ではなく単著の
 created: 2026-08-15
 kind: knowledge
 tags: [ergonomics/workspace]
+recall: "「首の前傾60°で27kg」という数字の出どころと性格は何か。どこまで信じてよく、どこから留保が要るか。モニタを上げる根拠として何を置くべきか。"
 srs:
   last: null
   interval: 0

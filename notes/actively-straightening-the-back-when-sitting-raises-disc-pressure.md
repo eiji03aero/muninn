@@ -3,6 +3,7 @@ title: 背筋を意識して伸ばして座ると、脱力して座るより椎�
 created: 2026-08-15
 kind: knowledge
 tags: [ergonomics/workspace]
+recall: "背筋を伸ばして座ると椎間板内圧はどうなるか、脱力して座った場合と比べて。その理由は何か。ここから出る「正しい姿勢の作り方」への修正は何か。"
 srs:
   last: null
   interval: 0

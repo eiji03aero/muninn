@@ -3,6 +3,7 @@ title: 快適な視線帯は水平から15〜30°下。上を見上げるのは�
 created: 2026-08-15
 kind: knowledge
 tags: [ergonomics/workspace]
+recall: "快適な視線の角度帯はどこか。上下で非対称なのはなぜか。視距離「腕1本分」の生理学的な裏付けは何か。低ければ低いほど良いと言えない理由は。"
 srs:
   last: null
   interval: 0
