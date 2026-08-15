@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 380" width="920" height="380" role="img" aria-label="ノートPCと外部ディスプレイの配置：外付けキーボードありの場合と内蔵キーボードのみの場合の側面図">
+  <title>ノートPC＋外部ディスプレイの側面図（パターンA / パターンB）</title>
+  <desc>縦横とも 3px = 1cm。目の高さは机上面から45cm、快適な視線帯は水平から15〜30°下。</desc>
+  <style>
+    .ln   { stroke: #6b7590; stroke-width: 1.6; fill: none; }
+    .desk { stroke: #6b7590; stroke-width: 2.4; fill: none; }
+    .body { stroke: #6b7590; stroke-width: 1.6; fill: none; }
+    .scr  { stroke: #4a86c8; stroke-width: 5; fill: none; stroke-linecap: round; }
+    .scr2 { stroke: #6b7590; stroke-width: 5; fill: none; stroke-linecap: round; opacity: .55; }
+    .box  { stroke: #6b7590; stroke-width: 1.6; fill: #6b7590; fill-opacity: .14; }
+    .gaze { stroke: #d98b3a; stroke-width: 1.8; fill: none; stroke-dasharray: 7 5; }
+    .gaze2{ stroke: #d98b3a; stroke-width: 1.4; fill: none; stroke-dasharray: 2 4; opacity: .7; }
+    .ref  { stroke: #6b7590; stroke-width: 1; fill: none; stroke-dasharray: 3 4; opacity: .7; }
+    .dim  { stroke: #55a06b; stroke-width: 1.2; fill: none; }
+    t     { font-family: system-ui, sans-serif; }
+    .t    { font-family: system-ui, sans-serif; font-size: 13px; fill: #6b7590; }
+    .tk   { font-family: system-ui, sans-serif; font-size: 14px; fill: #4a86c8; font-weight: 700; }
+    .tg   { font-family: system-ui, sans-serif; font-size: 13px; fill: #d98b3a; font-weight: 700; }
+    .td   { font-family: system-ui, sans-serif; font-size: 13px; fill: #55a06b; font-weight: 700; }
+    .cap  { font-family: system-ui, sans-serif; font-size: 15px; fill: #8b95b0; font-weight: 700; }
+    .warn { font-family: system-ui, sans-serif; font-size: 13px; fill: #c25f5f; font-weight: 700; }
+  </style>
+
+  <!-- ===================== パターン A ===================== -->
+  <g>
+    <text class="cap" x="20" y="26">A. 外付けキーボードあり — MBPを持ち上げて主画面にする</text>
+
+    <!-- 机 -->
+    <line class="desk" x1="20" y1="300" x2="430" y2="300"/>
+    <!-- スタンド -->
+    <rect class="box" x="110" y="255" width="76" height="45"/>
+    <!-- ノートPC本体（天板の下） -->
+    <rect class="box" x="110" y="249" width="70" height="6"/>
+    <!-- 画面（上端を奥に倒す＝視線に正対） -->
+    <line class="scr" x1="113" y1="249" x2="96" y2="191"/>
+    <!-- 外付けキーボード -->
+    <rect class="box" x="205" y="292" width="90" height="8"/>
+    <text class="t" x="205" y="318">外付けキーボード</text>
+
+    <!-- 人（頭・胴） -->
+    <circle class="body" cx="286" cy="152" r="26"/>
+    <path class="body" d="M286 178 L292 250 Q294 268 276 272"/>
+    <circle cx="266" cy="164" r="3.4" fill="#d98b3a"/>
+
+    <!-- 視線と水平基準 -->
+    <line class="ref" x1="266" y1="164" x2="96" y2="164"/>
+    <line class="gaze" x1="266" y1="164" x2="104" y2="220"/>
+    <path d="M211 164 A 55 55 0 0 0 214 182" fill="none" stroke="#d98b3a" stroke-width="1.6"/>
+    <text class="tg" x="172" y="214">15〜20°下</text>
+    <text class="tg" x="150" y="152">距離 50〜60cm</text>
+
+    <!-- 寸法: 画面中心の高さ -->
+    <line class="dim" x1="58" y1="220" x2="58" y2="300"/>
+    <line class="dim" x1="52" y1="220" x2="64" y2="220"/>
+    <line class="dim" x1="52" y1="300" x2="64" y2="300"/>
+    <line class="dim" x1="64" y1="220" x2="102" y2="220" stroke-dasharray="3 4"/>
+    <text class="td" x="22" y="214">22〜28cm</text>
+    <text class="t"  x="22" y="340">↑ 画面中心の高さ（唯一の目標値）</text>
+
+    <!-- 寸法: 持ち上げ量 -->
+    <line class="dim" x1="196" y1="255" x2="196" y2="300"/>
+    <line class="dim" x1="190" y1="255" x2="202" y2="255"/>
+    <line class="dim" x1="190" y1="300" x2="202" y2="300"/>
+    <text class="td" x="204" y="272">約15cm 上げる</text>
+
+    <text class="tk" x="60" y="182">MBP 14</text>
+  </g>
+
+  <!-- 区切り -->
+  <line x1="460" y1="16" x2="460" y2="364" stroke="#6b7590" stroke-width="1" stroke-dasharray="4 6" opacity=".5"/>
+
+  <!-- ===================== パターン B ===================== -->
+  <g transform="translate(470,0)">
+    <text class="cap" x="20" y="26">B. 内蔵キーボードのみ — 役割を逆転し、外部ディスプレイを主に</text>
+
+    <!-- 机 -->
+    <line class="desk" x1="20" y1="300" x2="430" y2="300"/>
+    <!-- 外部ディスプレイのスタンド -->
+    <rect class="box" x="70" y="251" width="60" height="49"/>
+    <!-- 外部ディスプレイ（主・適正高さ） -->
+    <line class="scr" x1="100" y1="251" x2="84" y2="199"/>
+    <text class="tk" x="26" y="192">JAPANNEXT 14</text>
+    <text class="t"  x="26" y="176">（主）</text>
+
+    <!-- MBP（机直置き・従） -->
+    <rect class="box" x="160" y="294" width="66" height="6"/>
+    <line class="scr2" x1="162" y1="294" x2="145" y2="235"/>
+    <text class="t" x="24" y="126">MBP（従・下段）</text>
+    <polyline class="ref" points="30,134 30,262 148,262"/>
+    <text class="t" x="160" y="318">内蔵キーボード</text>
+
+    <!-- 人 -->
+    <circle class="body" cx="320" cy="152" r="26"/>
+    <path class="body" d="M320 178 L326 250 Q328 268 310 272"/>
+    <circle cx="300" cy="164" r="3.4" fill="#d98b3a"/>
+
+    <!-- 主画面への視線 -->
+    <line class="ref" x1="300" y1="164" x2="84" y2="164"/>
+    <line class="gaze" x1="300" y1="164" x2="92" y2="225"/>
+    <path d="M245 164 A 55 55 0 0 0 248 180" fill="none" stroke="#d98b3a" stroke-width="1.6"/>
+    <text class="tg" x="176" y="216">16°下 / 距離 65〜75cm</text>
+
+    <!-- 従画面への視線（常用しない） -->
+    <line class="gaze2" x1="300" y1="164" x2="154" y2="265"/>
+    <text class="warn" x="212" y="252">35°前後</text>
+    <text class="warn" x="212" y="270">＝常用しない</text>
+
+    <!-- 注意書き -->
+    <text class="t" x="20" y="340">距離が伸びる分、表示スケールを上げて身体を前に出さないこと</text>
+  </g>
+</svg>
