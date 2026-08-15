@@ -23,6 +23,7 @@ muninn の入口。テーマごとのMOCはここから辿る。
 - [[philosophy|哲学（知識アトラス）]] — 神話から理性へ、古代ギリシアから認識論まで。概念グラフを順路でたどる（`atlas/philosophy/`）
 - [[mathematics|数学（知識アトラス）]] — 数学の全体地図。6分野を「日常／裏側／レンズ」の距離つきで一周し、地図の外側まで見る（`atlas/mathematics/`）
 - [[ui-architecture|UIアーキテクチャ（知識アトラス）]] — 「状態を画面へ写す問題」に対する Reactのモデル と The Elm Architecture の二つの答えを読み、指標ごとに比較する（`atlas/ui-architecture/`）
+- [[ergonomics|人間工学（知識アトラス）]] — 実用ファーストの地図。デスクワーク環境（椅子・モニタ・机・光）とUI設計（認知）の2ルート。理論ノードは深掘り待ちの stub で下にぶら下げてある（`atlas/ergonomics/`）
 
 ## 未分類
 
