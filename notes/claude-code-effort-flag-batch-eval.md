@@ -35,4 +35,4 @@ claude -p "$(cat task.md)" --model opus --effort xhigh --output-format json
 
 ## Links
 - [[llm-effort-differs-by-model-tier]] — このフラグで測って分かった、effort の意味のモデル差
-- [[higher-tier-model-may-skip-research]] — `num_turns` で検出できた挙動の実例
+- [[most-striking-n1-observation-is-likely-noise]] — `num_turns` が自動で取れるおかげで、採点なしに追試できた実例

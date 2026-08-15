@@ -32,7 +32,7 @@ muninn の入口。テーマごとのMOCはここから辿る。
 - [[llm-comparison-forgotten-criteria-flip-the-verdict]] — モデル比較の設計上の落とし穴
 - [[llm-eval-verifiable-axes-discriminate]] — 差が出るのは照合できる軸だけ。自前の正誤判定は天井に張り付く
 - [[llm-effort-differs-by-model-tier]] — effort が増やすものはモデルで違う（探索のスイッチ／深さの調整）
-- [[higher-tier-model-may-skip-research]] — 上位モデルでも effort が低いと調査を丸ごと省くことがある
+- [[most-striking-n1-observation-is-likely-noise]] — n=1 で一番目を引いた観測ほど再現しない（追試で結論を1本取り下げた）
 - [[claude-code-effort-flag-batch-eval]] — `--model` / `--effort` でモデル×effort を非対話に回す
 
 ## フォロー（follows/）
