@@ -65,7 +65,7 @@ export default function App() {
 
   // 解錠は2経路（Face ID / パスワード）あるが、成功したあとに起きることは同じ。
   // 失敗メッセージだけを経路ごとに変える——Face ID は「違う」ではなく「取れなかった」が起きるため。
-  const unlock = async (run, fallbackMessage) => {
+  const unlock = async (run, fallbackMessage, cancelMessage = '') => {
     try {
       const s = await run(state.lock);
       setState((p) => ({ ...p, status: 'ready', site: s, idx: buildIndex(s), error: '' }));
@@ -73,7 +73,7 @@ export default function App() {
       // ユーザーが自分でシートを閉じたときは失敗として騒がない
       const cancelled = e?.name === 'NotAllowedError' || e?.name === 'AbortError';
       setState((p) => ({
-        ...p, status: 'locked', error: cancelled ? '' : (e?.message || fallbackMessage),
+        ...p, status: 'locked', error: cancelled ? cancelMessage : (e?.message || fallbackMessage),
       }));
     }
   };
@@ -146,7 +146,13 @@ export default function App() {
       <LockGate
         lock={state.lock}
         error={state.error}
-        onPasskey={() => unlock((l) => unlockWithPasskey(l), '鍵を取り出せなかったのだ')}
+        // WebAuthn は「中断した」と「この端末に鍵が無い」を区別できない（プライバシー上わざと同じ
+        // NotAllowedError にしている）。無言で戻すと壊れて見えるので、両方を含む言い方で伝える。
+        onPasskey={() => unlock(
+          (l) => unlockWithPasskey(l),
+          '鍵を取り出せなかったのだ',
+          '開けなかった。中断したか、この端末がまだ登録されていない',
+        )}
         onPassword={(pw) => unlock((l) => unlockWithPassword(l, pw), 'パスワードが違うのだ')}
       />
     );

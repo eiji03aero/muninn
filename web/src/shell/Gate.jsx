@@ -34,6 +34,9 @@ export function LockGate({ lock, onPasskey, onPassword, error }) {
   const [enrolling, setEnrolling] = useState(false);
   const [platformOk, setPlatformOk] = useState(null); // null = 判定中
 
+  // 注意: hasSlots は「鍵スロットが存在するか」であって「**この端末が**登録済みか」ではない。
+  // WebAuthn には「この端末に鍵があるか」を事前に問い合わせる手段が無い（プライバシー上わざと無い）ので、
+  // 実際に試すまで分からない。だから登録導線を hasSlots で消してはならない（下の注記を参照）。
   const hasSlots = (lock?.prfSlots?.length || 0) > 0;
   const canPasskey = platformOk && hasSlots;
 
@@ -45,6 +48,10 @@ export function LockGate({ lock, onPasskey, onPassword, error }) {
 
   // Face ID で開けないと分かった時点で、非常口を畳んでおく理由が無くなる
   useEffect(() => { if (platformOk !== null && !canPasskey) setShowPw(true); }, [platformOk, canPasskey]);
+
+  // 解錠に失敗したら非常口を開く。閉じたままにすると
+  // 「押しても何も起きない画面」で行き止まりになる（原則6）
+  useEffect(() => { if (error) setShowPw(true); }, [error]);
 
   const run = async (fn) => {
     if (busy) return;
@@ -99,11 +106,14 @@ export function LockGate({ lock, onPasskey, onPassword, error }) {
 
           {error && <p className="sh-error">{error}</p>}
 
-          {/* 未登録の端末に道を示す。この行が見えていること自体が
-              「新しいビルドが配信されている」印にもなる（古いSWに掴まれていると出ない） */}
-          {platformOk && !hasSlots && (
+          {/* 登録導線は **スロットの有無で消してはならない**。
+              かつて `!hasSlots` を条件にしていたが、hasSlots は keyslots.json 全体の状態なので、
+              1台目を登録した瞬間に **2台目以降の登録導線が全端末で消えた**。
+              未登録の端末には「効かない Face ID ボタン」だけが残り、行き止まりになった（原則6違反）。
+              判定できない条件で導線を隠すな——出しておいて、押した人に試させるほうが安い。 */}
+          {platformOk && (
             <button className="sh-link" onClick={() => setEnrolling(true)}>
-              この端末を登録して Face ID で開く
+              {hasSlots ? 'この端末を登録する' : 'この端末を登録して Face ID で開く'}
             </button>
           )}
         </div>
