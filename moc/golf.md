@@ -39,6 +39,7 @@ tags: [moc]
 
 ## 体重移動・スイングシーケンス・フィニッシュ
 
+- [[golf-rotation-comes-from-two-hip-joints-and-thoracic-spine-not-lumbar-axis-shifts-trail-to-lead]] — 解剖。回すのは左右2つの股関節と胸椎（腰椎はほぼ回らない）。股関節は思うより低く外側／軸はバック右→ダウン左へ乗り換わる
 - [[golf-backswing-load-pressure-into-inside-of-trail-foot-not-sway]] — バックスイング。後ろ足の内側に圧を積む（スウェー／リバースピボット回避）
 - [[golf-backswing-keep-good-tilt-kill-sway-and-dip-rotate-onto-inside-trail-hip]] — バックの軸。良い右傾きは残し、スウェー/ディップを消す（回転で内側に乗る）
 - [[golf-takeaway-by-feel-hands-in-and-lever-sets-good-return-reference-not-path-preview]] — 始動はプレーンを線でなぞらずハンズイン＋てこで自然に。機構は"ダウンが戻る良い基準づくり"

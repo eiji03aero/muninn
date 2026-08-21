@@ -35,3 +35,4 @@ tags: [sports/golf]
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — 良い右傾き＝上体を残す＝アッパーの土台
 - [[golf-shallow-backswing-hand-and-shaft-in-line-reduces-fat]] — テークバックを深く引かず一直線/オンプレーンに上げる側
 - [[golf-takeaway-by-feel-hands-in-and-lever-sets-good-return-reference-not-path-preview]] — ハンズイン＋てこの自然な始動（ただしやり過ぎ＝深く引きすぎ→軸倒れ、はこのノートの警告）
+- [[golf-rotation-comes-from-two-hip-joints-and-thoracic-spine-not-lumbar-axis-shifts-trail-to-lead]] — 解剖学的な裏づけ（股関節の位置・軸は左右に乗り換わる・回るのは胸椎で腰椎ではない）
