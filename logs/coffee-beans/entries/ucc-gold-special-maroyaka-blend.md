@@ -2,7 +2,7 @@
 title: ゴールドスペシャル まろやかブレンド / UCC上島珈琲
 kind: logentry
 topic: coffee-beans
-created: 2026-08-13
+created: 2026-08-19
 image: images/ucc-gold-special-maroyaka-blend.webp
 fields:
   roaster: UCC上島珈琲
@@ -11,7 +11,7 @@ fields:
   rating: 3
   flavor: [まろやか, 酸味, 苦味控えめ]
   rebuy: false
-  tasted_on: 2026-08-13
+  tasted_on: 2026-08-19
 ---
 
 液の輪郭に少し黄金。粉は赤みがかっている。しっかりいれたつもりだが、結構透き通った感じ。うーん抽出しすぎたかも。普通に味が薄い。
