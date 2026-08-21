@@ -15,30 +15,32 @@ const KEY_USAGE = 'mn.face.usage';
 
 // 面ごとに動的 import する。こうしておくと日報の Chakra が他の面のチャンクに混ざらず、
 // 「日報を落とせば Chakra ごと消える」状態を保てる。
+//
+// import 関数は `load` として**外にも出す**。解錠を待っているあいだに先に取りに行かせるためで、
+// これが無いと「Face ID を見せている数秒」がまるごと待ち時間になるうえ、
+// その数秒のあいだに配信側が入れ替わると、解錠した瞬間に消えたチャンクを取りに行くことになる。
+const face = (o, load) => ({ ...o, load, Root: lazy(load) });
 export const FACES = [
-  {
+  face({
     id: 'daily',
     label: '日報',
     hint: '今日の紙面を上から読み、下のタブで横に移る。いまのかたち',
     // この面は自前のルータで URL を書き換えながら動く。shell が hash を追いかけると
     // 面の移動のたびに shell まで再描画されるので、追わない。
     ownsUrl: true,
-    Root: lazy(() => import('../faces/daily/index.jsx')),
-  },
-  {
+  }, () => import('../faces/daily/index.jsx')),
+  face({
     id: 'thumb',
     label: '親指ひとつ',
     hint: '左下の一点だけで操作する。上は読むだけ',
     ownsUrl: false,
-    Root: lazy(() => import('../faces/thumb/index.jsx')),
-  },
-  {
+  }, () => import('../faces/thumb/index.jsx')),
+  face({
     id: 'field',
     label: '一本の欄',
     hint: '下の欄に打つと中身が変わる。タブは無い',
     ownsUrl: false,
-    Root: lazy(() => import('../faces/field/index.jsx')),
-  },
+  }, () => import('../faces/field/index.jsx')),
 ];
 
 export const DEFAULT_FACE = 'daily';

@@ -1,7 +1,7 @@
 // 復号ゲートと、その周辺（読み込み中・読み込み失敗・端末の登録）。
 // どの面が選ばれていても最初に必ず通る層なので、面のUIライブラリ（Chakra）に依存させない。
 // 日報を落とす日が来ても、この3画面はそのまま残せる。
-import { useEffect, useState } from 'react';
+import { Component, useEffect, useState } from 'react';
 import { platformAuthenticatorAvailable } from '../lib/webauthn.js';
 import { Enroll } from './Enroll.jsx';
 
@@ -19,6 +19,63 @@ export function ShellError({ message }) {
       <div className="sh-center"><p className="sh-lede">読み込み失敗: {message}</p></div>
     </div>
   );
+}
+
+// 面は動的 import で読み込む。その import が失敗すると、**受け止める者が居なければ
+// React はツリーごと畳んで真っ白な画面になる**（#root の中身が空になる）。
+// これが実際に起きる: GitHub Pages は毎回 dist を丸ごと置き換えるので、デプロイの前後で
+// assets のファイル名が変わり、古い index.html を握ったまま動いているタブが
+// **もう存在しないチャンク**を取りに行く。解錠のあいだ（Face ID の数秒）に
+// 新しい Service Worker が古いキャッシュを消すと、ちょうどこの窓に入る。
+//
+// ここは最後の砦なので、握りつぶさない: 一度だけ自動で読み直し、それでも駄目なら
+// **何が起きたかと次の一手**を文字で出す。真っ白のまま黙るのだけは避ける。
+const RELOADED = 'mn.shell.reloaded';
+const isLoadError = (e) => /dynamically imported module|Importing a module script failed|error loading dynamically|Failed to fetch/i.test(String(e?.message || e));
+
+export class FaceBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { err: null, retried: false };
+  }
+
+  static getDerivedStateFromError(err) {
+    return { err };
+  }
+
+  componentDidCatch(err) {
+    if (!isLoadError(err)) return;
+    let seen = '1';
+    try { seen = sessionStorage.getItem(RELOADED); } catch { /* noop */ }
+    if (seen) { this.setState({ retried: true }); return; }
+    try { sessionStorage.setItem(RELOADED, '1'); } catch { /* noop */ }
+    window.location.reload();
+  }
+
+  render() {
+    const { err, retried } = this.state;
+    if (!err) return this.props.children;
+    if (isLoadError(err) && !retried) return <ShellLoading />; // reload 待ち
+    return (
+      <div className="mn-shell">
+        <div className="sh-center">
+          <p className="sh-lede">
+            {isLoadError(err)
+              ? '新しい版が配られた直後で、いまの画面が読み込めなかった。一度アプリを終了してから開き直すと直る。'
+              : `画面を組み立てられなかった: ${err?.message || err}`}
+          </p>
+          <button type="button" className="sh-subtle" onClick={() => { try { sessionStorage.removeItem(RELOADED); } catch { /* noop */ } window.location.reload(); }}>
+            もう一度読み込む
+          </button>
+        </div>
+      </div>
+    );
+  }
+}
+
+// 読み込みに成功したら、次の失敗のために「一度は読み直せる」状態へ戻しておく
+export function clearReloadGuard() {
+  try { sessionStorage.removeItem(RELOADED); } catch { /* noop */ }
 }
 
 /**

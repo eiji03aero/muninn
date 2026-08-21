@@ -19,7 +19,7 @@ import { loadShadow, loadRead, setLogSource } from './lib/recall.js';
 import { faceById, loadFaceId, saveFaceId, touchFace } from './shell/face.js';
 import { currentPath, setPath, parseTarget, SETTINGS_PATH } from './shell/hash.js';
 import { Settings } from './shell/Settings.jsx';
-import { LockGate, ShellLoading, ShellError } from './shell/Gate.jsx';
+import { clearReloadGuard, FaceBoundary, LockGate, ShellLoading, ShellError } from './shell/Gate.jsx';
 import './shell/shell.css';
 
 export default function App() {
@@ -118,6 +118,14 @@ export default function App() {
 
   const face = faceById(faceId);
 
+  // 面のチャンクは**解錠を待たずに**取りに行く。Face ID の数秒を待ち時間にしないためと、
+  // その数秒のあいだに新しい版が配られても、解錠した瞬間に真っ白にならないため
+  // （消えたチャンクを取りに行って import が失敗する。詳細は shell/Gate.jsx の FaceBoundary）。
+  // 失敗はここでは黙らせる——本番の判断は FaceBoundary がする。
+  useEffect(() => {
+    face.load?.().then(clearReloadGuard, () => {});
+  }, [face]);
+
   // URL を持たない面のときだけ、shell が hash を見張って対象を差し替える。
   // ディープリンクは「別のアプリから飛んでくる」だけでなく、PWA を開いたまま
   // 共有リンクを踏む形でも来る——初回マウントだけ見ていると、その2回目以降を落とす。
@@ -165,9 +173,11 @@ export default function App() {
         {inSettings ? (
           <Settings faceId={faceId} onPick={pickFace} onClose={() => closeSettings()} />
         ) : (
-          <Suspense fallback={<ShellLoading />}>
-            <face.Root key={face.id} initialTarget={initialTarget} />
-          </Suspense>
+          <FaceBoundary key={face.id}>
+            <Suspense fallback={<ShellLoading />}>
+              <face.Root initialTarget={initialTarget} />
+            </Suspense>
+          </FaceBoundary>
         )}
       </ShellCtx.Provider>
     </DataCtx.Provider>
