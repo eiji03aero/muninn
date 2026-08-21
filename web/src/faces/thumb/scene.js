@@ -1,7 +1,10 @@
-// 「いまどこにいるか」から、帯に並ぶ候補と、原点を叩いたときに起きることを決める。
+// 「いまどこにいるか」から、帯に並ぶ候補と、原点をタップしたときに起きることを決める。
 //
 // ここは純粋な計算に留める（DOM も副作用も持たない）。原点が実際に何をするかの実行は
 // index.jsx の runAct が握る——原点の意味は1箇所でしか決まらない、を守るため。
+//
+// 帯の `k`（種別）は**画面に出る語**なので、内部語彙をそのまま置かない。
+// views.jsx の一覧行とは文字列一致で選択を照合しているので、片方だけ直すと選択表示が壊れる。
 
 import { dayIndex, hash32 } from '../../lib/edition.js';
 import { shortTitle, cleanTitle } from '../../lib/graph.js';
@@ -32,7 +35,7 @@ export function reelItems(scene, ctx) {
       done: !!judged[c.note.slug],
       act: { t: 'flip' },
     }));
-    // 想起のあとに残る「今日の余白」。読み物を1つずつ差し出す
+    // 答え合わせのあとに残る枠。読み物を1つずつ差し出す
     const written = (site.atlases || []).flatMap((a) => a.concepts.filter((c) => c.status !== 'stub').map((c) => ({ a, c })));
     const ch = pickOfDay(written, today, 'thumb-chapter');
     if (ch) items.push({ k: '章', l: shortTitle(ch.c.title), act: { t: 'go', s: nodeScene(`/atlas/${ch.a.slug}/concept/${ch.c.slug}`) } });
@@ -41,7 +44,7 @@ export function reelItems(scene, ctx) {
     const ins = site.notes.filter((n) => n.kind === 'insight');
     const pick = pickOfDay(ins, today, 'thumb-insight');
     if (pick) items.push({ k: '気づき', l: pick.title.slice(0, 24), act: { t: 'go', s: nodeScene(`/note/${pick.slug}`) } });
-    items.push({ k: 'もう少し', l: 'あと5枚 出す', tone: 'act', act: { t: 'more' } });
+    items.push({ k: '追加', l: 'あと5枚出す', tone: 'act', act: { t: 'more' } });
     return items;
   }
 
@@ -53,7 +56,7 @@ export function reelItems(scene, ctx) {
     for (const a of site.atlases || []) items.push({ k: '連載', l: cleanTitle(a.title), act: { t: 'go', s: nodeScene(`/atlas/${a.slug}`) } });
     for (const f of site.follows) items.push({ k: '定点', l: cleanTitle(f.title), act: { t: 'go', s: nodeScene(`/follow/${f.name}`) } });
     for (const t of site.logtopics || []) items.push({ k: '記録帖', l: cleanTitle(t.title), act: { t: 'go', s: nodeScene(`/log/${t.slug}`) } });
-    for (const m of site.mocs) items.push({ k: '見取り図', l: cleanTitle(m.title), act: { t: 'go', s: nodeScene(`/moc/${m.slug}`) } });
+    for (const m of site.mocs) items.push({ k: '索引', l: cleanTitle(m.title), act: { t: 'go', s: nodeScene(`/moc/${m.slug}`) } });
     return items;
   }
 
@@ -64,7 +67,7 @@ export function reelItems(scene, ctx) {
     // 見つからなかったときが本番。「ありません」で終わらせず、依頼への入口に変える
     if (!hits.length) {
       return [{
-        k: '依頼', l: `「${q}」を調べてもらう`, tone: 'act',
+        k: '依頼', l: `「${q}」を調べる`, tone: 'act',
         act: { t: 'ask', text: `「${q}」について調べて、muninn に記録して。客観的な事実は原子ノートにして、既存の記事と相互リンクすること。（muninn の中を探したが見つからなかった）` },
       }];
     }
@@ -75,9 +78,9 @@ export function reelItems(scene, ctx) {
   }
 
   if (scene.t === 'ask') {
-    const items = [{ k: '書く', l: '新しく頼む', tone: 'act', act: { t: 'write' } }];
+    const items = [{ k: '書く', l: '新しい依頼', tone: 'act', act: { t: 'write' } }];
     if (slips.length || ctx.pending.length) {
-      items.push({ k: '渡す', l: '伝票をまるごとコピー', tone: 'act', act: { t: 'copy' } });
+      items.push({ k: 'コピー', l: '依頼をまとめてコピー', tone: 'act', act: { t: 'copy' } });
     }
     slips.forEach((s, i) => items.push({ k: `依頼${i + 1}`, l: s.label.slice(0, 24), slip: s, tone: 'act', act: { t: 'del', id: s.id } }));
     if (ctx.pending.length) {
@@ -91,7 +94,7 @@ export function reelItems(scene, ctx) {
     const sorted = [...list].sort((a, b) => ((a.updated || '') < (b.updated || '') ? 1 : -1));
     const items = sorted.map((n) => ({ k: kindOf(n), l: shortTitle(n.title).slice(0, 26), node: n, act: { t: 'go', s: nodeScene(n.route) } }));
     const moc = site.mocs.find((m) => (m.sections || []).some((sec) => sec.items.some((it) => sorted.some((n) => n.slug === it.target))));
-    if (moc) items.unshift({ k: '見取り図', l: cleanTitle(moc.title), act: { t: 'go', s: nodeScene(`/moc/${moc.slug}`) } });
+    if (moc) items.unshift({ k: '索引', l: cleanTitle(moc.title), act: { t: 'go', s: nodeScene(`/moc/${moc.slug}`) } });
     items.push({
       k: '依頼', l: 'このテーマを増やす', tone: 'act',
       act: { t: 'ask', text: `「${tagJa(scene.tag)}」について、muninn にまだ無いところを調べて記事にして。` },
@@ -102,7 +105,7 @@ export function reelItems(scene, ctx) {
   const node = graph.byRoute.get(scene.route);
   if (!node) return [];
   const items = [];
-  const ins = () => insOf(node.route, graph, extra).forEach((b) => items.push(pathItem('in', b.node, b.reason, '来る道')));
+  const ins = () => insOf(node.route, graph, extra).forEach((b) => items.push(pathItem('in', b.node, b.reason, 'リンク元')));
 
   switch (node.type) {
     case 'concept': {
@@ -115,12 +118,12 @@ export function reelItems(scene, ctx) {
       }
       for (const ns of node.ref.notes || []) {
         const to = graph.byRoute.get(`/note/${ns}`);
-        if (to) items.push(pathItem('out', to, 'この章から覚える価値のある知識として切り出した', '蒸留'));
+        if (to) items.push(pathItem('out', to, 'この章から、覚える価値のある知識として切り出しました', '派生'));
       }
       ins();
       if (node.ref.status === 'stub') {
         items.push({
-          k: '依頼', l: 'この章を書いてもらう', tone: 'act',
+          k: '依頼', l: 'この章の執筆を依頼', tone: 'act',
           act: { t: 'ask', text: `/mn-learn 連載「${cleanTitle(a.title)}」の章「${shortTitle(node.title)}」はまだ書かれていない。読み物として書いて。` },
         });
       } else {
@@ -134,7 +137,7 @@ export function reelItems(scene, ctx) {
     case 'atlas': {
       for (const r of node.ref.routes) {
         const first = graph.byRoute.get(`/atlas/${node.slug}/concept/${r.order[0]}`);
-        if (first) items.push({ k: '順路', l: r.label, route: r, act: { t: 'go', s: nodeScene(first.route) } });
+        if (first) items.push({ k: '読む順', l: r.label, route: r, act: { t: 'go', s: nodeScene(first.route) } });
       }
       for (const c of node.ref.concepts) {
         items.push({
@@ -156,7 +159,7 @@ export function reelItems(scene, ctx) {
       }
       ins();
       items.push({
-        k: '依頼', l: '次の観測を頼む', tone: 'act',
+        k: '依頼', l: '次の観測を依頼', tone: 'act',
         act: { t: 'ask', text: `/mn-follow 「${cleanTitle(node.title)}」の次の観測を記録したい。` },
       });
       break;
@@ -166,14 +169,14 @@ export function reelItems(scene, ctx) {
       for (const s of f.sessions) {
         items.push({ k: '観測', l: s.date, sess: s, act: { t: 'go', s: nodeScene(`/follow/${f.name}#${s.date}`) } });
       }
-      for (const o of outsOf(node, graph, idx)) items.push(pathItem('out', o.node, o.reason, '伸びる道'));
+      for (const o of outsOf(node, graph, idx)) items.push(pathItem('out', o.node, o.reason, 'リンク先'));
       break;
     }
     case 'entity': {
       const f = node.parent;
       for (const e of f.entities) {
         items.push({
-          k: e.slug === node.slug ? 'いま' : '人物', l: cleanTitle(e.title),
+          k: e.slug === node.slug ? '表示中' : '人物', l: cleanTitle(e.title),
           ent: e, act: { t: 'go', s: nodeScene(`/follow/${f.name}/player/${e.slug}`) },
         });
       }
@@ -185,7 +188,7 @@ export function reelItems(scene, ctx) {
         items.push({ k: '記録', l: e.title.slice(0, 24), entry: e, act: { t: 'go', s: nodeScene(`/log/${node.slug}/entry/${e.slug}`) } });
       }
       items.push({
-        k: '依頼', l: '記録を足してもらう', tone: 'act',
+        k: '依頼', l: '記録の追加を依頼', tone: 'act',
         act: { t: 'ask', text: `/mn-log 「${cleanTitle(node.title)}」に新しい記録を足したい。` },
       });
       break;
@@ -202,16 +205,16 @@ export function reelItems(scene, ctx) {
         for (const it of sec.items) {
           const r = resolveTarget(it.target, idx);
           const to = r && graph.byRoute.get(r.route);
-          if (to) items.push({ ...pathItem('out', to, it.reason, '道'), l: (it.alias || shortTitle(to.title)).slice(0, 26) });
+          if (to) items.push({ ...pathItem('out', to, it.reason, '関連'), l: (it.alias || shortTitle(to.title)).slice(0, 26) });
         }
       }
       break;
     }
     default: {
       ins();
-      for (const o of outsOf(node, graph, idx)) items.push(pathItem('out', o.node, o.reason, '伸びる道'));
+      for (const o of outsOf(node, graph, idx)) items.push(pathItem('out', o.node, o.reason, 'リンク先'));
       items.push({
-        k: '依頼', l: 'この記事について頼む', tone: 'act',
+        k: '依頼', l: 'この記事について依頼', tone: 'act',
         act: { t: 'ask', text: `「${node.title}」について、` },
       });
     }
@@ -219,23 +222,23 @@ export function reelItems(scene, ctx) {
   return items;
 }
 
-// ---------------- 原点を叩いたら何が起きるか ----------------
+// ---------------- 原点をタップしたら何が起きるか ----------------
 export function primaryOf(scene, item, ctx) {
   if (scene.t === 'today' && item?.card) {
     const v = ctx.judged[item.card];
     if (v && !ctx.rejudging) return { short: '次へ', label: '次の1枚へ', act: { t: 'next' } };
     if (!ctx.flipped && !v) return { short: 'めくる', label: 'めくる', act: { t: 'flip' } };
-    return { short: '判定', label: '判定', act: null, split: true };
+    return { short: '答え', label: '答え合わせ', act: null, split: true };
   }
   const a = item?.act;
-  if (!a) return { short: '—', label: '選べるものが無い', act: null };
+  if (!a) return { short: '—', label: '選べる項目がありません', act: null };
   switch (a.t) {
-    case 'go': return { short: item.path ? '移る' : '開く', label: item.path ? 'この道へ移る' : '開く', act: a };
-    case 'ask': return { short: '頼む', label: 'この依頼を書く', act: a };
+    case 'go': return { short: '開く', label: item.path ? 'リンク先を開く' : '開く', act: a };
+    case 'ask': return { short: '依頼', label: 'この依頼を書く', act: a };
     case 'write': return { short: '書く', label: '新しい依頼を書く', act: a };
-    case 'copy': return { short: '写す', label: '伝票をまるごとコピー', act: a };
-    case 'del': return { short: '外す', label: 'この依頼を伝票から外す', act: a };
-    case 'more': return { short: '5枚', label: 'あと5枚 出す', act: a };
+    case 'copy': return { short: 'コピー', label: '依頼をまとめてコピー', act: a };
+    case 'del': return { short: '削除', label: 'この依頼を削除', act: a };
+    case 'more': return { short: '5枚', label: 'あと5枚出す', act: a };
     case 'flip': return { short: 'めくる', label: 'めくる', act: a };
     default: return { short: '—', label: '—', act: null };
   }

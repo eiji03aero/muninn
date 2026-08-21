@@ -128,7 +128,7 @@ export function Rail({ viewRef, resetKey, controls }) {
       role="scrollbar"
       aria-controls={controls}
       aria-orientation="vertical"
-      aria-label="読むところを送る"
+      aria-label="本文をスクロール"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={pos}

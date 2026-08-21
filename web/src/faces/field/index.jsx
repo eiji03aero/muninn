@@ -166,7 +166,7 @@ export default function FieldRoot({ initialTarget }) {
         line: text.replace(/^\/mn\s*/, ''),
       });
       setAskCtx(null); setQuery('>'); bump(); refresh?.();
-      showToast(`伝票にためた（${loadSlips().length}件）`, () => { removeSlip(`field:${text}`); bump(); refresh?.(); });
+      showToast(`依頼にためた（${loadSlips().length}件）`, () => { removeSlip(`field:${text}`); bump(); refresh?.(); });
     },
     dropSlip: (id) => { removeSlip(id); bump(); refresh?.(); },
     // 依頼も答え合わせも、Claude に渡し終わったら一緒に消える。
@@ -487,7 +487,7 @@ function StackItem({ x, sel, recall }) {
     case 'askacts':
       return (
         <div className="ff-acts">
-          <button type="button" className="pri" onClick={() => x.api.addAsk(x.text)}>伝票にためる</button>
+          <button type="button" className="pri" onClick={() => x.api.addAsk(x.text)}>依頼にためる</button>
           <button type="button" onClick={() => x.api.copy(x.text, '依頼をコピーした')}>コピー</button>
         </div>
       );

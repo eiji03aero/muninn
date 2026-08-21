@@ -15,7 +15,7 @@ const TAP_MS = 180;       // これより短く離したら「叩いた」
 const MOVE_PX = 14;       // これを超えたら「引いた」
 const COMMIT_PX = 40;     // これを超えないと行き先は決まらない（誤爆防止）
 const LATCH_MS = 6000;    // 指を離したあと扇が残る時間
-const BACK_GAP = 24;      // 原点の下端から「戻す」の中心までの余白
+const BACK_GAP = 24;      // 原点の下端から「戻る」の中心までの余白
 
 export const Origin = forwardRef(function Origin(
   { split, verb, label, disabled, faceId, atRoot, onPrimary, onJudge, onDir, lobeLabels },
@@ -162,14 +162,14 @@ export const Origin = forwardRef(function Origin(
   return (
     <>
       <p id="tb-origin-help" className="tb-sr">
-        原点。叩くと、いま選んでいるものに対する操作を実行する。押したまま方向へ引くと行き先を選べる。
-        同じ行き先は「行き先を選ぶ」からも選べる。
+        操作ボタン。タップすると、選択中の項目に対する操作を実行します。
+        押したまま上下左右にスワイプすると移動先を選べます。同じ移動先はメニューからも選べます。
       </p>
       <div
         ref={wrapRef}
         className={`tb-origin${split ? ' is-split' : ''}`}
         role="group"
-        aria-label="原点"
+        aria-label="操作ボタン"
         onPointerDown={onDown}
         onPointerMove={onMove}
         onPointerUp={onUp}
@@ -207,7 +207,7 @@ export const Origin = forwardRef(function Origin(
         ref={fanRef}
         className={`tb-fan${fan ? ' is-on' : ''}${fan?.latched ? ' is-latched' : ''}`}
         role="menu"
-        aria-label="行き先"
+        aria-label="移動先メニュー"
         style={{ '--ox': `${c.x}px`, '--oy': `${c.y}px` }}
         onKeyDown={(e) => {
           const ws = [...fanRef.current.querySelectorAll('.tb-wedge')];
@@ -230,7 +230,7 @@ export const Origin = forwardRef(function Origin(
               type="button"
               role="menuitem"
               className={`tb-wedge${hot === d.id ? ' is-hot' : ''}${here ? ' is-here' : ''}`}
-              aria-label={`${d.label}${here ? '（いまここ）' : ''}。原点から${d.say}へ引いても行ける`}
+              aria-label={`${d.label}${here ? '（表示中）' : ''}。ボタンから${d.say}にスワイプしても移動できます`}
               style={{
                 left: c.x + FAN_R * Math.cos(rad),
                 top: c.y - FAN_R * Math.sin(rad),
@@ -247,7 +247,7 @@ export const Origin = forwardRef(function Origin(
           type="button"
           role="menuitem"
           className={`tb-wedge tb-wedge-back${hot === BACK_DIR.id ? ' is-hot' : ''}`}
-          aria-label="ひとつ戻す。原点から下へ引いても戻せる"
+          aria-label="戻る。ボタンから真下にスワイプしても戻れます"
           style={{ left: c.x, top: c.y + backR, transform: 'translate(-50%, -50%)' }}
           onClick={() => { closeFan(); onDir(BACK_DIR.id); }}
         >

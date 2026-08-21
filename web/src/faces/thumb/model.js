@@ -9,7 +9,7 @@
 //   2. **覗き窓に出す一口分の要約**。遷移せずに中身を判断させるための材料。
 
 import { resolveTarget } from '../../lib/wiki.js';
-import { linksWithReason, cleanTitle, shortTitle, tagLabel } from '../../lib/graph.js';
+import { linksWithReason, cleanTitle, shortTitle, tagLabel, typeLabel } from '../../lib/graph.js';
 
 // タグの表示名は lib と揃える（面ごとに呼び名が変わると記録が読めなくなる）
 export const tagJa = tagLabel;
@@ -30,13 +30,11 @@ export const EDGE_OUT = {
 };
 export const EDGE_KEYS = ['requires', 'contrasts', 'leadsTo', 'elaborates'];
 
-// 内部語彙（notes / atlas / MOC …）は画面に出さない。ここが語の変換点。
-const TYPE_JA = {
-  note: '記事', concept: '章', entity: '人物', session: '観測',
-  logentry: '記録', follow: '定点', atlas: '連載', logtopic: '記録帖', moc: '見取り図',
-};
+// 内部語彙（notes / atlas / MOC …）は画面に出さない。**変換表は lib の1本きり**にする——
+// ここに写しを持った結果、MOC の呼び名が lib では「索引」、この面だけ「見取り図」に割れていた。
+// 面をまたいで同じ物が2つの名前で呼ばれるのは、読者から見ればただのバグ。
 export const kindOf = (node) =>
-  (node?.type === 'note' && node.kind === 'insight') ? '気づき' : (TYPE_JA[node?.type] || '');
+  (node?.type === 'note' && node.kind === 'insight') ? '気づき' : (node?.type ? typeLabel(node.type) : '');
 
 export const mocTitle = (node) => `${cleanTitle(node.title)}`;
 
@@ -53,7 +51,7 @@ export function deint(s) {
     .replace(/学習アトラス|知識アトラス|アトラス/g, '連載')
     .replace(/\s*[（(]\s*\/?mn-[a-z-]+\s*[）)]/g, '')
     .replace(/\/?mn-[a-z-]+/g, '')
-    .replace(/\bMOC\b/g, '見取り図')
+    .replace(/\bMOC\b/g, '索引')
     .replace(/[ \t]{2,}/g, ' ');
 }
 
@@ -67,7 +65,7 @@ export function plain(s, max = 0) {
     .replace(/^\s*[-*>#|]+\s*/gm, '')
     .replace(/[*`_]/g, '')
     .replace(/\[\[|\]\]/g, '')
-    .replace(/\s*\n+\s*/g, ' ／ ')
+    .replace(/\s*\n+\s*/g, ' / ')
     .replace(/\s{2,}/g, ' ')
     .trim();
   if (max && t.length > max) t = `${t.slice(0, max)}…`;
@@ -103,7 +101,7 @@ export function extraBacklinks(site, graph) {
         }
       }
       for (const ns of c.notes || []) {
-        add(`/note/${ns}`, { ...from, reason: `連載「${cleanTitle(a.title)}」のこの章から蒸留された知識` });
+        add(`/note/${ns}`, { ...from, reason: `連載「${cleanTitle(a.title)}」のこの章から切り出した知識` });
       }
     }
   }
@@ -144,15 +142,15 @@ export function previewOf(node, graph) {
     case 'note':
       return { ...base, sub: (node.tags || []).map(tagJa).join('・'), q: node.ref.recall || '' };
     case 'concept':
-      return { ...base, sub: node.ref.status === 'written' ? '書けている' : 'まだ書かれていない', ex: plain(node.ref.gist || node.body, 140) };
+      return { ...base, sub: node.ref.status === 'written' ? '執筆済み' : '未執筆', ex: plain(node.ref.gist || node.body, 140) };
     case 'entity':
       return { ...base, sub: [node.ref.role, node.ref.club].filter(Boolean).join(' / '), ex: (node.ref.strengths || []).join(' / ') || base.ex };
     case 'follow':
-      return { ...base, sub: node.ref.followType === 'goal' ? 'よくなりたい' : 'もっと楽しみたい', ex: node.ref.goal || base.ex };
+      return { ...base, sub: node.ref.followType === 'goal' ? '上達が目的' : '興味で追う', ex: node.ref.goal || base.ex };
     case 'session':
       return { ...base, sub: node.ref.date, ex: node.ref.summary || base.ex };
     case 'moc':
-      return { ...base, sub: `${(node.ref.sections || []).length}つの束`, ex: (node.ref.sections || []).map((s) => s.title).join('・') };
+      return { ...base, sub: `${(node.ref.sections || []).length}セクション`, ex: (node.ref.sections || []).map((s) => s.title).join('・') };
     case 'logtopic':
       return { ...base, sub: `${node.ref.entries.length}件`, ex: (node.ref.fields || []).map((f) => f.label).join('・') };
     case 'atlas':
@@ -170,14 +168,19 @@ export function previewOf(node, graph) {
 // 引いた方向をその行き先に振り分ける境界（deg より広く取る）。半径は4つとも同じ
 // FAN_R で、ウェッジは中心をその円周に置く——半径を1つだけ変えると弧が崩れて見える。
 export const FAN_R = 126;
+//
+// `label` は**日報の面と同じ語**にする（テーマ / 探す / 依頼）。同じジョブが面ごとに
+// 違う名前で呼ばれていると、読者にとっては面を変えるたびに覚え直しになる。
+// 動詞（見渡す・頼む）をやめたのは原則14でもある——「見渡す」は中身を言っていない。
 export const DIRS = [
-  { id: 'today', label: '今日', deg: -8, hit: 8, arrow: '→', say: '横' },
-  { id: 'shelf', label: '見渡す', deg: 24, hit: 41, arrow: '↗', say: '斜め上' },
-  { id: 'search', label: '探す', deg: 58, hit: 77, arrow: '↗', say: 'もっと斜め上' },
-  { id: 'ask', label: '頼む', deg: 96, hit: 999, arrow: '↑', say: '真上' },
+  { id: 'today', label: '今日', deg: -8, hit: 8, arrow: '→', say: '右' },
+  { id: 'shelf', label: 'テーマ', deg: 24, hit: 41, arrow: '↗', say: '右斜め上' },
+  { id: 'search', label: '探す', deg: 58, hit: 77, arrow: '↗', say: '斜め上' },
+  { id: 'ask', label: '依頼', deg: 96, hit: 999, arrow: '↑', say: '真上' },
 ];
-// 「戻す」は原点の**真下**。半径は原点の実測の高さから決めるので、ここには持たない。
-export const BACK_DIR = { id: '__back', label: '戻す', arrow: '↓', say: '下' };
+// 原点の**真下**。半径は原点の実測の高さから決めるので、ここには持たない。
+// 「戻す」（他動詞＝物を元の場所へ返す）ではなく「戻る」。ナビゲーションの標準語。
+export const BACK_DIR = { id: '__back', label: '戻る', arrow: '↓', say: '真下' };
 
 // 在庫の偏りを見せるための集計。均等に並べないのが目的なので件数順のまま返す。
 export function shelfBars(graph, top = 11) {

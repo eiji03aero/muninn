@@ -89,7 +89,7 @@ export function Desk() {
 
           {total > 0 && (
             <Box>
-              <Slot count={`${total}件`}>未送信の伝票</Slot>
+              <Slot count={`${total}件`}>未送信の依頼</Slot>
               <Card>
                 <VStack align="stretch" gap="2">
                   {pending.length > 0 && (
@@ -180,7 +180,7 @@ export function Desk() {
                 正本はこのリポジトリの markdown。このサイトはそれを読むための派生ビルドで、
                 書き込みは Claude Code 側でやる。だからここでできるのは
                 <b style={{ color: C.ink }}>「Claude に渡す依頼を作って溜めること」</b>まで。
-                溜めた伝票は上の「ぜんぶコピー」で1回にまとめて渡せる。
+                溜めた依頼は上の「ぜんぶコピー」で1回にまとめて渡せる。
               </Text>
             </Card>
           </Box>

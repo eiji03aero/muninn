@@ -106,7 +106,7 @@ export function Reel({ items, index, onIndex, onActivate, empty, resetKey }) {
         ref={el}
         className="tb-reel"
         role="listbox"
-        aria-label="候補の帯"
+        aria-label="候補一覧"
         onScroll={onScroll}
         onKeyDown={onKeyDown}
         onWheel={(e) => {
@@ -122,7 +122,7 @@ export function Reel({ items, index, onIndex, onActivate, empty, resetKey }) {
             role="option"
             aria-selected={i === index}
             tabIndex={i === index ? 0 : -1}
-            aria-label={`${it.k}：${it.l}${it.done ? '（判定ずみ）' : ''}`}
+            aria-label={`${it.k}：${it.l}${it.done ? '（記録ずみ）' : ''}`}
             className={`tb-ri${it.done ? ' is-done' : ''}${it.tone ? ` is-${it.tone}` : ''}${i === index ? ' is-on' : ''}`}
             onClick={() => { if (i === index) onActivate(i); else { cur.current = i; jump(i, true); onIndex(i); } }}
           >

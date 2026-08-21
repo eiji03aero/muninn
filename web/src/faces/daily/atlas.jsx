@@ -426,7 +426,7 @@ export function Concept() {
                 setQueued(true);
                 refresh?.();
               }}>
-              {queued ? '✓ 伝票に積んだ' : '伝票に積む'}
+              {queued ? '✓ 依頼に追加した' : '依頼に追加'}
             </Button>
           </Flex>
         </Box>

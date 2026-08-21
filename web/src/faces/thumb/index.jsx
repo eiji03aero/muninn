@@ -20,7 +20,7 @@ import {
   markSeen, recallLog, recordVerdict, removeSlip, slipsPrompt, todayISO, undoVerdict,
 } from '../../lib/recall.js';
 import { copyText } from '../../shared/util.js';
-import { DIRS, extraBacklinks, tagJa } from './model.js';
+import { BACK_DIR, DIRS, extraBacklinks, tagJa } from './model.js';
 import { nodeScene, primaryOf, reelItems, sceneKey } from './scene.js';
 import { Origin } from './origin.jsx';
 import { Rail } from './rail.jsx';
@@ -120,7 +120,7 @@ export default function ThumbRoot({ initialTarget }) {
   const pop = useCallback(() => {
     if (stack.length) goto({ stack: stack.slice(0, -1) });
     else if (face !== 'today') goto({ stack: [], face: 'today' });
-    else say('ここが根。原点を引けば他の3つへ行ける');
+    else say('ここが最初の画面です。移動はメニューから');
   }, [stack, face, goto, say]);
   const goFace = useCallback((f) => {
     if (f !== 'search') { setQuery(''); setQueryRaw(''); }
@@ -159,7 +159,7 @@ export default function ThumbRoot({ initialTarget }) {
     clearTimeout(commitT.current);
     commitT.current = setTimeout(commit, UNDO_MS);
     setUndo({
-      label: '取り消す',
+      label: '元に戻す',
       run: () => {
         held.current = null;
         clearTimeout(commitT.current);
@@ -197,24 +197,24 @@ export default function ThumbRoot({ initialTarget }) {
 
   // ---- 原点を叩いたときに起きること（実行は1箇所に集める） ----
   const runAct = useCallback((act) => {
-    if (!act) { say('ここでは叩いても何も起きない。原点を引いて行き先を選ぶ'); return; }
+    if (!act) { say('ここでは押せる操作がありません。メニューから移動できます'); return; }
     switch (act.t) {
       case 'go': push(act.s); break;
       case 'flip': setFlipped(true); break;
       case 'next': nextCard(); break;
-      case 'more': setDayLimit((n) => n + 5); say('今日の並びから、次の5枚を出した'); break;
+      case 'more': setDayLimit((n) => n + 5); say('次の5枚を追加しました'); break;
       case 'write': setSheet(''); break;
       case 'ask': setSheet(act.text); break;
       case 'copy':
         copyText(slipsPrompt(loadSlips(), loadPending()))
-          .then(() => say('伝票をコピーした。Mac で Claude に貼る'));
+          .then(() => say('コピーしました。Claude に貼り付けてください'));
         break;
       case 'del': {
         const gone = slips.find((s) => s.id === act.id);
         removeSlip(act.id);
         setSlipV((n) => n + 1);
         setUndo({
-          label: '依頼を戻す',
+          label: '元に戻す',
           run: () => { if (gone) addSlip(gone); setSlipV((n) => n + 1); setUndo(null); },
         });
         clearTimeout(commitT.current);
@@ -284,11 +284,11 @@ export default function ThumbRoot({ initialTarget }) {
     const n = graph.byRoute.get(s.route);
     return n ? shortTitle(n.title).slice(0, 14) : '…';
   });
-  const selName = item ? `${item.k}：${item.l}` : 'なし';
+  const selName = item ? `${item.k}：${item.l}` : '選択なし';
   const card = item?.card ? cards.find((c) => c.note.slug === item.card)?.note : null;
   const lobeLabels = {
-    fz: `あやしい。答えは「${card?.title || ''}」。近いうちにまた出す`,
-    ok: `わかった。答えは「${card?.title || ''}」。次に出るまでの間隔を伸ばす`,
+    fz: `あやしい（答え：${card?.title || ''}）。近いうちにまた表示します`,
+    ok: `わかった（答え：${card?.title || ''}）。次に表示するまでの間隔が延びます`,
   };
 
   const nested = stack.length > 0;
@@ -298,7 +298,7 @@ export default function ThumbRoot({ initialTarget }) {
   return (
     <div className="face-thumb" data-face="thumb">
       {/* 上7割 = 読むためだけの場所。押せるものを1つも置かない */}
-      <div id="tb-view" className={`tb-view${scene.t !== 'today' ? ' has-peek' : ''}`} ref={viewRef} role="region" aria-label="読むところ" tabIndex={0}>
+      <div id="tb-view" className={`tb-view${scene.t !== 'today' ? ' has-peek' : ''}`} ref={viewRef} role="region" aria-label="本文" tabIndex={0}>
         <div className={`tb-viewin${scene.t === 'today' && item?.card ? ' is-fill' : ''}`}>
           <View scene={scene} ctx={ctx} item={item} items={items} />
         </div>
@@ -307,7 +307,7 @@ export default function ThumbRoot({ initialTarget }) {
       {scene.t !== 'today' && <Peek item={item} ctx={ctx} />}
 
       {/* 下3割 = 操作するところ */}
-      <div className="tb-ops" role="group" aria-label="操作するところ">
+      <div className="tb-ops" role="group" aria-label="操作パネル">
         <div className="tb-opsin">
           <Reel
             items={items}
@@ -315,16 +315,16 @@ export default function ThumbRoot({ initialTarget }) {
             resetKey={key}
             onIndex={(i) => { setReelIdx(i); setFlipped(false); }}
             onActivate={() => runAct(primary.act)}
-            empty={scene.t === 'search' ? 'ことばを打つと、ここに候補が並ぶ' : 'ここには候補が無い。原点を引いて別の場所へ。'}
+            empty={scene.t === 'search' ? 'キーワードを入力すると候補が表示されます' : '候補はありません。メニューから別の画面へ移動できます'}
           />
 
           <div className="tb-panel">
             {scene.t === 'search' ? (
               <div className="tb-find">
-                <label className="tb-sr" htmlFor="tb-find">ことばで探す</label>
+                <label className="tb-sr" htmlFor="tb-find">キーワードで検索</label>
                 <input
                   id="tb-find" type="search" autoComplete="off" enterKeyHint="search"
-                  placeholder="ことばを打つ（例: 毛穴 / メッシ）"
+                  placeholder="キーワードを入力（例：毛穴、メッシ）"
                   value={queryRaw}
                   onChange={(e) => { setQueryRaw(e.target.value); if (!composing.current) { setQuery(e.target.value); setReelIdx(0); } }}
                   onCompositionStart={() => { composing.current = true; }}
@@ -339,12 +339,12 @@ export default function ThumbRoot({ initialTarget }) {
               <>
                 <div className="tb-where">
                   <b>{faceLabel}</b>
-                  {crumbs.map((c) => <span key={c}> ▸ {c}</span>)}
+                  {crumbs.map((c) => <span key={c}> › {c}</span>)}
                 </div>
                 <div className="tb-act">
-                  {primary.split ? <em>思い出せた？</em>
-                    : primary.act ? <>叩く → <em>{primary.label}</em></>
-                      : <>引く → <em>行き先を選ぶ</em></>}
+                  {primary.split ? <em>答え合わせ</em>
+                    : primary.act ? <>タップで <em>{primary.label}</em></>
+                      : <>スワイプで <em>移動</em></>}
                 </div>
               </>
             )}
@@ -352,7 +352,7 @@ export default function ThumbRoot({ initialTarget }) {
             {/* 凡例は常設のヒントであり、そのままボタンでもある＝方向を忘れても目で選べる経路 */}
             <button
               type="button" className="tb-legend" aria-haspopup="menu"
-              aria-label="行き先を選ぶ。今日・見渡す・探す・頼む・戻す。原点から方向へ引いても同じ"
+              aria-label={`メニューを開く：${DIRS.map((d) => d.label).join("・")}・${BACK_DIR.label}。ボタンから同じ方向へスワイプしても移動できます`}
               onClick={() => originRef.current?.toggleFan()}
             >
               {DIRS.map((d) => (
@@ -360,7 +360,7 @@ export default function ThumbRoot({ initialTarget }) {
                   <b>{d.arrow}</b>{d.label}
                 </span>
               ))}
-              <span aria-hidden="true"><b>↓</b>戻す</span>
+              <span aria-hidden="true"><b>{BACK_DIR.arrow}</b>{BACK_DIR.label}</span>
             </button>
 
             <div className="tb-foot">
@@ -368,24 +368,24 @@ export default function ThumbRoot({ initialTarget }) {
                 <button type="button" className="tb-undo" onClick={() => { undo.run(); }}>↺ {undo.label}</button>
               ) : judgedCard ? (
                 // 猶予が切れたあとの逃げ道。ここが無いと判定が取り消せない操作になる
-                <button type="button" className="tb-undo" onClick={() => unjudge(judgedCard)}>↺ 判定を戻す</button>
+                <button type="button" className="tb-undo" onClick={() => unjudge(judgedCard)}>↺ 元に戻す</button>
               ) : (
                 // 判定中は原点が太るぶん幅が無い。削るのはカウンタから（道具は残す）
                 <span className="tb-counter" role="status">
-                  {!primary.split && week ? `今週 ${week}枚 めくった` : ''}
+                  {!primary.split && week ? `今週の再読 ${week}枚` : ''}
                 </span>
               )}
               <span className="tb-spacer" />
               <div className="tb-tools">
                 {nested && (
-                  <button type="button" aria-label="1つ前に戻る（原点を下へ引くのと同じ）" onClick={pop}>
+                  <button type="button" aria-label="戻る（下にスワイプしても戻れます）" onClick={pop}>
                     <span aria-hidden="true">↓</span>
                   </button>
                 )}
-                <button type="button" aria-label="この画面の使い方をもう一度読む" onClick={() => setIntro(true)}>
+                <button type="button" aria-label="使い方を見る" onClick={() => setIntro(true)}>
                   <span aria-hidden="true">?</span>
                 </button>
-                <button type="button" aria-label="設定をひらく（画面のかたちを選ぶ）" onClick={openSettings}>
+                <button type="button" aria-label="設定を開く（画面のかたちを選ぶ）" onClick={openSettings}>
                   <span aria-hidden="true">⚙</span>
                 </button>
               </div>
@@ -399,7 +399,7 @@ export default function ThumbRoot({ initialTarget }) {
             ref={originRef}
             split={!!primary.split}
             verb={primary.short}
-            label={primary.act ? `${primary.label}。選んでいるのは ${selName}` : `${primary.label}（いまは押せない）`}
+            label={primary.act ? `${primary.label}（選択中：${selName}）` : `${primary.label}（現在は使用できません）`}
             disabled={!primary.act}
             faceId={face}
             atRoot={!nested}
@@ -416,7 +416,7 @@ export default function ThumbRoot({ initialTarget }) {
           prefill={sheet}
           onCancel={() => setSheet(null)}
           onAdd={(text) => {
-            if (!text) { say('何を頼むか、一言でいいから書く'); return; }
+            if (!text) { say('依頼の内容を入力してください'); return; }
             addSlip({
               id: `thumb:${text.slice(0, 40)}:${Date.now()}`,
               kind: 'ask',
@@ -427,7 +427,7 @@ export default function ThumbRoot({ initialTarget }) {
             setSlipV((n) => n + 1);
             setSheet(null);
             if (face !== 'ask' || nested) goFace('ask');
-            say('伝票に足した');
+            say('依頼リストに追加しました');
           }}
         />
       )}

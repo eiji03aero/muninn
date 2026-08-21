@@ -45,7 +45,7 @@ function Paths({ items, item }) {
         <div key={`${title}:${x.path.node.route}`} className={`tb-path${item === x ? ' is-on' : ''}`}>
           <span className="tb-arrow" aria-hidden="true">{x.path.dir === 'in' ? '←' : '→'}</span>
           <div className="tb-pathb">
-            <div className="tb-why">{x.path.reason || '（理由は書かれていない）'}</div>
+            <div className="tb-why">{x.path.reason || '（理由は未記入）'}</div>
             <div className="tb-to">{shortTitle(x.path.node.title)} <span className="tb-tokind">{kindOf(x.path.node)}</span></div>
           </div>
         </div>
@@ -54,8 +54,8 @@ function Paths({ items, item }) {
   ) : null);
   return (
     <>
-      {grp('ここへ来る道', ins, `${ins.length}本 — 向こうが書いた理由`)}
-      {grp('ここから伸びる道', outs, `${outs.length}本`)}
+      {grp('リンク元', ins, `${ins.length}件・リンク元が書いた理由`)}
+      {grp('リンク先', outs, `${outs.length}件`)}
     </>
   );
 }
@@ -72,7 +72,7 @@ function Today({ ctx, item, items }) {
     const paths = (graph.backlinks.get(`/note/${n.slug}`)?.length || 0) + (extra.get(`/note/${n.slug}`)?.length || 0);
     return (
       <>
-        <Kick note={`${i + 1} / ${cards.length} 枚目`}>今日</Kick>
+        <Kick note={`${i + 1} / ${cards.length}枚`}>今日</Kick>
         <div className="tb-card">
           <div className="tb-meta">
             {(n.tags || []).slice(0, 1).map((t) => <span key={t} className="tb-tag">{tagJa(t)}</span>)}
@@ -81,8 +81,8 @@ function Today({ ctx, item, items }) {
           <div className="tb-q">{n.recall || n.title}</div>
           {!open ? (
             <p className="tb-qhint">
-              頭の中で答えてから、左下の原点をぽんと叩く。<br />
-              答えが出たら原点が2つに割れる。左＝あやしい／右＝わかった。
+              頭の中で答えてから、左下のボタンをタップしてください。<br />
+              答えが表示されると、ボタンが左右に分かれます。左＝あやしい／右＝わかった。
             </p>
           ) : (
             <div className="tb-ans">
@@ -91,11 +91,11 @@ function Today({ ctx, item, items }) {
               {v ? (
                 <p className={`tb-verdict${v === 'ok' ? ' is-ok' : ' is-fz'}`}>
                   {v === 'ok'
-                    ? '✓「わかった」として記録した。次に出るまでの間隔が伸びる'
-                    : '△「あやしい」として記録した。近いうちにまた出る'}
+                    ? '✓「わかった」で記録しました。次に表示するまでの間隔が延びます'
+                    : '△「あやしい」で記録しました。近いうちにまた表示します'}
                 </p>
               ) : (
-                <p className="tb-qhint">この記事には道が {paths} 本ある。判定してから、あらためて開けばたどれる。</p>
+                <p className="tb-qhint">この記事にはリンクが {paths}件あります。答え合わせのあとに開くとたどれます。</p>
               )}
             </div>
           )}
@@ -106,11 +106,11 @@ function Today({ ctx, item, items }) {
   if (item?.act?.t === 'more') {
     return (
       <>
-        <Kick note="おかわり">今日</Kick>
-        <h1 className="tb-h1">今日の分は、ここまでで足りている。</h1>
+        <Kick note="もっと読む">今日</Kick>
+        <h1 className="tb-h1">今日の分はここまでです</h1>
         <p className="tb-lead">
-          それでも続けたいときだけ、原点を叩くと次の5枚が出る。<br />
-          並び順は日付から決まっているので、何度開いても今日は同じ順番。引き直しはできない。
+          続けたいときは、ボタンをタップすると次の5枚が出ます。<br />
+          並び順は日付で決まるので、何度開いても今日は同じ順番です。
         </p>
       </>
     );
@@ -118,7 +118,7 @@ function Today({ ctx, item, items }) {
   const pv = item?.act?.t === 'go' ? previewOf(ctx.graph.byRoute.get(item.act.s.route), ctx.graph) : null;
   return (
     <>
-      <Kick note="余白">今日</Kick>
+      <Kick note="おすすめ">今日</Kick>
       {pv ? (
         <>
           <h1 className="tb-h1">{pv.title}</h1>
@@ -126,9 +126,9 @@ function Today({ ctx, item, items }) {
           <p className="tb-lead">{pv.ex}</p>
         </>
       ) : (
-        <p className="tb-lead">今日の分は、ぜんぶ終わっている。</p>
+        <p className="tb-lead">今日の分は終わりました。</p>
       )}
-      {items.length ? null : <p className="tb-lead">期日の来た記事が無い。原点を引いて別の場所へ。</p>}
+      {items.length ? null : <p className="tb-lead">今日読む記事はありません。メニューから別の画面へ移動できます。</p>}
     </>
   );
 }
@@ -140,14 +140,15 @@ function Shelf({ ctx, item }) {
   const total = site.notes.length;
   const topShare = head[0] ? Math.round((head[0].count / total) * 100) : 0;
   const others = [
-    ['連載', `${(site.atlases || []).length}本 — 順路つきの読み物`],
-    ['定点', `${site.follows.length}つ — 同じ条件で見つづける`],
-    ['記録帖', `${(site.logtopics || []).length}冊 — 同じ項目で並べて比べる`],
-    ['見取り図', `${site.mocs.length}枚 — 手で並べた索引`],
+    ['連載', `${(site.atlases || []).length}本・読む順つきの読み物`],
+    ['定点', `${site.follows.length}件・同じ条件で見つづける`],
+    ['記録帖', `${(site.logtopics || []).length}冊・同じ項目で並べて比べる`],
+    // ここの語は scene.js の帯の `k` と文字列一致で照合している。片方だけ直すと選択表示が壊れる
+    ['索引', `${site.mocs.length}件・手で並べた索引`],
   ];
   return (
     <>
-      <Kick note="いま手元にあるもの">見渡す</Kick>
+      <Kick note="いまあるもの">テーマ</Kick>
       <div className="tb-bars">
         {head.map((t) => (
           <div key={t.tag} className={`tb-bar${item?.tag === t.tag ? ' is-on' : ''}`}>
@@ -165,11 +166,11 @@ function Shelf({ ctx, item }) {
         )}
       </div>
       <p className="tb-lead">
-        記事は全部で {total} 本。うち {topShare}% が{head[0]?.label}。<br />
-        この偏りは事実なので、均等には並べない。
+        記事は全部で {total}本。うち {topShare}% が{head[0]?.label}です。<br />
+        偏りをそのまま出しています。
       </p>
       <div className="tb-grp">
-        <Kick>ほかの棚</Kick>
+        <Kick>そのほか</Kick>
         <Rows>{others.map(([k, d]) => <Row key={k} k={k} on={item?.k === k}>{d}</Row>)}</Rows>
       </div>
     </>
@@ -182,18 +183,18 @@ function Search({ ctx, item, items }) {
   if (!q) {
     return (
       <>
-        <Kick note="あれ何だっけ">探す</Kick>
-        <h1 className="tb-h1">思い出したい語を、下に打つ。</h1>
+        <Kick note="キーワードで探す">探す</Kick>
+        <h1 className="tb-h1">思い出したい言葉を下に入力</h1>
         <p className="tb-lead">
-          打つそばから、記事・章・定点・人物・記録の全部から絞り込む。<br />
-          全部が手元にあるので、待ち時間は無い。
+          入力しながら、記事・章・定点・人物・記録をまとめて絞り込みます。<br />
+          待ち時間はありません。
         </p>
-        <p className="tb-lead"><b style={{ color: HUD }}>見つからなかったときが本番。</b><br />
-          その語は muninn にまだ無いということ。そのまま Claude への依頼に変わる。
+        <p className="tb-lead"><b style={{ color: HUD }}>見つからないときが本番です。</b><br />
+          まだ記録が無いということなので、そのまま Claude への依頼にできます。
         </p>
         {ctx.seen.length > 0 && (
           <div className="tb-grp">
-            <Kick>最近ひらいたもの</Kick>
+            <Kick>最近見たもの</Kick>
             <Rows>{ctx.seen.slice(0, 5).map((s) => <Row key={s.route}>{s.title}</Row>)}</Rows>
           </div>
         )}
@@ -205,10 +206,9 @@ function Search({ ctx, item, items }) {
     return (
       <>
         <Kick note={`「${q}」`}>探す</Kick>
-        <h1 className="tb-h1">「{q}」は、まだ手元に無い。</h1>
+        <h1 className="tb-h1">「{q}」はまだ記録がありません</h1>
         <p className="tb-lead">
-          無いという事実が、次に貯めるものを決める。<br />
-          原点を叩くと、この語を調べてもらう依頼が伝票に乗る。
+          ボタンをタップすると、この言葉を調べる依頼を追加できます。
         </p>
       </>
     );
@@ -239,23 +239,23 @@ function Ask({ ctx, item }) {
   if (!slips.length && !pending.length) {
     return (
       <>
-        <Kick note="Claude に渡す伝票">頼む</Kick>
-        <h1 className="tb-h1">伝票は、まだ空。</h1>
+        <Kick note="Claude に渡す依頼">依頼</Kick>
+        <h1 className="tb-h1">依頼はまだありません</h1>
         <p className="tb-lead">
-          ここは書き込む場所ではない。書くのは手元の Claude Code で、ここは
-          <b style={{ color: HUD }}>頼みごとを溜めておく紙</b>。<br />
-          読んでいて足りないと思ったところで、原点を <b style={{ color: HUD }}>↑ 頼む</b> に引けば、
-          いま見ているものが依頼に付いてくる。<br />
-          溜まったらコピーして、Mac の前で貼る。
+          ここでは記録を書き換えられません。書き換えるのは Claude Code で、この画面は
+          <b style={{ color: HUD }}>依頼を溜めておく場所</b>です。<br />
+          読んでいて足りないと思ったら、ボタンを <b style={{ color: HUD }}>↑ 依頼</b> にスワイプすると、
+          いま見ているものが依頼に付きます。<br />
+          溜まったらコピーして、Claude に貼り付けてください。
         </p>
       </>
     );
   }
   return (
     <>
-      <Kick note="Claude に渡す伝票">頼む</Kick>
+      <Kick note="Claude に渡す依頼">依頼</Kick>
       {/* 件数は行のほうに持たせる。h1 で足し算した数を出すと「1件」の中身が読めない */}
-      <h1 className="tb-h1">伝票にたまっているもの</h1>
+      <h1 className="tb-h1">たまっている依頼</h1>
       <Rows>
         {pending.length > 0 && (
           <Row k="答え合わせ" on={!!item?.pending}>再読の結果 {pending.length}件</Row>
@@ -265,7 +265,7 @@ function Ask({ ctx, item }) {
         ))}
       </Rows>
       <div className="tb-grp">
-        <Kick>コピーされる文</Kick>
+        <Kick>コピーされる内容</Kick>
         <pre className="tb-pre">{docketText}</pre>
       </div>
     </>
@@ -278,7 +278,7 @@ function Theme({ ctx, item, scene }) {
     .slice().sort((a, b) => ((a.updated || '') < (b.updated || '') ? 1 : -1));
   return (
     <>
-      <Kick note={`${list.length}本`}>{tagJa(scene.tag)}</Kick>
+      <Kick note={`${list.length}件`}>{tagJa(scene.tag)}</Kick>
       <Rows>
         {list.map((n) => (
           <Row key={n.route} k={kindOf(n)} on={item?.node?.route === n.route}>
@@ -300,15 +300,15 @@ function NoteView({ ctx, node, item, items }) {
       <h1 className="tb-h1">{node.title}</h1>
       <div className="tb-meta">
         {(n.tags || []).map((t) => <span key={t} className="tb-tag">{tagJa(t)}</span>)}
-        <span>書いた日 {n.created}</span>
+        <span>作成日 {n.created}</span>
       </div>
-      {n.recall && <p className="tb-quote">問い： {n.recall}</p>}
+      {n.recall && <p className="tb-quote">問い：{n.recall}</p>}
       <ThumbMd text={node.body} idx={ctx.idx} />
       {items.some((x) => x.path) ? <Paths items={items} item={item} />
         : (
           <div className="tb-grp">
-            <Kick>道</Kick>
-            <p className="tb-lead">この記事には、まだ来る道も伸びる道も無い。<br />原点を叩けば「道を引いてほしい」と伝票に頼める。</p>
+            <Kick>リンク</Kick>
+            <p className="tb-lead">この記事にはまだリンク元もリンク先もありません。<br />ボタンをタップすると、リンクを張る依頼を追加できます。</p>
           </div>
         )}
     </>
@@ -321,7 +321,7 @@ function ConceptView({ ctx, node, item, items }) {
   const a = node.parent;
   return (
     <>
-      <Kick note={c.status === 'stub' ? 'この章はまだ書かれていない' : 'この章は書けている'}>
+      <Kick note={c.status === 'stub' ? '未執筆' : '執筆済み'}>
         連載「{cleanTitle(a.title)}」
       </Kick>
       <h1 className="tb-h1">{shortTitle(c.title)}</h1>
@@ -339,7 +339,7 @@ function ConceptView({ ctx, node, item, items }) {
                 return (
                   <Row key={cs} k={String(j + 1)} on={j === i}>
                     {shortTitle(cc.title)}
-                    {cc.status === 'stub' && <div className="tb-rowr">まだ書かれていない</div>}
+                    {cc.status === 'stub' && <div className="tb-rowr">未執筆</div>}
                   </Row>
                 );
               })}
@@ -360,12 +360,12 @@ function AtlasView({ ctx, node, item }) {
   const a = node.ref;
   return (
     <>
-      <Kick note={`${a.concepts.length}章 / 順路${a.routes.length}本`}>連載</Kick>
+      <Kick note={`${a.concepts.length}章・読む順 ${a.routes.length}通り`}>連載</Kick>
       <h1 className="tb-h1">{cleanTitle(a.title)}</h1>
       <p className="tb-lead">{plain(node.body, 180)}</p>
       {a.routes.map((r) => (
         <div className="tb-grp" key={r.id}>
-          <Kick note={item?.route?.id === r.id ? 'いま選んでいる順路' : ''}>{r.label}</Kick>
+          <Kick note={item?.route?.id === r.id ? '選択中の読む順' : ''}>{r.label}</Kick>
           <p className="tb-lead">{r.desc}</p>
           <Rows>
             {r.order.map((cs, j) => {
@@ -374,8 +374,8 @@ function AtlasView({ ctx, node, item }) {
               return (
                 <Row key={cs} k={String(j + 1)} on={item?.concept?.slug === cs}>
                   {shortTitle(cc.title)}
-                  {cc.status === 'stub' && <div className="tb-rowr">まだ書かれていない</div>}
-                  {ctx.reads[a.slug]?.has(cs) && <div className="tb-rowr">読んだ</div>}
+                  {cc.status === 'stub' && <div className="tb-rowr">未執筆</div>}
+                  {ctx.reads[a.slug]?.has(cs) && <div className="tb-rowr">読了</div>}
                 </Row>
               );
             })}
@@ -391,16 +391,16 @@ function FollowView({ ctx, node, item, items }) {
   const f = node.ref;
   return (
     <>
-      <Kick note={f.followType === 'goal' ? 'よくなりたい' : 'もっと楽しみたい'}>定点</Kick>
+      <Kick note={f.followType === 'goal' ? '上達が目的' : '興味で追う'}>定点</Kick>
       <h1 className="tb-h1">{cleanTitle(f.title)}</h1>
       <p className="tb-lead">{f.goal}</p>
       {f.snapshot?.length > 0 && (
-        <div className="tb-grp"><Kick>いまの姿</Kick>
+        <div className="tb-grp"><Kick>現状</Kick>
           <ul className="tb-ul">{f.snapshot.map((x) => <li key={x}>{x}</li>)}</ul>
         </div>
       )}
       {f.series?.length > 0 && (
-        <div className="tb-grp"><Kick note="良し悪しは正本の宣言に従う">数字</Kick>
+        <div className="tb-grp"><Kick note="良し悪しの向きは記録側の設定に従います">数字</Kick>
           <div className="tb-mets">
             {f.series.map((s) => {
               const last = s.points[s.points.length - 1];
@@ -412,7 +412,7 @@ function FollowView({ ctx, node, item, items }) {
                   <div className="tb-metk">{s.key}</div>
                   <div className="tb-metv">{last.value}</div>
                   <div className={`tb-metd${good === null ? '' : good ? ' is-good' : ' is-bad'}`}>
-                    {d == null ? '—' : `${d > 0 ? '+' : ''}${d}`} ／ {s.goal === 'up' ? '大きいほど良い' : s.goal === 'down' ? '小さいほど良い' : '良し悪しは決めていない'}
+                    {d == null ? '—' : `${d > 0 ? '+' : ''}${d}`} ／ {s.goal === 'up' ? '大きいほど良い' : s.goal === 'down' ? '小さいほど良い' : '未設定'}
                   </div>
                   <Sparkline points={s.points} height={30} color={s.goal ? HUD : '#616b78'} goal={s.goal} />
                 </div>
@@ -435,7 +435,7 @@ function FollowView({ ctx, node, item, items }) {
           <Rows>{f.entities.map((e) => (
             <Row key={e.slug} k={e.group} on={item?.ent?.slug === e.slug}>
               {cleanTitle(e.title)}
-              <div className="tb-rowr">{e.role} / {e.club}{e.status === 'injured' ? ' — いま離脱中' : ''}</div>
+              <div className="tb-rowr">{e.role} / {e.club}{e.status === 'injured' ? '（離脱中）' : ''}</div>
             </Row>
           ))}</Rows>
         </div>
@@ -496,7 +496,7 @@ function EntityView({ ctx, node, item, items }) {
       <h1 className="tb-h1">{cleanTitle(e.title)}</h1>
       <div className="tb-meta">
         <span className="tb-tag">{e.role}</span><span>{e.club}</span>
-        {e.status === 'injured' && <span className="tb-warn">いま離脱中</span>}
+        {e.status === 'injured' && <span className="tb-warn">離脱中</span>}
       </div>
       {e.strengths?.length > 0 && (
         <div className="tb-grp"><Kick>強み</Kick><ul className="tb-ul">{e.strengths.map((x) => <li key={x}>{x}</li>)}</ul></div>
@@ -505,7 +505,7 @@ function EntityView({ ctx, node, item, items }) {
         <div className="tb-grp"><Kick>伸ばしている点</Kick><ul className="tb-ul">{e.developing.map((x) => <li key={x}>{x}</li>)}</ul></div>
       )}
       {e.changelog?.length > 0 && (
-        <div className="tb-grp"><Kick>移り変わり</Kick>
+        <div className="tb-grp"><Kick>これまでの変化</Kick>
           <Rows>{e.changelog.map((c) => <Row key={`${c.date}${c.note}`} k={c.date}>{c.note}</Row>)}</Rows>
         </div>
       )}
@@ -523,8 +523,8 @@ function LogTopicView({ ctx, node, item }) {
       <Kick note={`${t.entries.length}件`}>記録帖</Kick>
       <h1 className="tb-h1">{cleanTitle(t.title)}</h1>
       <p className="tb-lead">
-        記録する項目は最初に決めてある： {t.fields.map((f) => f.label).join('・')}。<br />
-        同じ項目で貯めるから、あとで並べて比べられる。
+        記録する項目：{t.fields.map((f) => f.label).join('・')}。<br />
+        同じ項目で貯めるので、あとで並べて比べられます。
       </p>
       <Rows>
         {t.entries.map((e) => (
@@ -539,8 +539,8 @@ function LogTopicView({ ctx, node, item }) {
         ))}
       </Rows>
       {t.entries.length < 3 && (
-        <div className="tb-grp"><Kick>比べるにはまだ薄い</Kick>
-          <p className="tb-lead">記録が{t.entries.length}件では、並べても比べられない。<br />原点を叩けば「次も記録して」と伝票に頼める。</p>
+        <div className="tb-grp"><Kick>まだ比べられません</Kick>
+          <p className="tb-lead">記録が{t.entries.length}件では比較できません。<br />ボタンをタップすると、次の記録を依頼できます。</p>
         </div>
       )}
     </>
@@ -579,7 +579,7 @@ function MocView({ ctx, node, item }) {
   const m = node.ref;
   return (
     <>
-      <Kick note="手で並べた索引">見取り図</Kick>
+      <Kick note="手で並べた索引">索引</Kick>
       <h1 className="tb-h1">{cleanTitle(m.title)}</h1>
       {(m.sections || []).map((sec) => (
         <div className="tb-grp" key={sec.title}>
@@ -617,7 +617,7 @@ export function View({ scene, ctx, item, items }) {
   if (scene.t === 'ask') return <Ask ctx={ctx} item={item} />;
   if (scene.t === 'theme') return <Theme ctx={ctx} item={item} scene={scene} />;
   const node = ctx.graph.byRoute.get(scene.route);
-  if (!node) return <p className="tb-lead">この対象は見つからない。原点を下へ引けば戻せる。</p>;
+  if (!node) return <p className="tb-lead">この項目は見つかりません。下にスワイプすると戻れます。</p>;
   const C = NODE_VIEWS[node.type] || NoteView;
   return <C ctx={ctx} node={node} item={item} items={items} />;
 }

@@ -242,7 +242,7 @@ export function Edition() {
                   <Flex as="button" key={i} onClick={() => navigate('/desk')}
                     className="glass-soft press" px="4" py="3" borderRadius="14px"
                     align="center" justify="space-between" w="100%" textAlign="left">
-                    <Text fontSize="sm" color={C.ink} fontWeight="600">未送信の伝票</Text>
+                    <Text fontSize="sm" color={C.ink} fontWeight="600">未送信の依頼</Text>
                     <Text fontSize="sm" color={C.amber} fontWeight="700" flexShrink="0">{a.count}件 ›</Text>
                   </Flex>
                 ),
