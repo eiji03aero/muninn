@@ -23,12 +23,12 @@ import { copyText } from '../../shared/util.js';
 import { DIRS, extraBacklinks, tagJa } from './model.js';
 import { nodeScene, primaryOf, reelItems, sceneKey } from './scene.js';
 import { Origin } from './origin.jsx';
+import { Rail } from './rail.jsx';
 import { Reel } from './reel.jsx';
 import { View } from './views.jsx';
 import { Intro, Peek, Sheet, Toast } from './parts.jsx';
 import './thumb.css';
 
-const KEY_HAND = 'mn.face.thumb.hand';
 const KEY_SEEN_INTRO = 'mn.face.thumb.intro';
 const UNDO_MS = 8000;   // 判定を書き込むまでの猶予＝取り消せる時間
 const NEXT_MS = 340;
@@ -42,7 +42,6 @@ export default function ThumbRoot({ initialTarget }) {
   const today = todayISO();
 
   // ---- 面の状態 ----
-  const [hand, setHand] = useState(() => (lsGet(KEY_HAND, 'L') === 'R' ? 'R' : 'L'));
   const [intro, setIntro] = useState(() => lsGet(KEY_SEEN_INTRO, '') !== '1');
   const [face, setFace] = useState('today');
   const [stack, setStack] = useState([]);
@@ -92,8 +91,8 @@ export default function ThumbRoot({ initialTarget }) {
 
   const ctx = useMemo(() => ({
     site, idx, graph, extra, reads, cards, judged, flipped, query, slips, pending, seen,
-    today, hand, docketText: slipsPrompt(slips, pending),
-  }), [site, idx, graph, extra, reads, cards, judged, flipped, query, slips, pending, seen, today, hand]);
+    today, docketText: slipsPrompt(slips, pending),
+  }), [site, idx, graph, extra, reads, cards, judged, flipped, query, slips, pending, seen, today]);
 
   const items = useMemo(() => reelItems(scene, ctx), [key, ctx]); // eslint-disable-line react-hooks/exhaustive-deps
   const index = Math.max(0, Math.min(reelIdx, items.length - 1));
@@ -273,7 +272,6 @@ export default function ThumbRoot({ initialTarget }) {
       else if (e.key === 'Enter' || e.key === ' ') { runAct(primary.act); e.preventDefault(); }
       else if (e.key === 'Escape' || e.key === 'Backspace') { pop(); e.preventDefault(); }
       else if (e.key >= '1' && e.key <= '4') goFace(DIRS[Number(e.key) - 1].id);
-      else if (e.key === 'h' || e.key === 'H') setHand((h) => { const n = h === 'L' ? 'R' : 'L'; lsSet(KEY_HAND, n); return n; });
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
@@ -294,14 +292,13 @@ export default function ThumbRoot({ initialTarget }) {
   };
 
   const nested = stack.length > 0;
-  const near = primary.split ? 172 : 128;
   // いま選んでいるのが「判定ずみの札」なら、いつでも判定を戻せる
   const judgedCard = item?.card && judged[item.card] ? item.card : null;
 
   return (
-    <div className={`face-thumb${hand === 'R' ? ' is-right' : ''}`} data-face="thumb">
+    <div className="face-thumb" data-face="thumb">
       {/* 上7割 = 読むためだけの場所。押せるものを1つも置かない */}
-      <div className={`tb-view${scene.t !== 'today' ? ' has-peek' : ''}`} ref={viewRef} role="region" aria-label="読むところ" tabIndex={0}>
+      <div id="tb-view" className={`tb-view${scene.t !== 'today' ? ' has-peek' : ''}`} ref={viewRef} role="region" aria-label="読むところ" tabIndex={0}>
         <div className={`tb-viewin${scene.t === 'today' && item?.card ? ' is-fill' : ''}`}>
           <View scene={scene} ctx={ctx} item={item} items={items} />
         </div>
@@ -311,7 +308,7 @@ export default function ThumbRoot({ initialTarget }) {
 
       {/* 下3割 = 操作するところ */}
       <div className="tb-ops" role="group" aria-label="操作するところ">
-        <div className="tb-opsin" style={{ '--near': `${near}px` }}>
+        <div className="tb-opsin">
           <Reel
             items={items}
             index={index}
@@ -360,7 +357,7 @@ export default function ThumbRoot({ initialTarget }) {
             >
               {DIRS.map((d) => (
                 <span key={d.id} className={face === d.id && !nested ? 'is-cur' : ''} aria-hidden="true">
-                  <b>{hand === 'R' ? (d.arrowR || d.arrow) : d.arrow}</b>{d.label}
+                  <b>{d.arrow}</b>{d.label}
                 </span>
               ))}
               <span aria-hidden="true"><b>↓</b>戻す</span>
@@ -385,17 +382,6 @@ export default function ThumbRoot({ initialTarget }) {
                     <span aria-hidden="true">↓</span>
                   </button>
                 )}
-                <button
-                  type="button" aria-label={`原点を${hand === 'L' ? '右下' : '左下'}へ入れ替える`}
-                  onClick={() => setHand((h) => {
-                    const n = h === 'L' ? 'R' : 'L';
-                    lsSet(KEY_HAND, n);
-                    say(n === 'L' ? '原点を左下へ' : '原点を右下へ');
-                    return n;
-                  })}
-                >
-                  <span aria-hidden="true">⇄</span>
-                </button>
                 <button type="button" aria-label="この画面の使い方をもう一度読む" onClick={() => setIntro(true)}>
                   <span aria-hidden="true">?</span>
                 </button>
@@ -406,9 +392,11 @@ export default function ThumbRoot({ initialTarget }) {
             </div>
           </div>
 
+          {/* つまみ。読む領域を、指を下3割に置いたまま送るための握り */}
+          <Rail viewRef={viewRef} resetKey={key} controls="tb-view" />
+
           <Origin
             ref={originRef}
-            hand={hand}
             split={!!primary.split}
             verb={primary.short}
             label={primary.act ? `${primary.label}。選んでいるのは ${selName}` : `${primary.label}（いまは押せない）`}
@@ -446,7 +434,6 @@ export default function ThumbRoot({ initialTarget }) {
 
       {intro && (
         <Intro
-          hand={hand}
           onClose={() => { setIntro(false); lsSet(KEY_SEEN_INTRO, '1'); }}
           onSettings={openSettings}
         />

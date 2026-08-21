@@ -9,15 +9,16 @@
 // 支援技術から到達できない原点はこの面の否定になる。判定中は左右がそれぞれ独立したボタン。
 // ドラッグを一度も使わずに、Tab と Enter と扇だけで全機能に到達できること。
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import { BACK_DIR, DIRS } from './model.js';
+import { BACK_DIR, DIRS, FAN_R } from './model.js';
 
 const TAP_MS = 180;       // これより短く離したら「叩いた」
 const MOVE_PX = 14;       // これを超えたら「引いた」
 const COMMIT_PX = 40;     // これを超えないと行き先は決まらない（誤爆防止）
 const LATCH_MS = 6000;    // 指を離したあと扇が残る時間
+const BACK_GAP = 24;      // 原点の下端から「戻す」の中心までの余白
 
 export const Origin = forwardRef(function Origin(
-  { hand, split, verb, label, disabled, faceId, atRoot, onPrimary, onJudge, onDir, lobeLabels },
+  { split, verb, label, disabled, faceId, atRoot, onPrimary, onJudge, onDir, lobeLabels },
   ref,
 ) {
   const wrapRef = useRef(null);
@@ -28,11 +29,12 @@ export const Origin = forwardRef(function Origin(
   const g = useRef(null);
   const handled = useRef(0);
   const latchT = useRef(null);
-  const sx = hand === 'R' ? -1 : 1;
 
   const center = useCallback(() => {
     const r = wrapRef.current?.getBoundingClientRect();
-    return r ? { x: r.left + r.width / 2, y: r.top + r.height / 2, half: r.width / 2 } : { x: 0, y: 0, half: 38 };
+    return r
+      ? { x: r.left + r.width / 2, y: r.top + r.height / 2, halfH: r.height / 2 }
+      : { x: 0, y: 0, halfH: 38 };
   }, []);
 
   const closeFan = useCallback(() => {
@@ -71,13 +73,14 @@ export const Origin = forwardRef(function Origin(
     el.style.transform = `rotate(${deg}deg) scaleX(${Math.min(dist, 150) / 150})`;
   };
 
+  // 引いた向き → 行き先。境界は DIRS の `hit` に持たせてある（扇の見た目の角度 `deg` より広い）。
   const dirAt = (dx, dy) => {
     const dist = Math.hypot(dx, dy);
     if (dist < COMMIT_PX) return null;
-    const ang = (Math.atan2(-dy, sx * dx) * 180) / Math.PI;
+    const ang = (Math.atan2(-dy, dx) * 180) / Math.PI;
     if (ang < -40 && ang > -140) return BACK_DIR.id;
-    const a = Math.max(0, Math.min(100, ang));
-    return a < 15 ? 'today' : a < 45 ? 'shelf' : a < 75 ? 'search' : 'ask';
+    const a = Math.max(-40, Math.min(140, ang));
+    return (DIRS.find((d) => a < d.hit) || DIRS[DIRS.length - 1]).id;
   };
 
   const onDown = (e) => {
@@ -88,6 +91,9 @@ export const Origin = forwardRef(function Origin(
     g.current = { x: e.clientX, y: e.clientY, t: Date.now(), moved: false, lobe, id: e.pointerId };
     try { wrapRef.current.setPointerCapture(e.pointerId); } catch { /* noop */ }
     wrapRef.current.classList.add('is-press');
+    // ドラッグを長押しと解釈した OS 側の選択・拡大鏡を止める。preventDefault だけでは
+    // 取りこぼす端末があるので、選択が始まっていたらこちらから畳む。
+    document.getSelection?.()?.removeAllRanges?.();
     g.current.timer = setTimeout(() => { if (g.current && !g.current.moved) openFan(false); }, TAP_MS);
   };
 
@@ -149,7 +155,9 @@ export const Origin = forwardRef(function Origin(
   };
 
   const c = fan?.center || center();
-  const dirLabel = (d) => (sx > 0 ? d.arrow : (d.arrowR || d.arrow));
+  // 「戻す」は原点の真下。原点の実測の高さから半径を決めるので、判定中に原点が
+  // 太っても重ならず、44px 角を確保したままホームインジケータ帯にも掛からない。
+  const backR = c.halfH + BACK_GAP;
 
   return (
     <>
@@ -159,7 +167,7 @@ export const Origin = forwardRef(function Origin(
       </p>
       <div
         ref={wrapRef}
-        className={`tb-origin${split ? ' is-split' : ''}${hand === 'R' ? ' is-right' : ''}`}
+        className={`tb-origin${split ? ' is-split' : ''}`}
         role="group"
         aria-label="原点"
         onPointerDown={onDown}
@@ -211,10 +219,10 @@ export const Origin = forwardRef(function Origin(
       >
         <span className="tb-scrim" aria-hidden="true" />
         <span ref={aimRef} className="tb-aim" aria-hidden="true" style={{ left: c.x, top: c.y }} />
+        {/* 4つとも同じ半径の弧に、中心を載せる。半径を1つだけ詰めると弧が崩れて
+            「2番目・3番目だけ浮いている」ように見えるので、ここは揃える。 */}
         {DIRS.map((d) => {
           const rad = (d.deg * Math.PI) / 180;
-          const x = c.x + sx * d.r * Math.cos(rad);
-          const y = c.y - d.r * Math.sin(rad);
           const here = atRoot && faceId === d.id;
           return (
             <button
@@ -224,13 +232,13 @@ export const Origin = forwardRef(function Origin(
               className={`tb-wedge${hot === d.id ? ' is-hot' : ''}${here ? ' is-here' : ''}`}
               aria-label={`${d.label}${here ? '（いまここ）' : ''}。原点から${d.say}へ引いても行ける`}
               style={{
-                left: x, top: y,
-                // 配置だけ回して中身は正立させる（ピルの原点に近い辺を半径に合わせる）
-                transform: `translate(${(-50 + 50 * sx * Math.cos(rad)).toFixed(2)}%, ${(-50 - 50 * Math.sin(rad)).toFixed(2)}%)`,
+                left: c.x + FAN_R * Math.cos(rad),
+                top: c.y - FAN_R * Math.sin(rad),
+                transform: 'translate(-50%, -50%)',
               }}
               onClick={() => { closeFan(); onDir(d.id); }}
             >
-              <span className="tb-wdir" aria-hidden="true">{dirLabel(d)}</span>
+              <span className="tb-wdir" aria-hidden="true">{d.arrow}</span>
               <span className="tb-wlb">{d.label}</span>
             </button>
           );
@@ -240,12 +248,7 @@ export const Origin = forwardRef(function Origin(
           role="menuitem"
           className={`tb-wedge tb-wedge-back${hot === BACK_DIR.id ? ' is-hot' : ''}`}
           aria-label="ひとつ戻す。原点から下へ引いても戻せる"
-          /* 引く方向は「下」だが、ピルを真下に置くと 44px 角を確保した時点で画面最下端
-             （iOS のホームインジケータ帯）に食い込む。斜め下にずらして高さを稼ぐ。 */
-          style={{
-            left: c.x + sx * (c.half + 58), top: c.y + 30,
-            transform: 'translate(-50%, -50%)',
-          }}
+          style={{ left: c.x, top: c.y + backR, transform: 'translate(-50%, -50%)' }}
           onClick={() => { closeFan(); onDir(BACK_DIR.id); }}
         >
           <span className="tb-wdir" aria-hidden="true">{BACK_DIR.arrow}</span>

@@ -165,14 +165,18 @@ export function previewOf(node, graph) {
 // ---- 方向の意味 ----
 // **画面をまたいで固定**（受け入れ条件4）。ここを画面ごとに変えたら、この面は成立しない。
 // 主要動線は4つに絞る（扇のウェッジが狭くなるとラジアルの優位が消える）。1階層で終わり。
+//
+// `deg` は扇のウェッジを**同じ半径の弧に等間隔で載せる**ための角度で、`hit` は
+// 引いた方向をその行き先に振り分ける境界（deg より広く取る）。半径は4つとも同じ
+// FAN_R で、ウェッジは中心をその円周に置く——半径を1つだけ変えると弧が崩れて見える。
+export const FAN_R = 126;
 export const DIRS = [
-  { id: 'today', label: '今日', deg: 0, r: 130, arrow: '→', arrowR: '←', say: '横' },
-  { id: 'shelf', label: '見渡す', deg: 30, r: 130, arrow: '↗', arrowR: '↖', say: '斜め上' },
-  { id: 'search', label: '探す', deg: 60, r: 130, arrow: '↗', arrowR: '↖', say: 'もっと斜め上' },
-  // 頼む（真上）の半径だけ小さい。ここが扇の最上端になるので、
-  // 「主要な操作要素はすべて画面下端から250px以内」を割らない位置に留める。
-  { id: 'ask', label: '頼む', deg: 90, r: 106, arrow: '↑', arrowR: '↑', say: '真上' },
+  { id: 'today', label: '今日', deg: -8, hit: 8, arrow: '→', say: '横' },
+  { id: 'shelf', label: '見渡す', deg: 24, hit: 41, arrow: '↗', say: '斜め上' },
+  { id: 'search', label: '探す', deg: 58, hit: 77, arrow: '↗', say: 'もっと斜め上' },
+  { id: 'ask', label: '頼む', deg: 96, hit: 999, arrow: '↑', say: '真上' },
 ];
+// 「戻す」は原点の**真下**。半径は原点の実測の高さから決めるので、ここには持たない。
 export const BACK_DIR = { id: '__back', label: '戻す', arrow: '↓', say: '下' };
 
 // 在庫の偏りを見せるための集計。均等に並べないのが目的なので件数順のまま返す。

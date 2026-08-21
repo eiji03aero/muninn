@@ -81,7 +81,7 @@ function Today({ ctx, item, items }) {
           <div className="tb-q">{n.recall || n.title}</div>
           {!open ? (
             <p className="tb-qhint">
-              頭の中で答えてから、{ctx.hand === 'R' ? '右下' : '左下'}の原点をぽんと叩く。<br />
+              頭の中で答えてから、左下の原点をぽんと叩く。<br />
               答えが出たら原点が2つに割れる。左＝あやしい／右＝わかった。
             </p>
           ) : (

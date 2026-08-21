@@ -109,24 +109,25 @@ export function Sheet({ prefill, onCancel, onAdd }) {
 }
 
 // ---------------- 使い方 ----------------
-export function Intro({ hand, onClose, onSettings }) {
+export function Intro({ onClose, onSettings }) {
   return (
     <div className="tb-intro" role="dialog" aria-modal="true" aria-labelledby="tb-introt">
       <div className="tb-introt" id="tb-introt">親指ひとつ</div>
       <div className="tb-intros">操作原点はひとつ、方向が意味</div>
       <ul className="tb-introl">
         <li>画面の<b>上7割は読むためだけの場所</b>。ボタンも、戻るも、見出し棒も置かない。</li>
-        <li>操作は{hand === 'R' ? '右下' : '左下'}の丸＝<b>原点</b>ひとつ。<b>ぽんと叩けば「実行」</b>、<b>押したまま引けば「移動」</b>。</li>
+        <li>操作は左下の丸＝<b>原点</b>ひとつ。<b>ぽんと叩けば「実行」</b>、<b>押したまま引けば「移動」</b>。</li>
         <li>方向の意味は永久に固定。
-          <b>{DIRS.map((d) => `${hand === 'R' ? (d.arrowR || d.arrow) : d.arrow}${d.label}`).join(' ／ ')} ／ ↓戻す</b>。
+          <b>{DIRS.map((d) => `${d.arrow}${d.label}`).join(' ／ ')} ／ ↓戻す</b>。
           忘れても、押しっぱなしにすれば扇が<i>目に見えて</i>開く。
         </li>
         <li>原点の上の<b>帯</b>が候補。指ではじいて選び、選んだものは上に大きく映る。決めるのは原点。</li>
+        <li>原点の右の細い<b>つまみ</b>で本文を送る。掴んで動かすか、溝を叩けば1画面ぶん。</li>
         <li>想起では原点が<b>2つに割れる</b>。左＝あやしい／右＝わかった。指は原点から一歩も動かない。</li>
       </ul>
       <p className="tb-introf">
         PC で見る方へ： 原点はマウスでも押して引けます。キーボードは ← → で帯、Enter で原点、
-        1〜4 で行き先、Esc で戻す、H で利き手の左右入れ替え。<br />
+        1〜4 で行き先、Esc で戻す。つまみは Tab で移って ↑ ↓ ・PageUp/Down で送れます。<br />
         スクリーンリーダーでご覧の方へ： ドラッグを使わずに、Tab だけで全部操作できます。
         原点・帯の候補・「行き先を選ぶ」はすべてボタンです。
       </p>
