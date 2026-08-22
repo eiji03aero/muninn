@@ -160,6 +160,28 @@ export function previewOf(node, graph) {
   }
 }
 
+// ---- 帯の候補と、本文の行を結びつける鍵 ----
+// 帯（下）と本文（上）には**同じものが2つの姿で出ている**。両者を突き合わせないと、
+// 「本文で読んでいる行を開く」も「選んでいる候補まで本文を送る」も書けない。
+// 索引を持ち回すと views の呼び出し側13箇所を通すことになるので、
+// **どちらの側からも同じ文字列が出る鍵**を1つ決めて、それで照合する。
+export function itemKey(it) {
+  if (!it) return '';
+  const n = it.path?.node || it.hit?.node || it.node;
+  if (n) return n.route;
+  if (it.tag) return it.tag;
+  if (it.concept) return it.concept.slug;
+  if (it.ent) return it.ent.slug;
+  if (it.entry) return it.entry.slug;
+  if (it.sess) return it.sess.date;
+  if (it.slip) return it.slip.id;
+  return '';
+}
+
+// 「飛び先」＝この候補を選んで原点を叩くと、別のページへ移るもの。
+// 想起の札だけは例外で必ず残す——今日の面の主役をモードで消してはいけない。
+export const isJump = (it) => !!it?.card || it?.act?.t === 'go';
+
 // ---- 方向の意味 ----
 // **画面をまたいで固定**（受け入れ条件4）。ここを画面ごとに変えたら、この面は成立しない。
 // 主要動線は4つに絞る（扇のウェッジが狭くなるとラジアルの優位が消える）。1階層で終わり。

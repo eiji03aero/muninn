@@ -27,8 +27,10 @@ const Kick = ({ children, note }) => (
 );
 
 const Rows = ({ children }) => <div className="tb-rows">{children}</div>;
-const Row = ({ on, k, children }) => (
-  <div className={`tb-row${on ? ' is-on' : ''}`}>
+// `pick` は帯の候補と同じ鍵（model.js の itemKey）。本文の行と帯を突き合わせるために刻む。
+// **押せるようにするわけではない**——跳ぶ手段は下の帯のままで、ここは目印にすぎない。
+const Row = ({ on, k, pick, children }) => (
+  <div className={`tb-row${on ? ' is-on' : ''}`} data-pick={pick || undefined}>
     {k ? <span className="tb-rowk">{k}</span> : null}
     <div className="tb-rowt">{children}</div>
   </div>
@@ -42,7 +44,7 @@ function Paths({ items, item }) {
     <div className="tb-grp" key={title}>
       <Kick note={note}>{title}</Kick>
       {arr.map((x) => (
-        <div key={`${title}:${x.path.node.route}`} className={`tb-path${item === x ? ' is-on' : ''}`}>
+        <div key={`${title}:${x.path.node.route}`} data-pick={x.path.node.route} className={`tb-path${item === x ? ' is-on' : ''}`}>
           <span className="tb-arrow" aria-hidden="true">{x.path.dir === 'in' ? '←' : '→'}</span>
           <div className="tb-pathb">
             <div className="tb-why">{x.path.reason || '（理由は未記入）'}</div>
@@ -151,7 +153,7 @@ function Shelf({ ctx, item }) {
       <Kick note="いまあるもの">テーマ</Kick>
       <div className="tb-bars">
         {head.map((t) => (
-          <div key={t.tag} className={`tb-bar${item?.tag === t.tag ? ' is-on' : ''}`}>
+          <div key={t.tag} data-pick={t.tag} className={`tb-bar${item?.tag === t.tag ? ' is-on' : ''}`}>
             <span className="tb-fill" style={{ width: `${(t.count / max) * 100}%` }} />
             <span className="tb-barn">{t.label}</span>
             <span className="tb-barc">{t.count}</span>
@@ -218,7 +220,7 @@ function Search({ ctx, item, items }) {
       <Kick note={`「${q}」 ${hits.length}件`}>探す</Kick>
       <Rows>
         {hits.slice(0, 20).map((x) => (
-          <Row key={x.hit.node.route} k={kindOf(x.hit.node)} on={item === x}>
+          <Row key={x.hit.node.route} pick={x.hit.node.route} k={kindOf(x.hit.node)} on={item === x}>
             {shortTitle(x.hit.node.title)}
             {x.hit.snip && (
               <div className="tb-rowr">
@@ -261,7 +263,7 @@ function Ask({ ctx, item }) {
           <Row k="答え合わせ" on={!!item?.pending}>再読の結果 {pending.length}件</Row>
         )}
         {slips.map((s, i) => (
-          <Row key={s.id} k={String(i + 1)} on={item?.slip?.id === s.id}>{s.label}</Row>
+          <Row key={s.id} pick={s.id} k={String(i + 1)} on={item?.slip?.id === s.id}>{s.label}</Row>
         ))}
       </Rows>
       <div className="tb-grp">
@@ -281,7 +283,7 @@ function Theme({ ctx, item, scene }) {
       <Kick note={`${list.length}件`}>{tagJa(scene.tag)}</Kick>
       <Rows>
         {list.map((n) => (
-          <Row key={n.route} k={kindOf(n)} on={item?.node?.route === n.route}>
+          <Row key={n.route} pick={n.route} k={kindOf(n)} on={item?.node?.route === n.route}>
             {shortTitle(n.title)}
             <div className="tb-rowr">{relDay(n.updated, ctx.today)}に更新</div>
           </Row>
@@ -337,7 +339,7 @@ function ConceptView({ ctx, node, item, items }) {
                 const cc = a.concepts.find((x) => x.slug === cs);
                 if (!cc) return null;
                 return (
-                  <Row key={cs} k={String(j + 1)} on={j === i}>
+                  <Row key={cs} pick={cs} k={String(j + 1)} on={j === i}>
                     {shortTitle(cc.title)}
                     {cc.status === 'stub' && <div className="tb-rowr">未執筆</div>}
                   </Row>
@@ -372,7 +374,7 @@ function AtlasView({ ctx, node, item }) {
               const cc = a.concepts.find((x) => x.slug === cs);
               if (!cc) return null;
               return (
-                <Row key={cs} k={String(j + 1)} on={item?.concept?.slug === cs}>
+                <Row key={cs} pick={cs} k={String(j + 1)} on={item?.concept?.slug === cs}>
                   {shortTitle(cc.title)}
                   {cc.status === 'stub' && <div className="tb-rowr">未執筆</div>}
                   {ctx.reads[a.slug]?.has(cs) && <div className="tb-rowr">読了</div>}
@@ -433,7 +435,7 @@ function FollowView({ ctx, node, item, items }) {
       {f.entities?.length > 0 && (
         <div className="tb-grp"><Kick note={`${f.entities.length}人`}>顔ぶれ</Kick>
           <Rows>{f.entities.map((e) => (
-            <Row key={e.slug} k={e.group} on={item?.ent?.slug === e.slug}>
+            <Row key={e.slug} pick={e.slug} k={e.group} on={item?.ent?.slug === e.slug}>
               {cleanTitle(e.title)}
               <div className="tb-rowr">{e.role} / {e.club}{e.status === 'injured' ? '（離脱中）' : ''}</div>
             </Row>
@@ -528,7 +530,7 @@ function LogTopicView({ ctx, node, item }) {
       </p>
       <Rows>
         {t.entries.map((e) => (
-          <Row key={e.slug} k={e.fields?.rating ? `★${e.fields.rating}` : ''} on={item?.entry?.slug === e.slug}>
+          <Row key={e.slug} pick={e.slug} k={e.fields?.rating ? `★${e.fields.rating}` : ''} on={item?.entry?.slug === e.slug}>
             {e.title}
             <div className="tb-rowr">
               {t.fields.slice(0, 3).map((f) => e.fields?.[f.key])
@@ -591,7 +593,7 @@ function MocView({ ctx, node, item }) {
               const to = r && ctx.graph.byRoute.get(r.route);
               if (!to) return null;
               return (
-                <Row key={it.target} k={kindOf(to)} on={item?.path?.node?.route === to.route}>
+                <Row key={it.target} pick={to.route} k={kindOf(to)} on={item?.path?.node?.route === to.route}>
                   {it.alias || shortTitle(to.title)}
                   {it.reason && <div className="tb-rowr">{it.reason}</div>}
                 </Row>

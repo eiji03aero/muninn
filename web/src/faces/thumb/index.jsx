@@ -20,7 +20,7 @@ import {
   markSeen, recallLog, recordVerdict, removeSlip, slipsPrompt, todayISO, undoVerdict,
 } from '../../lib/recall.js';
 import { copyText } from '../../shared/util.js';
-import { BACK_DIR, DIRS, extraBacklinks, tagJa } from './model.js';
+import { BACK_DIR, DIRS, extraBacklinks, isJump, itemKey, tagJa } from './model.js';
 import { nodeScene, primaryOf, reelItems, sceneKey } from './scene.js';
 import { Origin } from './origin.jsx';
 import { Rail } from './rail.jsx';
@@ -30,6 +30,7 @@ import { Intro, Peek, Sheet, Toast } from './parts.jsx';
 import './thumb.css';
 
 const KEY_SEEN_INTRO = 'mn.face.thumb.intro';
+const KEY_PICK = 'mn.face.thumb.pick';
 const UNDO_MS = 8000;   // 判定を書き込むまでの猶予＝取り消せる時間
 const NEXT_MS = 340;
 const PEEK_MS = 2800;   // 候補を切り替えてから覗き窓が引っ込むまで
@@ -56,6 +57,7 @@ export default function ThumbRoot({ initialTarget }) {
   const [slipV, setSlipV] = useState(0);
   const [undo, setUndo] = useState(null);
   const [peek, setPeek] = useState(false);
+  const [pick, setPick] = useState(() => lsGet(KEY_PICK, '') === '1');
 
   const viewRef = useRef(null);
   const originRef = useRef(null);
@@ -64,6 +66,9 @@ export default function ThumbRoot({ initialTarget }) {
   const toastT = useRef(0);
   const peekT = useRef(0);
   const lastKey = useRef('');
+  const selfScroll = useRef(0);   // こちらが送った本文スクロールを、読み手の操作と取り違えない
+  const fromRead = useRef(false); // 選択が「本文を読んだ側」から来たか
+  const keepPick = useRef('');    // 絞りを切り替えても同じものを選んだままにする
   const commitT = useRef(0);
   const held = useRef(null); // まだ書き込んでいない判定
 
@@ -98,7 +103,12 @@ export default function ThumbRoot({ initialTarget }) {
     today, docketText: slipsPrompt(slips, pending),
   }), [site, idx, graph, extra, reads, cards, judged, flipped, query, slips, pending, seen, today]);
 
-  const items = useMemo(() => reelItems(scene, ctx), [key, ctx]); // eslint-disable-line react-hooks/exhaustive-deps
+  const allItems = useMemo(() => reelItems(scene, ctx), [key, ctx]); // eslint-disable-line react-hooks/exhaustive-deps
+  // 飛び先だけモード。**絞った結果が空になる場面（依頼など）では素通しにする**——
+  // 「絞ったら何も無くなった」は、読み手から見れば壊れているのと区別が付かない。
+  const jumps = useMemo(() => allItems.filter(isJump), [allItems]);
+  const picked = pick && jumps.length > 0 && jumps.length < allItems.length;
+  const items = picked ? jumps : allItems;
   const index = Math.max(0, Math.min(reelIdx, items.length - 1));
   const item = items[index];
   const primary = primaryOf(scene, item, ctx);
@@ -127,6 +137,7 @@ export default function ThumbRoot({ initialTarget }) {
     setReelIdx(wantIdx ?? idxMem.current[nk] ?? 0);
     setPeek(false);
     clearTimeout(peekT.current);
+    selfScroll.current = Date.now();
     if (viewRef.current) viewRef.current.scrollTop = 0;
   }, [key, index, face]);
 
@@ -253,6 +264,7 @@ export default function ThumbRoot({ initialTarget }) {
     const first = lastKey.current !== key;
     lastKey.current = key;
     if (!v || first) return;
+    if (fromRead.current) { fromRead.current = false; return; } // 読んだ側から動いたぶんは送り返さない
     const el = v.querySelector('.is-on');
     if (!el) return;
     const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -264,8 +276,55 @@ export default function ThumbRoot({ initialTarget }) {
     let to = null;
     if (top < lo) to = top - 12;
     else if (top + h > hi) to = top + h + guard - v.clientHeight;
-    if (to != null) v.scrollTo({ top: Math.max(0, to), behavior: smooth ? 'smooth' : 'auto' });
+    if (to != null) {
+      selfScroll.current = Date.now();
+      v.scrollTo({ top: Math.max(0, to), behavior: smooth ? 'smooth' : 'auto' });
+    }
   }, [index, key]);
+
+  // 2) 逆向き（本文→帯）: 読んでいる位置にいちばん近い行へ、帯の選択を寄せる。
+  // これで「読んでいたものをそのまま開く」が成立する——本文の一覧を読んで飛びたくなったとき、
+  // 同じ項目を帯の中から探し直す必要がなくなる。
+  // こちらが送ったスクロール（1）では動かさない。往復すると選択が発振する。
+  useEffect(() => {
+    const v = viewRef.current;
+    if (!v) return undefined;
+    let raf = 0;
+    const onScroll = () => {
+      if (Date.now() - selfScroll.current < 500 || raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        const rows = v.querySelectorAll('[data-pick]');
+        if (!rows.length) return;
+        const line = v.getBoundingClientRect().top + 28; // 「いま読んでいる高さ」
+        let best = null;
+        let bestD = Infinity;
+        for (const el of rows) {
+          const r = el.getBoundingClientRect();
+          if (r.bottom < line) continue;               // 読み終えた行は候補にしない
+          const d = Math.abs(r.top - line);
+          if (d < bestD) { bestD = d; best = el; }
+        }
+        if (!best) return;
+        const i = items.findIndex((it) => itemKey(it) === best.dataset.pick);
+        if (i < 0 || i === index) return;
+        fromRead.current = true;
+        setReelIdx(i);
+        setFlipped(false);
+      });
+    };
+    v.addEventListener('scroll', onScroll, { passive: true });
+    return () => { v.removeEventListener('scroll', onScroll); cancelAnimationFrame(raf); };
+  }, [items, index]);
+
+  // 絞りを切り替えても、いま選んでいるものは選んだままにする（並びの番号は変わるため）
+  useEffect(() => {
+    if (!keepPick.current) return;
+    const want = keepPick.current;
+    keepPick.current = '';
+    const i = items.findIndex((it) => itemKey(it) === want);
+    if (i >= 0) setReelIdx(i);
+  }, [items]);
 
   // 起動直後は、今日の未判定の最初の1枚に合わせる（続きから差し出す）
   const seeded = useRef(false);
@@ -349,7 +408,7 @@ export default function ThumbRoot({ initialTarget }) {
           <Reel
             items={items}
             index={index}
-            resetKey={key}
+            resetKey={`${key}:${picked ? 'p' : 'a'}`}
             onIndex={(i) => { setReelIdx(i); setFlipped(false); showPeek(); }}
             onActivate={() => runAct(primary.act)}
             empty={scene.t === 'search' ? 'キーワードを入力すると候補が表示されます' : '候補はありません。メニューから別の画面へ移動できます'}
@@ -375,8 +434,13 @@ export default function ThumbRoot({ initialTarget }) {
             ) : (
               <>
                 <div className="tb-where">
-                  <b>{faceLabel}</b>
-                  {crumbs.map((c) => <span key={c}> › {c}</span>)}
+                  {/* 現在地は詰まったら省略してよいが、絞りが効いている印だけは必ず残す
+                      ——見えないと「候補が減っている」がただの不具合に見える */}
+                  <span className="tb-wherein">
+                    <b>{faceLabel}</b>
+                    {crumbs.map((c) => <span key={c}> › {c}</span>)}
+                  </span>
+                  {picked && <span className="tb-pickon">飛び先だけ</span>}
                 </div>
                 <div className="tb-act">
                   {primary.split ? <em>答え合わせ</em>
@@ -401,15 +465,13 @@ export default function ThumbRoot({ initialTarget }) {
             </button>
 
             <div className="tb-foot">
-              {undo ? (
-                <button type="button" className="tb-undo" onClick={() => { undo.run(); }}>↺ {undo.label}</button>
-              ) : judgedCard ? (
+              {!undo && judgedCard ? (
                 // 猶予が切れたあとの逃げ道。ここが無いと判定が取り消せない操作になる
                 <button type="button" className="tb-undo" onClick={() => unjudge(judgedCard)}>↺ 元に戻す</button>
               ) : (
-                // 判定中は原点が太るぶん幅が無い。削るのはカウンタから（道具は残す）
+                // 道具と幅を取り合う。詰まったら先に削るのはカウンタから（道具は残す）
                 <span className="tb-counter" role="status">
-                  {!primary.split && week ? `今週の再読 ${week}枚` : ''}
+                  {!undo && !primary.split && week ? `今週の再読 ${week}枚` : ''}
                 </span>
               )}
               <span className="tb-spacer" />
@@ -418,6 +480,28 @@ export default function ThumbRoot({ initialTarget }) {
                   <button type="button" aria-label="戻る（下にスワイプしても戻れます）" onClick={pop}>
                     <span aria-hidden="true">↓</span>
                   </button>
+                )}
+                {/* 今日の面には絞る相手が居ない（札は飛び先ではない）ので出さない。
+                    出しても効かない道具を並べると、道具の意味が薄まる */}
+                {scene.t !== 'today' && (
+                <button
+                  type="button"
+                  className={pick ? 'is-on' : ''}
+                  aria-pressed={pick ? 'true' : 'false'}
+                  aria-label="候補を飛び先だけに絞る"
+                  onClick={() => {
+                    keepPick.current = itemKey(item);
+                    setPick((v) => {
+                      const n = !v;
+                      lsSet(KEY_PICK, n ? '1' : '0');
+                      if (n) say(jumps.length ? '飛び先だけに絞った' : 'この画面には飛び先が無いので、そのまま出す');
+                      else say('絞りを外した');
+                      return n;
+                    });
+                  }}
+                >
+                  <span aria-hidden="true">⇢</span>
+                </button>
                 )}
                 <button type="button" aria-label="使い方を見る" onClick={() => setIntro(true)}>
                   <span aria-hidden="true">?</span>
@@ -474,6 +558,14 @@ export default function ThumbRoot({ initialTarget }) {
           onClose={() => { setIntro(false); lsSet(KEY_SEEN_INTRO, '1'); }}
           onSettings={openSettings}
         />
+      )}
+
+      {/* 取り消しは操作領域の上に浮かせる。足元の行で道具と幅を取り合うと、
+          狭い端末で「↺ 元に戻…」のように切れる（実際に切れていた） */}
+      {undo && (
+        <div className="tb-undobar">
+          <button type="button" className="tb-undo" onClick={() => { undo.run(); }}>↺ {undo.label}</button>
+        </div>
       )}
 
       <Toast text={toast} />
