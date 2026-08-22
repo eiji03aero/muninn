@@ -32,6 +32,7 @@ import './thumb.css';
 const KEY_SEEN_INTRO = 'mn.face.thumb.intro';
 const UNDO_MS = 8000;   // 判定を書き込むまでの猶予＝取り消せる時間
 const NEXT_MS = 340;
+const PEEK_MS = 2800;   // 候補を切り替えてから覗き窓が引っ込むまで
 
 const lsGet = (k, fb) => { try { return localStorage.getItem(k) ?? fb; } catch { return fb; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch { /* noop */ } };
@@ -54,12 +55,15 @@ export default function ThumbRoot({ initialTarget }) {
   const [sheet, setSheet] = useState(null);
   const [slipV, setSlipV] = useState(0);
   const [undo, setUndo] = useState(null);
+  const [peek, setPeek] = useState(false);
 
   const viewRef = useRef(null);
   const originRef = useRef(null);
   const composing = useRef(false);
   const idxMem = useRef({});
   const toastT = useRef(0);
+  const peekT = useRef(0);
+  const lastKey = useRef('');
   const commitT = useRef(0);
   const held = useRef(null); // まだ書き込んでいない判定
 
@@ -99,6 +103,14 @@ export default function ThumbRoot({ initialTarget }) {
   const item = items[index];
   const primary = primaryOf(scene, item, ctx);
 
+  // 覗き窓は「候補を切り替えた瞬間」だけ出す。手が止まれば引っ込み、読む領域を返す。
+  const showPeek = useCallback(() => {
+    setPeek(true);
+    clearTimeout(peekT.current);
+    peekT.current = setTimeout(() => setPeek(false), PEEK_MS);
+  }, []);
+  useEffect(() => () => clearTimeout(peekT.current), []);
+
   const say = useCallback((m) => {
     setToast(m);
     clearTimeout(toastT.current);
@@ -113,6 +125,8 @@ export default function ThumbRoot({ initialTarget }) {
     setFlipped(false);
     const nk = sceneKey(next.stack.length ? next.stack[next.stack.length - 1] : { t: next.face || face });
     setReelIdx(wantIdx ?? idxMem.current[nk] ?? 0);
+    setPeek(false);
+    clearTimeout(peekT.current);
     if (viewRef.current) viewRef.current.scrollTop = 0;
   }, [key, index, face]);
 
@@ -230,6 +244,29 @@ export default function ThumbRoot({ initialTarget }) {
     else goFace(id);
   }, [pop, goFace]);
 
+  // 候補を切り替えたら、**本文側の該当行を見えるところまで送る**。
+  // 帯で選んでいるものと、上に映っているものが一致していないと、
+  // 「タップで開く」が何を開くのか読者の側から確かめられない。
+  // 場面に入った直後は動かさない——記事は先頭から読ませたいので、そこを奪わない。
+  useEffect(() => {
+    const v = viewRef.current;
+    const first = lastKey.current !== key;
+    lastKey.current = key;
+    if (!v || first) return;
+    const el = v.querySelector('.is-on');
+    if (!el) return;
+    const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const top = el.getBoundingClientRect().top - v.getBoundingClientRect().top + v.scrollTop;
+    const h = el.offsetHeight;
+    const guard = 168;                       // 覗き窓が出ても隠れない位置に置く
+    const lo = v.scrollTop + 12;
+    const hi = v.scrollTop + v.clientHeight - guard;
+    let to = null;
+    if (top < lo) to = top - 12;
+    else if (top + h > hi) to = top + h + guard - v.clientHeight;
+    if (to != null) v.scrollTo({ top: Math.max(0, to), behavior: smooth ? 'smooth' : 'auto' });
+  }, [index, key]);
+
   // 起動直後は、今日の未判定の最初の1枚に合わせる（続きから差し出す）
   const seeded = useRef(false);
   useEffect(() => {
@@ -265,17 +302,17 @@ export default function ThumbRoot({ initialTarget }) {
         return;
       }
       if (t?.closest?.('button') && (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight' || e.key === 'ArrowLeft')) return;
-      if (e.key === 'ArrowRight') { setReelIdx((i) => Math.min(i + 1, items.length - 1)); e.preventDefault(); }
-      else if (e.key === 'ArrowLeft') { setReelIdx((i) => Math.max(i - 1, 0)); e.preventDefault(); }
-      else if (e.key === 'Home') { setReelIdx(0); e.preventDefault(); }
-      else if (e.key === 'End') { setReelIdx(items.length - 1); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { setReelIdx((i) => Math.min(i + 1, items.length - 1)); showPeek(); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft') { setReelIdx((i) => Math.max(i - 1, 0)); showPeek(); e.preventDefault(); }
+      else if (e.key === 'Home') { setReelIdx(0); showPeek(); e.preventDefault(); }
+      else if (e.key === 'End') { setReelIdx(items.length - 1); showPeek(); e.preventDefault(); }
       else if (e.key === 'Enter' || e.key === ' ') { runAct(primary.act); e.preventDefault(); }
       else if (e.key === 'Escape' || e.key === 'Backspace') { pop(); e.preventDefault(); }
       else if (e.key >= '1' && e.key <= '4') goFace(DIRS[Number(e.key) - 1].id);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [intro, items.length, primary, runAct, pop, goFace]);
+  }, [intro, items.length, primary, runAct, pop, goFace, showPeek]);
 
   // ---- 表示用の文字列 ----
   const faceLabel = DIRS.find((d) => d.id === face)?.label || '今日';
@@ -298,13 +335,13 @@ export default function ThumbRoot({ initialTarget }) {
   return (
     <div className="face-thumb" data-face="thumb">
       {/* 上7割 = 読むためだけの場所。押せるものを1つも置かない */}
-      <div id="tb-view" className={`tb-view${scene.t !== 'today' ? ' has-peek' : ''}`} ref={viewRef} role="region" aria-label="本文" tabIndex={0}>
+      <div id="tb-view" className="tb-view" ref={viewRef} role="region" aria-label="本文" tabIndex={0}>
         <div className={`tb-viewin${scene.t === 'today' && item?.card ? ' is-fill' : ''}`}>
           <View scene={scene} ctx={ctx} item={item} items={items} />
         </div>
       </div>
 
-      {scene.t !== 'today' && <Peek item={item} ctx={ctx} />}
+      {scene.t !== 'today' && <Peek item={item} ctx={ctx} on={peek} />}
 
       {/* 下3割 = 操作するところ */}
       <div className="tb-ops" role="group" aria-label="操作パネル">
@@ -313,7 +350,7 @@ export default function ThumbRoot({ initialTarget }) {
             items={items}
             index={index}
             resetKey={key}
-            onIndex={(i) => { setReelIdx(i); setFlipped(false); }}
+            onIndex={(i) => { setReelIdx(i); setFlipped(false); showPeek(); }}
             onActivate={() => runAct(primary.act)}
             empty={scene.t === 'search' ? 'キーワードを入力すると候補が表示されます' : '候補はありません。メニューから別の画面へ移動できます'}
           />

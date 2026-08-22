@@ -11,7 +11,13 @@
      道具の並びが画面下端から浮いていた。足すのは1箇所だけにする。 */
   --ops: 250px;
   --inset-b: env(safe-area-inset-bottom, 0px);
-  --opsh: calc(var(--ops) + var(--inset-b));
+  /* safe-area を**丸ごと**空けると、iOS の standalone（ホーム画面から起動）では
+     道具の並びが下端から 34pt 浮いて見える。ブラウザのタブでは inset が 0 なので
+     気づけない差で、実際「まだ浮いている」と報告されたのはここ。
+     ホームインジケータが描かれるのは下端から 20pt ほどの帯なので、**避けるのはその分だけ**。
+     指の届く距離のほうを優先する（タップ標的であって、下端からのスワイプではない）。 */
+  --pad-b: max(6px, calc(var(--inset-b) - 20px));
+  --opsh: calc(var(--ops) + var(--pad-b));
   --near: 174px;   /* 原点＋つまみが占める左の幅。パネルはこの右から始まる */
   --col: 460px;
   --bg: #07080a;
@@ -65,8 +71,9 @@
   width: 100%; max-width: var(--col); margin: 0 auto;
   padding: max(22px, env(safe-area-inset-top)) 22px 28px;
 }
-/* 覗き窓が出ているあいだは、その分だけ本文の底を上げる（最後の行が隠れない） */
-[data-face="thumb"] .tb-view.has-peek .tb-viewin { padding-bottom: 172px; }
+/* 覗き窓は常設しない（下記）ので、本文の底を常時空けておく必要はなくなった。
+   最後の行のぶんだけ余裕を持たせる。 */
+[data-face="thumb"] .tb-viewin { padding-bottom: 28px; }
 [data-face="thumb"] .tb-viewin.is-fill { min-height: calc(100dvh - var(--opsh) - 56px); display: flex; flex-direction: column; }
 [data-face="thumb"] .tb-viewin.is-fill .tb-card { flex: 1; display: flex; flex-direction: column; }
 [data-face="thumb"] .tb-viewin.is-fill .tb-qhint { margin-top: auto; padding-top: 18px; }
@@ -198,12 +205,19 @@
 [data-face="thumb"] .tb-metd.is-bad { color: var(--warn); }
 
 /* ---------------- 覗き窓 ---------------- */
+/* 覗き窓は**選んでいる最中だけ**出す一時的な重ね。
+   常設していたころは 152px を読む領域から恒久的に奪っていて、記事を読むあいだじゅう
+   「いま選んでいる候補の要約」が居座っていた——読むための面でそれは本末転倒だった。
+   出るのは候補を切り替えた瞬間で、手が止まれば引っ込む（index.jsx の PEEK_MS）。 */
 [data-face="thumb"] .tb-peek {
   position: absolute; left: 0; right: 0; bottom: var(--opsh); height: 152px; z-index: 12;
   background: #06070a; box-shadow: 0 -14px 22px -8px #06070a;
   border-top: 1px solid rgba(127, 209, 232, .28);
   padding: 11px 20px 12px; overflow: hidden;
+  opacity: 0; transform: translateY(8px); pointer-events: none;
+  transition: opacity .13s linear, transform .13s ease-out;
 }
+[data-face="thumb"] .tb-peek.is-on { opacity: 1; transform: translateY(0); }
 [data-face="thumb"] .tb-peekin {
   height: 100%; max-width: var(--col); margin: 0 auto;
   display: flex; flex-direction: column; overflow: hidden;
@@ -246,7 +260,7 @@
 /* safe-area の分だけ底を上げた「中身の箱」。以降の座標はすべてこの箱の中で完結し、
    safe-area は二度と出てこない（＝子が下端に貼り付く） */
 [data-face="thumb"] .tb-opsin {
-  position: absolute; left: 0; right: 0; top: 0; bottom: var(--inset-b);
+  position: absolute; left: 0; right: 0; top: 0; bottom: var(--pad-b);
   max-width: var(--col); margin: 0 auto;
 }
 

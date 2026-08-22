@@ -233,7 +233,13 @@ export function primaryOf(scene, item, ctx) {
   const a = item?.act;
   if (!a) return { short: '—', label: '選べる項目がありません', act: null };
   switch (a.t) {
-    case 'go': return { short: '開く', label: item.path ? 'リンク先を開く' : '開く', act: a };
+    // 「道」は向きで呼び名が変わる。入ってくる側を「リンク先」と呼ぶと、
+    // 上に映っている行（リンク元の一覧）と画面の言葉が食い違う。
+    case 'go': return {
+      short: '開く',
+      label: item.path ? `${item.path.dir === 'in' ? 'リンク元' : 'リンク先'}を開く` : '開く',
+      act: a,
+    };
     case 'ask': return { short: '依頼', label: 'この依頼を書く', act: a };
     case 'write': return { short: '書く', label: '新しい依頼を書く', act: a };
     case 'copy': return { short: 'コピー', label: '依頼をまとめてコピー', act: a };

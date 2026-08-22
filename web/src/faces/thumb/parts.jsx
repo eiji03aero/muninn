@@ -53,11 +53,11 @@ function peekOf(item, ctx) {
   return null;
 }
 
-export function Peek({ item, ctx }) {
+export function Peek({ item, ctx, on }) {
   const p = peekOf(item, ctx);
   if (!p) return null;
   return (
-    <div className="tb-peek" aria-live="polite" aria-atomic="true">
+    <div className={`tb-peek${on ? ' is-on' : ''}`} aria-live="polite" aria-atomic="true" aria-hidden={on ? 'false' : 'true'}>
       <div className="tb-peekin">
         <div className="tb-peekh"><b>プレビュー</b><i /><span>{p.head}</span></div>
         {p.why && <div className="tb-peekwhy">{p.why}</div>}
