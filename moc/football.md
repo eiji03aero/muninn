@@ -19,6 +19,11 @@ tags: [moc]
 - [[otamendi-retired-from-argentina-after-2026-world-cup]] — 大会後の世代交代第一歩。17年・139キャップの守備リーダーが代表引退。
 - [[messi-all-time-world-cup-top-scorer]] — メッシが2026で通算W杯得点王＆シルバーボール。
 - [[argentina-badge-three-stars-1978-1986-2022]] — エンブレム3つ星の意味。1986＝マラドーナ、2022＝メッシ。
+- [[mastantuono-youngest-official-debutant-for-argentina]] — 代表の「最年少デビュー」は公式戦か親善試合かで答えが変わる（マラドーナとの線引き）。
+
+## ルール・カレンダー
+
+- [[fifa-merged-september-and-october-international-windows-from-2026]] — 2026年から9月と10月の代表ウィンドウが統合（9/21〜10/6の16日間・最大4試合）。代表の日程を読むときの前提。
 
 ## フォロー（時系列で追う側）
 
