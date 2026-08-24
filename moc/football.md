@@ -20,10 +20,12 @@ tags: [moc]
 - [[messi-all-time-world-cup-top-scorer]] — メッシが2026で通算W杯得点王＆シルバーボール。
 - [[argentina-badge-three-stars-1978-1986-2022]] — エンブレム3つ星の意味。1986＝マラドーナ、2022＝メッシ。
 - [[mastantuono-youngest-official-debutant-for-argentina]] — 代表の「最年少デビュー」は公式戦か親善試合かで答えが変わる（マラドーナとの線引き）。
+- [[jorge-messi-father-and-lifelong-agent-died-in-2026]] — メッシの父は生涯の代理人でもあった。2026-08-08に死去。
 
-## ルール・カレンダー
+## ルール・契約・カレンダー
 
 - [[fifa-merged-september-and-october-international-windows-from-2026]] — 2026年から9月と10月の代表ウィンドウが統合（9/21〜10/6の16日間・最大4試合）。代表の日程を読むときの前提。
+- [[buy-back-clause-lets-the-selling-club-reclaim-a-player-at-a-fixed-price]] — バイバック条項＝売った側が決まった額で買い戻せる一方的オプション。レンタルの買い取りOPとは方向が逆。
 
 ## フォロー（時系列で追う側）
 
