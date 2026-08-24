@@ -66,7 +66,7 @@ rivals:
 
 - [[nico-paz]] — 左利きのトップ下。セリエA最優秀MF、現状の最有力（Como）
 - [[giuliano-simeone]] — 走力と守備貢献で枠を取る右ウイング。すでに代表14キャップ・W杯メンバー（Atlético Madrid）
-- [[franco-mastantuono]] — 18歳の左利きアタッカー。負傷とW杯落選から仕切り直し（Fiorentina／レアルからレンタル）
+- [[franco-mastantuono]] — 19歳の左利きアタッカー。フィオレンティーナ（背番号30）で出場時間を取りに行く段階（レアルからレンタル）
 - [[valentin-barco]] — 左SBと中盤を兼ねる可変性。W杯メンバー最年少（Chelsea）
 - [[santiago-castro]] — セリエAで主力を張る21歳CF。代表の帰属は未確定（Bologna）
 
