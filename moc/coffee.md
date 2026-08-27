@@ -23,3 +23,5 @@ tags: [moc]
 - [[coffee-strength-is-the-dose-ratio-while-extraction-yield-is-grind-temperature-and-time]] — 「薄い」は比率、「渋い」は抽出率。混同すると対処を間違える
 - [[coffee-reveals-acidity-and-sweetness-as-it-cools]] — 冷める過程で酸味と甘さが立つ。一杯を一度に判定しない
 - [[french-press-metal-mesh-passes-oils-and-fines-so-it-needs-a-coarse-grind]] — 器具の差はフィルターが何を通すかの差。プレスはボディ、ペーパーはクリア
+- [[grind-size-has-to-match-the-contact-time-of-the-brewing-method]] — 挽き目と器具はセット。粗挽きを短時間のドリップに流用すると素通りする
+- [[coffee-extracts-acids-first-then-sweetness-then-bitterness]] — 酸→甘み→苦味の順に出る。抽出不足は酸っぱく、過抽出は渋い
