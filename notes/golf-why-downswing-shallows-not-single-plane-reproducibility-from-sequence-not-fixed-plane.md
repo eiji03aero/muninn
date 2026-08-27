@@ -29,3 +29,4 @@ srs:
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — シャローを生む下半身始動の順序
 - [[golf-takeaway-by-feel-hands-in-and-lever-sets-good-return-reference-not-path-preview]] — 「バックとダウンは同一軌道でない（切り返しで少しシャロー）」の対
 - [[golf-l-to-l-positions-happen-naturally-low-point-set-by-pressure-not-rotation]] — 位置/面を作りにいかない＝再現性は反復から、の原則
+- [[golf-the-slot-is-a-transition-phase-not-a-position-value-is-passive-face-squaring-mackenzie]] — この「浅くなる局面」の呼称＝スロット。実測基準と価値（受動的スクエア化）の側
