@@ -167,6 +167,7 @@ export function previewOf(node, graph) {
 // **どちらの側からも同じ文字列が出る鍵**を1つ決めて、それで照合する。
 export function itemKey(it) {
   if (!it) return '';
+  if (it.pick) return it.pick; // 束・一覧の行（node を持たない候補）はここで鍵を自前に持つ
   const n = it.path?.node || it.hit?.node || it.node;
   if (n) return n.route;
   if (it.tag) return it.tag;
@@ -191,12 +192,71 @@ export const isJump = (it) => !!it?.card || it?.act?.t === 'go';
 // FAN_R で、ウェッジは中心をその円周に置く——半径を1つだけ変えると弧が崩れて見える。
 export const FAN_R = 126;
 //
-// `label` は**日報の面と同じ語**にする（テーマ / 探す / 依頼）。同じジョブが面ごとに
+// `label` は**日報の面と同じ語**にする（探す / 依頼）。同じジョブが面ごとに
 // 違う名前で呼ばれていると、読者にとっては面を変えるたびに覚え直しになる。
 // 動詞（見渡す・頼む）をやめたのは原則14でもある——「見渡す」は中身を言っていない。
+//
+// ただし `shelf` だけは日報と1対1に揃えられない。**日報はこのジョブを2タブ（続きもの / テーマ）に
+// 割っているが、この面の方向は4本しかない**。5本目を足すと、この面の最大の弱点
+//（低頻度だと方向の記憶が育たない）を自分から悪化させるので、腕は増やさない。
+// そこで1本の方向の中を2段（束 → 中身）にして両方を収めた。結果、行き先はテーマだけではなく
+// 連載・定点・記録帖・索引も含むので、**`テーマ` という名前は中身に対して嘘になる**。
+// 原則14（押す前に中身が分かる）を優先して `一覧` に改めた。嘘の名前より、揃わない名前を取る。
+// ---- 見渡すの1段目 ----
+// かつて `見渡す` は 48件を1本の帯に平らに並べていた（テーマ31件 → 連載 → 定点 → 記録帖 → 索引）。
+// 続きものに届くのにテーマを31枚はじく必要があり、**原則1「探させない、差し出す」に反していた**。
+// 原則11（一度に見せるのは12点まで）にも4倍の違反。だから1段目を「何の束か」に畳んで、
+// 中身は2段目（scene.t === 'cat'）に送る。方向は増やさない——この面の弱点は
+// 「低頻度だと方向の記憶が育たない」ことなので、扇の腕を増やすのは最悪手になる。
+//
+// label は画面に出る語で、**views.jsx の一覧行と文字列一致で照合している**。ここを唯一の出どころにする。
+export const CATS = [
+  // テーマを先頭に置くのは意図的。原則8（タグが第一階層）を1ホップ深くする代償を、
+  // 「見渡すを開いてそのまま叩けば今までと同じタグ一覧」で薄める。
+  { id: 'theme', label: 'テーマ', unit: '件', desc: 'タグで束ねた記事' },
+  { id: 'atlas', label: '連載', unit: '本', desc: '読む順つきの読み物' },
+  { id: 'follow', label: '定点', unit: '件', desc: '同じ条件で見つづける' },
+  { id: 'log', label: '記録帖', unit: '冊', desc: '同じ項目で並べて比べる' },
+  { id: 'moc', label: '索引', unit: '件', desc: '手で並べた索引' },
+];
+
+export const catOf = (id) => CATS.find((c) => c.id === id) || CATS[0];
+
+export function catCount(id, site, graph) {
+  switch (id) {
+    case 'theme': return graph.tags.filter((t) => t.count > 0).length;
+    case 'atlas': return (site.atlases || []).length;
+    case 'follow': return site.follows.length;
+    case 'log': return (site.logtopics || []).length;
+    default: return site.mocs.length;
+  }
+}
+
+// 2段目に並べるもの。帯（scene.js）と一覧（views.jsx）で同じ順・同じ鍵を使うため、ここに一本化する。
+export function catRoutes(id, site) {
+  switch (id) {
+    case 'atlas': return (site.atlases || []).map((a) => ({
+      route: `/atlas/${a.slug}`, title: a.title,
+      note: `章 ${(a.concepts || []).length}本`,
+    }));
+    case 'follow': return site.follows.map((f) => ({
+      route: `/follow/${f.name}`, title: f.title,
+      note: `観測 ${(f.sessions || []).length}回`,
+    }));
+    case 'log': return (site.logtopics || []).map((t) => ({
+      route: `/log/${t.slug}`, title: t.title,
+      note: `記録 ${(t.entries || []).length}件`,
+    }));
+    default: return site.mocs.map((m) => ({
+      route: `/moc/${m.slug}`, title: m.title,
+      note: `${(m.sections || []).reduce((s, sec) => s + sec.items.length, 0)}項目`,
+    }));
+  }
+}
+
 export const DIRS = [
   { id: 'today', label: '今日', deg: -8, hit: 8, arrow: '→', say: '右' },
-  { id: 'shelf', label: 'テーマ', deg: 24, hit: 41, arrow: '↗', say: '右斜め上' },
+  { id: 'shelf', label: '一覧', deg: 24, hit: 41, arrow: '↗', say: '右斜め上' },
   { id: 'search', label: '探す', deg: 58, hit: 77, arrow: '↗', say: '斜め上' },
   { id: 'ask', label: '依頼', deg: 96, hit: 999, arrow: '↑', say: '真上' },
 ];

@@ -5,7 +5,10 @@ import { Sparkline } from '../../shared/Sparkline.jsx';
 import { relDay } from '../../shared/util.js';
 import { cleanTitle, shortTitle } from '../../lib/graph.js';
 import { resolveTarget } from '../../lib/wiki.js';
-import { kindOf, plain, previewOf, shelfBars, tagJa, wikiToPlainText } from './model.js';
+import {
+  catCount, catOf, catRoutes, CATS,
+  itemKey, kindOf, plain, previewOf, shelfBars, tagJa, wikiToPlainText,
+} from './model.js';
 
 const HUD = '#ffc46b';
 const PATHC = '#7fd1e8';
@@ -136,45 +139,75 @@ function Today({ ctx, item, items }) {
 }
 
 // ---------------- 見渡す ----------------
+// 1段目＝何の束か。中身は Cat（2段目）へ送る。
+// かつてここは 48件を平らに並べていて、続きものに届くのにテーマを31枚はじく必要があった（model.js の CATS）。
 function Shelf({ ctx, item }) {
   const { graph, site } = ctx;
-  const { head, rest, restN, max } = shelfBars(graph);
-  const total = site.notes.length;
-  const topShare = head[0] ? Math.round((head[0].count / total) * 100) : 0;
-  const others = [
-    ['連載', `${(site.atlases || []).length}本・読む順つきの読み物`],
-    ['定点', `${site.follows.length}件・同じ条件で見つづける`],
-    ['記録帖', `${(site.logtopics || []).length}冊・同じ項目で並べて比べる`],
-    // ここの語は scene.js の帯の `k` と文字列一致で照合している。片方だけ直すと選択表示が壊れる
-    ['索引', `${site.mocs.length}件・手で並べた索引`],
-  ];
   return (
     <>
-      <Kick note="いまあるもの">テーマ</Kick>
-      <div className="tb-bars">
-        {head.map((t) => (
-          <div key={t.tag} data-pick={t.tag} className={`tb-bar${item?.tag === t.tag ? ' is-on' : ''}`}>
-            <span className="tb-fill" style={{ width: `${(t.count / max) * 100}%` }} />
-            <span className="tb-barn">{t.label}</span>
-            <span className="tb-barc">{t.count}</span>
-          </div>
+      <Kick note="muninn にあるもの">一覧</Kick>
+      <Rows>
+        {CATS.map((c) => (
+          <Row key={c.id} k={c.label} pick={`cat:${c.id}`} on={item?.cat === c.id}>
+            {catCount(c.id, site, graph)}{c.unit}・{c.desc}
+          </Row>
         ))}
-        {rest.length > 0 && (
-          <div className="tb-bar is-other">
-            <span className="tb-fill" style={{ width: `${(restN / max) * 100}%` }} />
-            <span className="tb-barn">その他 {rest.length}テーマ</span>
-            <span className="tb-barc">{restN}</span>
-          </div>
-        )}
-      </div>
+      </Rows>
       <p className="tb-lead">
-        記事は全部で {total}本。うち {topShare}% が{head[0]?.label}です。<br />
-        偏りをそのまま出しています。
+        記事は全部で {site.notes.length}本。<br />
+        種類を選ぶと、その中身が候補に並びます。
       </p>
-      <div className="tb-grp">
-        <Kick>そのほか</Kick>
-        <Rows>{others.map(([k, d]) => <Row key={k} k={k} on={item?.k === k}>{d}</Row>)}</Rows>
-      </div>
+    </>
+  );
+}
+
+// 2段目＝束の中身。テーマだけは棒グラフで在庫の偏りを見せる（他は件数つきの一覧）。
+function Cat({ ctx, item, scene }) {
+  const { graph, site } = ctx;
+  const c = catOf(scene.cat);
+
+  if (scene.cat === 'theme') {
+    const { head, rest, restN, max } = shelfBars(graph);
+    const total = site.notes.length;
+    const topShare = head[0] ? Math.round((head[0].count / total) * 100) : 0;
+    return (
+      <>
+        <Kick note="いまあるもの">テーマ</Kick>
+        <div className="tb-bars">
+          {head.map((t) => (
+            <div key={t.tag} data-pick={t.tag} className={`tb-bar${item?.tag === t.tag ? ' is-on' : ''}`}>
+              <span className="tb-fill" style={{ width: `${(t.count / max) * 100}%` }} />
+              <span className="tb-barn">{t.label}</span>
+              <span className="tb-barc">{t.count}</span>
+            </div>
+          ))}
+          {rest.length > 0 && (
+            <div className="tb-bar is-other">
+              <span className="tb-fill" style={{ width: `${(restN / max) * 100}%` }} />
+              <span className="tb-barn">その他 {rest.length}テーマ</span>
+              <span className="tb-barc">{restN}</span>
+            </div>
+          )}
+        </div>
+        <p className="tb-lead">
+          記事は全部で {total}本。うち {topShare}% が{head[0]?.label}です。<br />
+          偏りをそのまま出しています。
+        </p>
+      </>
+    );
+  }
+
+  const rows = catRoutes(scene.cat, site);
+  return (
+    <>
+      <Kick note={c.desc}>{c.label}</Kick>
+      <Rows>
+        {rows.map((r) => (
+          <Row key={r.route} k={r.note} pick={r.route} on={itemKey(item) === r.route}>
+            {cleanTitle(r.title)}
+          </Row>
+        ))}
+      </Rows>
     </>
   );
 }
@@ -615,6 +648,7 @@ const NODE_VIEWS = {
 export function View({ scene, ctx, item, items }) {
   if (scene.t === 'today') return <Today ctx={ctx} item={item} items={items} />;
   if (scene.t === 'shelf') return <Shelf ctx={ctx} item={item} />;
+  if (scene.t === 'cat') return <Cat ctx={ctx} item={item} scene={scene} />;
   if (scene.t === 'search') return <Search ctx={ctx} item={item} items={items} />;
   if (scene.t === 'ask') return <Ask ctx={ctx} item={item} />;
   if (scene.t === 'theme') return <Theme ctx={ctx} item={item} scene={scene} />;

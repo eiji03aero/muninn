@@ -9,10 +9,13 @@
 import { dayIndex, hash32 } from '../../lib/edition.js';
 import { shortTitle, cleanTitle } from '../../lib/graph.js';
 import { resolveTarget } from '../../lib/wiki.js';
-import { EDGE_KEYS, EDGE_OUT, insOf, kindOf, outsOf, plain, stripLinks, tagJa } from './model.js';
+import {
+  catCount, catOf, catRoutes, CATS,
+  EDGE_KEYS, EDGE_OUT, insOf, kindOf, outsOf, plain, stripLinks, tagJa,
+} from './model.js';
 
 export const nodeScene = (route) => ({ t: 'node', route });
-export const sceneKey = (s) => `${s.t}:${s.route || s.tag || ''}`;
+export const sceneKey = (s) => `${s.t}:${s.route || s.tag || s.cat || ''}`;
 
 const pickOfDay = (arr, today, salt) =>
   (arr.length ? arr[(dayIndex(today) + hash32(salt)) % arr.length] : null);
@@ -48,16 +51,30 @@ export function reelItems(scene, ctx) {
     return items;
   }
 
+  // 1段目＝何の束か（5件）。中身は2段目へ送る。理由は model.js の CATS を参照。
   if (scene.t === 'shelf') {
-    const items = graph.tags.map((t) => ({
-      k: 'テーマ', l: `${t.label} ${t.count}`, tag: t.tag,
-      act: { t: 'go', s: { t: 'theme', tag: t.tag } },
+    return CATS.map((c) => ({
+      k: c.label,
+      l: `${catCount(c.id, site, graph)}${c.unit}`,
+      cat: c.id,
+      pick: `cat:${c.id}`,
+      act: { t: 'go', s: { t: 'cat', cat: c.id } },
     }));
-    for (const a of site.atlases || []) items.push({ k: '連載', l: cleanTitle(a.title), act: { t: 'go', s: nodeScene(`/atlas/${a.slug}`) } });
-    for (const f of site.follows) items.push({ k: '定点', l: cleanTitle(f.title), act: { t: 'go', s: nodeScene(`/follow/${f.name}`) } });
-    for (const t of site.logtopics || []) items.push({ k: '記録帖', l: cleanTitle(t.title), act: { t: 'go', s: nodeScene(`/log/${t.slug}`) } });
-    for (const m of site.mocs) items.push({ k: '索引', l: cleanTitle(m.title), act: { t: 'go', s: nodeScene(`/moc/${m.slug}`) } });
-    return items;
+  }
+
+  // 2段目＝束の中身。
+  if (scene.t === 'cat') {
+    if (scene.cat === 'theme') {
+      return graph.tags.map((t) => ({
+        k: 'テーマ', l: `${t.label} ${t.count}`, tag: t.tag,
+        act: { t: 'go', s: { t: 'theme', tag: t.tag } },
+      }));
+    }
+    const label = catOf(scene.cat).label;
+    return catRoutes(scene.cat, site).map((r) => ({
+      k: label, l: cleanTitle(r.title), pick: r.route,
+      act: { t: 'go', s: nodeScene(r.route) },
+    }));
   }
 
   if (scene.t === 'search') {

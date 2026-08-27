@@ -20,7 +20,7 @@ import {
   markSeen, recallLog, recordVerdict, removeSlip, slipsPrompt, todayISO, undoVerdict,
 } from '../../lib/recall.js';
 import { copyText } from '../../shared/util.js';
-import { BACK_DIR, DIRS, extraBacklinks, isJump, itemKey, tagJa } from './model.js';
+import { BACK_DIR, catOf, DIRS, extraBacklinks, isJump, itemKey, tagJa } from './model.js';
 import { nodeScene, primaryOf, reelItems, sceneKey } from './scene.js';
 import { Origin } from './origin.jsx';
 import { Rail } from './rail.jsx';
@@ -376,6 +376,7 @@ export default function ThumbRoot({ initialTarget }) {
   // ---- 表示用の文字列 ----
   const faceLabel = DIRS.find((d) => d.id === face)?.label || '今日';
   const crumbs = stack.map((s) => {
+    if (s.t === 'cat') return catOf(s.cat).label;
     if (s.t === 'theme') return tagJa(s.tag);
     const n = graph.byRoute.get(s.route);
     return n ? shortTitle(n.title).slice(0, 14) : '…';
