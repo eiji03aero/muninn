@@ -207,7 +207,7 @@ export function LogTopic() {
                 {filterFields.map((f) => {
                   const values = f.type === 'rating'
                     ? [5, 4, 3].map((n) => ({ v: n, label: `★${n}${n < 5 ? '+' : ''}` }))
-                    : [...new Set(topic.entries.map((e) => valOf(e, f.key)).filter((v) => v != null))].map((v) => ({ v, label: String(v) }));
+                    : [...new Set(topic.entries.map((e) => valOf(e, f.key)).filter((v) => v != null))].map((v) => ({ v, label: f.type === 'bool' ? (v ? 'はい' : 'いいえ') : String(v) }));
                   if (!values.length) return null;
                   return (
                     <Box key={f.key}>
