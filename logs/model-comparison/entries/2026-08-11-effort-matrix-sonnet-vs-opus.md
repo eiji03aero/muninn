@@ -5,10 +5,12 @@ topic: model-comparison
 created: 2026-08-11
 fields:
   task: 性質の違う4題（罠入り仕様の実装／規約の適用と改定提案／検索と仮説生成／両立不能な要件の設計）
+  task_kind: 複数
   models: [claude-sonnet-5, claude-opus-5]
   effort: [medium, high, xhigh]
   runs: 1
-  winner: claude-opus-5（照合可能な軸では全題で優勢。ただし n=1 の軸が多く、追試済みは探索量のみ）
+  winner: claude-opus-5
+  worth_premium: 題により割れる
   rating: 4
   cheaper: claude-sonnet-5
   cost_delta_pct: 77

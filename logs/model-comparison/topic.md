@@ -7,10 +7,12 @@ tags: [log/model-eval]
 image_visibility: none
 fields:
   - { key: task, label: お題, type: text, required: true }
+  - { key: task_kind, label: お題の性質, type: enum, options: [実装, 設計, 調査, レビュー, 執筆, 複数], required: true }
   - { key: models, label: 対象モデル, type: tags, required: true }
   - { key: effort, label: effort, type: tags, required: true }
   - { key: runs, label: 試行回数, type: number, required: true }
   - { key: winner, label: 基準ベースの勝者, type: text, required: true }
+  - { key: worth_premium, label: 高い方の価値, type: enum, options: [あった, なかった, 題により割れる], required: true }
   - { key: rating, label: 差の大きさ, type: rating, required: true }
   - { key: cheaper, label: 安かった方, type: text }
   - { key: cost_delta_pct, label: コスト差, type: number, unit: '%' }
@@ -19,15 +21,19 @@ fields:
 display:
   subtitle: task
   badge: rating
-  card_fields: [models, winner, effort]
+  card_fields: [task_kind, winner, worth_premium]
   sort: { by: tested_on, order: desc }
-  filters: [rating, blind]
+  filters: [task_kind, worth_premium, rating, blind]
 ---
 
 同じお題を複数のAIモデルに投げて、成果物を突き合わせた記録。単発の「どっちが賢いか」ではなく、**お題の性質ごとにどちらが向くか**を貯めるのが狙い。回数を重ねるほど「この種の仕事はこっち」という判断材料になる。
 
 ## 記録のコツ
 
+- **決定に効く軸は `enum` か数値で持つ。** 比較表に列として出るのは
+  `number / rating / enum / bool` だけで、`text` / `tags` は落ちる。
+  「お題の性質」「高い方の価値」を text のまま置いていたせいで、
+  2件並べても比較表が何も答えない状態になっていた（2026-08-28 に修正）。
 - **effort をどう扱ったかを必ず残す。** 1つに揃えて回したなら `effort` に1つだけ書く（モデル差を見る実験）。
   複数の effort を振ったなら全部書く（モデル差と effort 差を切り分けるマトリクス実験）。
   **揃えたつもりで揃っていないのが最悪**なので、対話の `/effort` ではなく起動時フラグで指定する（→ [[claude-code-effort-flag-batch-eval]]）。

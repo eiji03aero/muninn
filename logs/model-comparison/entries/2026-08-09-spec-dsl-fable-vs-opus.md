@@ -5,10 +5,12 @@ topic: model-comparison
 created: 2026-08-09
 fields:
   task: ソフトウェア仕様を管理する独自DSLの設計（実証課題つき）
+  task_kind: 設計
   models: [claude-fable-5, claude-opus-5]
   effort: high
   runs: 1
   winner: claude-opus-5
+  worth_premium: あった
   rating: 3
   cheaper: claude-fable-5
   cost_delta_pct: 24
