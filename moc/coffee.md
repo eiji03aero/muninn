@@ -25,3 +25,5 @@ tags: [moc]
 - [[french-press-metal-mesh-passes-oils-and-fines-so-it-needs-a-coarse-grind]] — 器具の差はフィルターが何を通すかの差。プレスはボディ、ペーパーはクリア
 - [[grind-size-has-to-match-the-contact-time-of-the-brewing-method]] — 挽き目と器具はセット。粗挽きを短時間のドリップに流用すると素通りする
 - [[coffee-extracts-acids-first-then-sweetness-then-bitterness]] — 酸→甘み→苦味の順に出る。抽出不足は酸っぱく、過抽出は渋い
+- [[coffee-extraction-yield-caps-near-30-percent-and-tastes-best-at-18-to-22]] — 溶けるのは約30%まで、うまいのは18〜22%。「2割」は限界ではなく最適点
+- [[blooming-releases-co2-first-so-water-can-wet-the-grounds-evenly]] — 蒸らしはCO2を先に逃がす手順。効くのはドリップで、浸漬式では重要度が下がる
