@@ -16,6 +16,10 @@ srs:
 - **再現性**: 体主導だと最下点とフェースの戻りが**体のピボット（回転）に紐づいて安定**する。いわゆる**手打ち**（体が止まって手・腕が独立／先行して動く）はタイミング依存になり、両振れ・ダフリの温床＝再現性が低い。
 - **但し書き**: 「手を完全に殺す（デッドハンド）」も誤り。ヘッドスピードには腕・手首の**解放（リリース）**が要る。手が"無い"のではなく、**手が独立して操作しない**のが肝。フェースの向き自体はリード手首が主役。
 
+**「手打ち」の定義（誤用に注意）**: 手打ちとは**「エンジンがどこか」の話**であって、**「腕が動くかどうか」の話ではない**。だから**テークバックで腕が動くこと自体は手打ちではない**（→ [[golf-takeaway-using-hands-is-normal-natural-set-helps-smash-but-keep-face-toe-up-square]]）。始動で区別すべきは次の2つで、手打ちとはまた別の失敗：
+- ✅ **腕が動く**（体の回転に連れられて動く／自然なセット）
+- ❌ **位置を目指して腕で軌道をなぞる**（＝操作・分析麻痺 → [[golf-takeaway-by-feel-hands-in-and-lever-sets-good-return-reference-not-path-preview]]）
+
 ## Links
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — 体主導の中身。地面から順のシーケンスが再現性の基盤
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — 「手はフェース管理担当」の原理。フェース向きはリード手首の掌背屈・前腕回旋で決まる

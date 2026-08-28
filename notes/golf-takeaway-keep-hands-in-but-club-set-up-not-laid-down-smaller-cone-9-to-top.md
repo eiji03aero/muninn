@@ -13,6 +13,14 @@ tags: [sports/golf]
 - **9→トップは"小さい円錐"、始動→9は"大きい円錐"**：前半はワイドにセット、後半は立ててコンパクトにトップへ。**寝る罠を避けるイメージ**で、ダウンの二段/円錐のバックスイング版。※**フィールでありコネクションを崩さない**（小さい円錐を作ろうと腕だけ独立して持ち上げるとクロス/分離）→ [[golf-connection-turn-body-fully-but-keep-arms-in-front-not-restrict-turn-no-fixed-angles]]。
 - **オンプレーン意識過剰の反省**：完全な一枚にはならないし、**一枚に拘ると自然で再現性のあるデリバリーは不可能**（→ [[golf-why-downswing-shallows-not-single-plane-reproducibility-from-sequence-not-fixed-plane]]）。
 
+**操作イメージ（追記）**：
+
+> **主語は胸。胸を右へ向けていくと、アドレスで作った形のまま腕とクラブが胸の前で連れて行かれる。その間、ヘッドの"重さ"が手首を自然にセットしていく。腕はそれを邪魔せず"サポート"するだけ。**
+
+- **「遠心力に任せる」は誤り**——**テークバックは低速なので遠心力はほぼ働いていない**。感じるべきは**ヘッドの"重さ"（慣性）**で、これは速度に関係なく常にある（→ [[golf-backswing-keep-good-tilt-kill-sway-and-dip-rotate-onto-inside-trail-hip]] の「遠心力は主因でない（低速）」）。**遠心力＝速度の産物／重さ＝常にある**の区別。
+- **腕は「エンジンではないが死んでもいない」**＝"サポート"という言葉が実態に近い。
+- **意識の対象は「どこを通るか」でなく「胸が回ったか」**。位置の確認は**振った後**（動画・スロー素振り）でやる。振りながらやると軌道をなぞる操作＝分析麻痺に戻る。
+
 ## Links
 - [[golf-takeaway-by-feel-hands-in-and-lever-sets-good-return-reference-not-path-preview]] — ハンズイン＋てこの自然な始動。この気づきの土台（やり過ぎの但し書きも）
 - [[golf-shallow-backswing-hand-and-shaft-in-line-reduces-fat]] — 深く引かず一直線/オンプレーンに上げる側。「寝かせない」の受け皿
