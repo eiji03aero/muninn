@@ -28,3 +28,4 @@ tags: [sports/golf]
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — シャフトの傾き側。姿勢とセットでアッパーを作る
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 沈む→ポストアップ。膝の曲げが伸び代になる先
 - [[golf-my-driver-distance-roadmap-smash-first-then-speed]] — 方針。この構えの是正はミートとスピードの両方に効く
+- [[golf-rory-address-is-textbook-side-bend-13-to-34-hands-behind-ball-shoulders-square]] — 合わせにいく先。前傾30°・肩スクエア・手元はボールより後ろ

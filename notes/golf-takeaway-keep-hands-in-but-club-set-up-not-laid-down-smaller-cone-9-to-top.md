@@ -28,3 +28,4 @@ tags: [sports/golf]
 - [[golf-my-swing-theory-revision-single-plane-to-two-tier-mortar-cone-retain-lag-to-p6-then-release]] — ダウンの二段/円錐。9→トップの「小さい円錐」はそのバックスイング版
 - [[golf-why-downswing-shallows-not-single-plane-reproducibility-from-sequence-not-fixed-plane]] — 「完全な一枚は無理/拘ると再現性が落ちる」の理論
 - [[golf-over-inside-plane-tilted-right-is-three-way-loss-not-a-reproducibility-tradeoff]] — 寝かせる/過度インが招く潜り・三方損。これが予防したい下流
+- [[golf-shallow-and-laid-down-are-three-different-things-onplane-vs-laidoff-vs-transition-slot]] — 語の整理。ここで言う「寝かせる」は②レイドオフの意味で、「シャローに上げる」（①）とは別物

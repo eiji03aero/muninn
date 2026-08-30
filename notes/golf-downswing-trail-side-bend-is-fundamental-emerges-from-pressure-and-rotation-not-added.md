@@ -38,3 +38,4 @@ srs:
 - [[golf-finish-stacked-on-lead-leg-shift-pressure-then-post-up]] — 側屈と同期する地面反力（ポストアップ）
 - [[golf-downswing-pressure-shift-precedes-rotation-ground-up-sequence]] — 側屈を生む順序（圧→回転）
 - [[golf-over-inside-plane-tilted-right-is-three-way-loss-not-a-reproducibility-tradeoff]] — 過剰側の帰結（潜り/スタック）
+- [[golf-rory-address-is-textbook-side-bend-13-to-34-hands-behind-ball-shoulders-square]] — 実測での裏づけ。アドレス13°→インパクト34°と2.6倍に増える＝結果であって足すものでない

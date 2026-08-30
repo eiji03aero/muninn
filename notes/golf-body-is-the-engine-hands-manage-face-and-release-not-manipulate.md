@@ -29,3 +29,4 @@ srs:
 - [[golf-driver-distance-is-ballspeed-smash-is-free-but-capped-300-needs-speed]] — 遠心力・しなり戻りは"出力"であって意識で稼ぐ手品ではない、という飛距離側の応用
 - [[golf-hands-release-is-a-real-speed-source-but-not-manipulation]] — 「リリース（解放）」は速度源で必須、「操作（こねる）」とは別物、を掘り下げた版
 - [[golf-meet-is-decided-by-top-to-impact-on-plane-square-delivery-not-static-positions]] — 「デリバリーの主語は手でなく体」の但し書きは、この再現性＝体のピボット紐づけが根拠
+- [[golf-my-static-torso-rehearsal-builds-hands-only-impact-chest-outruns-arms-30deg]] — 手打ちの温床の実例。上体を止めた素振りは「エンジンを腕に置く」練習になっている

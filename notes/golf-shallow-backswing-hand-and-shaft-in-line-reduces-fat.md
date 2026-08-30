@@ -22,3 +22,4 @@ tags: [sports/golf]
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — ハーフウェイバックでリード手首をフラットに保つ点で共通。あちらはフェース管理、こちらはプレーン／入射角の側面
 - [[golf-dont-lock-lead-arm-in-backswing]] — 同じバックスイングでの構造維持。あちらは半径、こちらはプレーン
 - [[golf-slice-comes-from-open-face-not-hand-lead]] — シャローに引くとスライスするのでは、という不安への回答
+- [[golf-shallow-and-laid-down-are-three-different-things-onplane-vs-laidoff-vs-transition-slot]] — 語の整理。ここで言う「シャロー」は①オンプレーンの意味で、②レイドオフ・③切り返しのスロットとは別物

@@ -24,3 +24,4 @@ tags: [sports/golf]
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — スクエアに"向かわせる"の実体はリード手首/前腕でのフェース管理
 - [[golf-over-inside-plane-tilted-right-is-three-way-loss-not-a-reproducibility-tradeoff]] — デリバリーが過度にインへ行った失敗版。ミートを決めるデリバリーが右に倒れると三方損
 - [[golf-my-swing-theory-revision-single-plane-to-two-tier-mortar-cone-retain-lag-to-p6-then-release]] — このデリバリーの中身を単一平面でなく二段/すり鉢で捉え直した改訂
+- [[golf-my-static-torso-rehearsal-builds-hands-only-impact-chest-outruns-arms-30deg]] — 「アドレスと同じ形に戻らない」の数値での具体例。腕は戻るが胸は27°開いている
