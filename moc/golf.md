@@ -13,6 +13,7 @@ tags: [moc]
 - [[golf-hover-clubhead-at-address-calibrates-low-point]] — 手首側の基準。アドレスでヘッドを1mm浮かせる
 - [[golf-dont-lock-lead-arm-in-backswing]] — 腕（半径）側の基準。リード腕を伸ばし切って固めない
 - [[golf-shallow-backswing-hand-and-shaft-in-line-reduces-fat]] — 入射角・プレーン側の基準。シャフトを立てすぎず手の甲とシャフトを一直線にしてシャローに上げる
+- [[golf-shallow-and-laid-down-are-three-different-things-onplane-vs-laidoff-vs-transition-slot]] — 語の整理。「シャロー/寝かせる」は①オンプレーン(良)②レイドオフ(悪)③切り返しのスロット(良)の3つを指す
 
 ## フェース管理（向き・スクエアに返す）
 
@@ -23,7 +24,8 @@ tags: [moc]
 
 ## アドレス（クラブ別の構え）
 
-- [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — ドライバー。ハンドファーストにせず前傾なしで構えてアッパーに打つ
+- [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — ドライバー。ハンドファーストにせず前傾なしで構えてアッパーに打つ（※「腕とシャフト一直線」は誤りとして訂正済み）
+- [[golf-rory-address-is-textbook-side-bend-13-to-34-hands-behind-ball-shoulders-square]] — 実測の基準。ローリーのアドレスは教科書的（前傾30°/肩スクエア/手元はボールより後ろ）。側屈はアドレス13°→インパクト34°
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアン（対比）。軽いハンドファーストでダウンブロー
 - [[golf-driver-address-connection-without-tension-relax-into-low-trail-shoulder]] — ドライバーの腕/肩の力加減。連結は残しテンションだけ抜く、緩めは右肩を下へ
 - [[golf-driver-posture-knee-flex-and-forward-bend-shallower-than-iron-deep-bend-blocks-upward-strike]] — 姿勢の基本。膝15〜25°/上体の前傾25〜30°（アイアンより浅い）。突っ張り膝＝深い前傾＋地面反力の伸び代を失う
@@ -57,6 +59,7 @@ tags: [moc]
 - [[golf-swing-image-checkpoint-just-past-impact-to-swing-through]] — 振り抜きのイメージ。インパクト後の通過点でクラブ位置を確認して振り抜く
 - [[golf-halfway-down-p6-square-checkpoint-shaft-parallel-face-matches-spine-flat-lead-wrist]] — チェックポイント。P6(9時)のオンプレーン/スクエア合図（シャフト平行・面は背骨角・手首フラット〜掌屈）。空向き=開き/ヘッドが手元下=潜り
 - [[golf-my-p6-is-stuck-under-open-face-cupped-lead-wrist-fix-causes-not-pose]] — 自己診断。自分のP6は潜り＋開き＋カップ＝スタックの指紋。ポーズでなく手首掌屈＋潜らせないで直す
+- [[golf-my-static-torso-rehearsal-builds-hands-only-impact-chest-outruns-arms-30deg]] — 自己診断。上体を止めた素振りが手打ちの温床。インパクトで胸27°/骨盤41°開くのに手元は+5cm＝腕は胸から見て置き去り。作るのは「腕を後ろ」でなく「胸が追い越す」
 - [[golf-swing-is-not-a-single-plane-kwon-functional-swing-plane-clubhead-plane-hands-tighter-circle-shaft-cone]] — 理論。スイングは単一平面でない（Kwon FSP）。ヘッド＝平面/手＝内側の小円/シャフト＝円錐。初期シャフト平面に戻らない
 - [[golf-why-downswing-shallows-not-single-plane-reproducibility-from-sequence-not-fixed-plane]] — なぜ二段が定石か。別円で1枚を通らない／シャローは順序の副産物／再現性は面の固定でなく順序の反復。単一面はモー/ブライソンの少数派流派
 - [[golf-the-slot-is-a-transition-phase-not-a-position-value-is-passive-face-squaring-mackenzie]] — 「スロット」の定義と実測基準（3/4でバックよりフラット）。価値の本命は軌道でなく受動的スクエア化（MacKenzie）
