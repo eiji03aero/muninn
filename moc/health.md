@@ -27,6 +27,9 @@ tags: [moc]
 - [[skincare-moisturizing-is-three-roles-humectant-emollient-occlusive]] — 保湿は「与える・補う・閉じる」の3役割。化粧水だけでは完成しない
 - [[humectants-need-occlusive-seal-or-they-dry-skin-in-low-humidity]] — HAは蓋がないと低湿度でかえって肌の水を奪う（TEWL）
 - [[pores-hidden-after-waking-and-washing-are-temporarily-masked-not-improved]] — 寝起き/洗顔直後に毛穴が消えるのは一時的マスク、数時間後が素の肌
+- [[collagen-is-the-dermis-scaffold-protein-made-by-fibroblasts]] — コラーゲンとは何か（真皮の足場・線維芽細胞・ビタミンC）
+- [[retinoids-work-as-a-gene-switch-building-collagen-and-blocking-mmp]] — レチノイドの機序（遺伝子スイッチ／作る＋守る）
+- [[pore-visibility-differs-by-facial-zone-sebum-density-anchoring-mobility]] — 毛穴の目立ちは部位で違う（皮脂腺密度・骨への固定・可動性・たるみ集中帯）
 - [[my-skincare-pore-plan-keep-sunscreen-niacinamide-add-retinol]] — 私の毛穴ケア方針（現行の評価と次の一手）
 - [[skincare-pores/profile|スキンケア（毛穴を目立たなくする）]] `[follow/goal]` — 毛穴ケアを定点観測するフォロー（`follows/skincare-pores/`）
 
