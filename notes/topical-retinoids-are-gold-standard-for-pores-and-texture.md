@@ -19,6 +19,7 @@ srs:
 導入は**少量・低頻度から**（週2〜3回）。刺激・皮むけ・乾燥（いわゆるA反応）が出るため、いきなり毎晩は避ける。ナイアシンアミドとは相性がよく併用できる。強い酸（AHA/BHA）と同じ晩に重ねるのは慣れてから。妊娠中は使用不可。市販でここまで、重度は皮膚科でトレチノイン処方。
 
 ## Links
+- [[retinoids-work-as-a-gene-switch-building-collagen-and-blocking-mmp]] — この効果が出る機序（遺伝子スイッチ／作る＋守る）
 - [[enlarged-pores-three-causes-sebum-laxity-follicle-size]] — 詰まり・たるみの両方に効くため本命
 - [[niacinamide-reduces-sebum-and-improves-pore-appearance]] — 併用しやすい皮脂対策成分
 - [[sunscreen-protects-dermal-collagen-the-base-of-pore-and-aging-care]] — レチノイドで増やす前に、UVで壊さない土台が必要
