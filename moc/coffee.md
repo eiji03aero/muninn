@@ -14,6 +14,7 @@ tags: [moc]
 - [[robusta-adds-bitterness-and-body-cheaply-and-vietnam-is-the-largest-producer]] — 生豆生産国名から配合を読む。ベトナムが入っていたらロブスタを疑う
 - [[mocha-is-a-yemeni-port-name-that-now-labels-yemeni-and-ethiopian-coffee]] — 「モカ」は産地ではなく港の名前。指すのはイエメン・エチオピア産と果実味のある酸
 - [[brazil-coffee-is-the-nutty-low-acid-base-that-most-blends-are-built-on]] — ブラジルはナッツ・チョコ系の「土台の豆」。ブレンドの地の部分を担う
+- [[brazil-abic-grades-tradicional-superior-gourmet-are-printed-on-the-bag]] — 袋の Tradicional / Gourmet は商品名ではなく品質等級。欠点豆とロブスタの許容が違う
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 焙煎後の劣化。脂質酸化とCO2抜けで平坦・紙っぽくなる。飲み頃は焙煎後7〜21日
 
 ## 味わい方・評価のしかた
