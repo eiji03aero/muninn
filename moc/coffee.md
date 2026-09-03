@@ -17,6 +17,10 @@ tags: [moc]
 - [[brazil-abic-grades-tradicional-superior-gourmet-are-printed-on-the-bag]] — 袋の Tradicional / Gourmet は商品名ではなく品質等級。欠点豆とロブスタの許容が違う
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 焙煎後の劣化。脂質酸化とCO2抜けで平坦・紙っぽくなる。飲み頃は焙煎後7〜21日
 
+## 体への影響
+
+- [[unfiltered-coffee-leaves-cafestol-and-kahweol-which-raise-ldl-cholesterol]] — 非濾過はLDLを上げる。厚いボディと同じ油分に由来するので片方だけは取れない
+
 ## 味わい方・評価のしかた
 
 - [[coffee-aroma-is-weak-when-cold-because-volatiles-need-heat]] — 冷やすと香りが立たないのは物理。豆の香りを評価するならホットで
