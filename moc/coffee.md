@@ -21,7 +21,13 @@ tags: [moc]
 
 - [[unfiltered-coffee-leaves-cafestol-and-kahweol-which-raise-ldl-cholesterol]] — 非濾過はLDLを上げる。厚いボディと同じ油分に由来するので片方だけは取れない
 
+## 欠点を読む
+
+- [[green-vegetative-flavors-signal-underdeveloped-roasting]] — 青臭さ・野菜っぽさは焙煎不足のサイン。抽出不足との切り分けは「青さの有無」
+
 ## 味わい方・評価のしかた
+
+- [[light-bodied-acidic-coffee-works-with-tonic-water]] — 酸が主役で軽い豆はトニックで割ると活きる。深煎りは苦味がぶつかる
 
 - [[coffee-aroma-is-weak-when-cold-because-volatiles-need-heat]] — 冷やすと香りが立たないのは物理。豆の香りを評価するならホットで
 - [[ice-cooling-roughly-halves-iced-coffee-concentration]] — 氷で冷やすと濃度はほぼ半分。急冷式が「倍の濃さ」で淹れる理由
