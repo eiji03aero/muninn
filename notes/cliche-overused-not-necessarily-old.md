@@ -22,4 +22,4 @@ srs:
 日本語の近い感覚は「ベタ」「お決まり」「テンプレ」「手垢のついた」あたり。
 
 ## Links
-（なし）
+- [[suspense-comes-from-information-given-not-withheld]] — どちらも「読者がすでに何を知っているか」を前提に効果を設計する話
