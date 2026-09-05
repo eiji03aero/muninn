@@ -44,6 +44,19 @@ muninn の入口。テーマごとのMOCはここから辿る。
 - [[argentina-nt/profile|アルゼンチン代表]] `[interest]` — 代表チームを追って試合を最大限楽しむ（`follows/argentina-nt/`）
 - [[skincare-pores/profile|スキンケア（毛穴を目立たなくする）]] `[goal]` — 毛穴ケアを定点観測して「たるみ毛穴」を目立たなくする（`follows/skincare-pores/`）
 
+## 創作（writings/）
+
+お題に対して自分で書き、固定の5軸（引き/構成/具体/文体/声）で講評を受け、改稿を重ねて作品にする。`/mn-write` で運用（muninn で唯一のアウトプットconcern）。
+
+> **サイト未対応**（`docs/pbi/PBI-04-writings-face.md`）。現状はリポジトリの markdown で読む。下のリンクはサイトではただの文字列になる。
+
+- [[rubric|文章の評価軸（ルーブリック）]] — 講評の軸の正本。ここが動くと上達が測れなくなる（`writings/rubric.md`）
+- [[prompts|お題ストック]] — 鍛えたい軸ごとに設計したお題の在庫（`writings/prompts.md`）
+
+### 作品
+
+- [[oyachumi-no-jikan|おやちゅみの時間（仮）]] `[推敲中]` — 小説の導入の一節。日常から度肝を抜く展開へ繋ぐ（`writings/pieces/`）
+
 ## ログ（logs/）
 
 トピック別に、多数の項目を一貫したスキーマ（記録項目）で貯める記録帖（台帳）。`/mn-log` で運用（notes/ とは別concern）。サイトでは一覧・絞り込みで比較できる。
