@@ -28,6 +28,7 @@ tags: [moc]
 ## 味わい方・評価のしかた
 
 - [[light-bodied-acidic-coffee-works-with-tonic-water]] — 酸が主役で軽い豆はトニックで割ると活きる。深煎りは苦味がぶつかる
+- [[iridescent-bubbles-on-spent-grounds-are-thin-film-interference-from-coffee-oil]] — 虹色の泡は油分の薄膜干渉。泡の「量」より鮮度の手がかりになる
 
 - [[coffee-aroma-is-weak-when-cold-because-volatiles-need-heat]] — 冷やすと香りが立たないのは物理。豆の香りを評価するならホットで
 - [[ice-cooling-roughly-halves-iced-coffee-concentration]] — 氷で冷やすと濃度はほぼ半分。急冷式が「倍の濃さ」で淹れる理由
