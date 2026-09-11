@@ -264,6 +264,9 @@ export function viewShelf({ site, graph, rest, api }) {
     ...site.follows.map((f) => ({
       route: `/follow/${f.name}`, label: '定点', title: cleanTitle(f.title), sub: `${f.sessions.length}回の観測`,
     })),
+    ...(site.writings?.pieces || []).map((w) => ({
+      route: `/piece/${w.slug}`, label: '作品', title: cleanTitle(w.title), sub: `${(w.rounds || []).length}稿`,
+    })),
   ];
   for (const o of [...others].reverse()) {
     stack.push({ k: 'row', key: o.route, label: o.label, title: o.title, sub: o.sub, act: () => api.open(o.route) });

@@ -7,12 +7,12 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import { HashRouter, Routes, Route, Navigate, useLocation, useNavigationType, useParams } from 'react-router-dom';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import { useData } from '../../lib/ctx.js';
-import { tagToParam } from '../../lib/graph.js';
+import { paramToTag } from '../../lib/graph.js';
 import { Note, Follow, Player } from './pages.jsx';
 import { Edition } from './edition.jsx';
-import { Shelf, ShelfBoard } from './shelf.jsx';
-import { Series } from './series.jsx';
+import { Groups, GroupList } from './groups.jsx';
 import { Search } from './search.jsx';
+import { Piece } from './piece.jsx';
 import { Desk } from './desk.jsx';
 import { Atlas, Concept } from './atlas.jsx';
 import { LogTopic, LogEntry } from './logs.jsx';
@@ -47,13 +47,19 @@ function ScrollManager() {
   return null;
 }
 
-// 旧ルート（/notes・/moc/:slug・/logs）の着地。PWA のホーム追加やブックマークから
-// 旧URLが踏まれるのは実運用で必ず起きる。黙って飛ばさず、何がどこへ行ったかを1回だけ告げる。
+// 旧ルートの着地。PWA のホーム追加やブックマークから旧URLが踏まれるのは実運用で必ず起きるので、
+// 廃止した画面は必ず後継へ送る（404 にしない）。
+// 索引（MOC）はテーマ単位の束なので、その束のテーマで探すへ送る。
 function LegacyMoc({ graph }) {
   const { slug } = useParams();
   const bundle = graph.bundles.find((b) => b.moc === slug && b.tag);
-  const to = bundle ? `/shelf/${tagToParam(bundle.tag)}` : '/shelf';
-  return <Navigate to={to} replace state={{ legacy: 'moc' }} />;
+  return <Navigate to={bundle ? `/search?tag=${encodeURIComponent(bundle.tag)}` : '/groups'} replace />;
+}
+
+// 旧「テーマ1枚」（/shelf/:tag）。テーマ指定の検索がその役目を継いだ。
+function LegacyShelfTag() {
+  const { tag } = useParams();
+  return <Navigate to={`/search?tag=${encodeURIComponent(paramToTag(tag))}`} replace />;
 }
 
 export default function DailyRoot() {
@@ -66,9 +72,8 @@ export default function DailyRoot() {
           <ScrollManager />
           <Routes>
             <Route path="/" element={<Edition />} />
-            <Route path="/series" element={<Series />} />
-            <Route path="/shelf" element={<Shelf />} />
-            <Route path="/shelf/:tag" element={<ShelfBoard />} />
+            <Route path="/groups" element={<Groups />} />
+            <Route path="/groups/:id" element={<GroupList />} />
             <Route path="/search" element={<Search />} />
             <Route path="/desk" element={<Desk />} />
 
@@ -79,10 +84,14 @@ export default function DailyRoot() {
             <Route path="/atlas/:slug/concept/:cslug" element={<Concept />} />
             <Route path="/log/:topic" element={<LogTopic />} />
             <Route path="/log/:topic/entry/:slug" element={<LogEntry />} />
+            <Route path="/piece/:slug" element={<Piece />} />
 
-            {/* 廃止した3ルート。/logs は記録帖の索引だったので、その役目を継いだ「続きもの」へ送る */}
-            <Route path="/notes" element={<Navigate to="/shelf" replace state={{ legacy: 'notes' }} />} />
-            <Route path="/logs" element={<Navigate to="/series" replace state={{ legacy: 'logs' }} />} />
+            {/* 廃止したルート。網羅は「一覧」に、絞り込みは「探す」に吸収された */}
+            <Route path="/notes" element={<Navigate to="/groups/note" replace />} />
+            <Route path="/logs" element={<Navigate to="/groups/logtopic" replace />} />
+            <Route path="/series" element={<Navigate to="/groups" replace />} />
+            <Route path="/shelf" element={<Navigate to="/search" replace />} />
+            <Route path="/shelf/:tag" element={<LegacyShelfTag />} />
             <Route path="/moc/:slug" element={<LegacyMoc graph={graph} />} />
 
             {/* 設定は shell の持ち物。ここで受け止めておかないと下の `*` が入口へ書き戻し、

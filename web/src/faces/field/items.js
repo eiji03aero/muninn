@@ -72,6 +72,7 @@ function subOf(n) {
     case 'logtopic': return `${(n.ref.entries || []).length}件`;
     case 'logentry': return Object.values(n.ref.fields || {})
       .filter((v) => typeof v === 'string').slice(0, 2).join(' · ');
+    case 'piece': return [n.ref.form, `${(n.ref.rounds || []).length}稿`].filter(Boolean).join(' · ');
     case 'moc': return (n.ref.sections || []).map((s) => s.title).join(' · ');
     default: return '';
   }
@@ -82,6 +83,7 @@ function hayOf(n, sub) {
   const extra = n.type === 'logentry' ? JSON.stringify(n.ref.fields || {})
     : n.type === 'entity' ? [...(n.ref.strengths || []), ...(n.ref.developing || [])].join(' ')
     : n.type === 'follow' ? (n.ref.snapshot || []).join(' ')
+    : n.type === 'piece' ? n.ref.prompt || ''
     : '';
   return [n.title, n.slug, (n.tags || []).join(' '), (n.tags || []).map(tagLabel).join(' '),
     sub, extra, n.body].join('\n').toLowerCase();

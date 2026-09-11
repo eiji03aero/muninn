@@ -16,8 +16,8 @@ shot() {
 }
 
 shot 01-edition   "/"
-shot 02-shelf     "/shelf"
-shot 03-shelfboard "/shelf/health--skincare"
+shot 02-groups    "/groups"
+shot 03-groupnote "/groups/note"
 shot 04-search    "/search"
 shot 05-desk      "/desk"
 shot 06-note      "/note/12-day-war-2025-israel-us-iran"
@@ -27,5 +27,6 @@ shot 09-atlas     "/atlas/philosophy"
 shot 10-concept   "/atlas/philosophy/concept/anaximander-apeiron"
 shot 11-logtopic  "/log/coffee-beans"
 shot 12-logentry  "/log/coffee-beans/entry/sample-ethiopia-yirgacheffe"
-shot 13-legacy    "/notes"
+shot 13-piece     "/piece/oyachumi-no-jikan"
+shot 14-legacy    "/notes"
 echo "done -> $OUT"

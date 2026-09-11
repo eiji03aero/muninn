@@ -34,7 +34,8 @@ export function linksWithReason(body) {
 
 const TYPE_LABEL = {
   note: '記事', concept: '章', entity: '人物', session: '観測',
-  logentry: '記録', follow: '定点', atlas: '連載', logtopic: '記録帖', moc: '索引',
+  logentry: '記録', follow: '定点', atlas: '連載', logtopic: '記録帖',
+  piece: '作品', moc: '索引',
 };
 export const typeLabel = (t) => TYPE_LABEL[t] || t;
 
@@ -73,9 +74,14 @@ function collectNodes(site) {
       });
     }
     for (const s of f.sessions) {
+      // **識別子は日付ではなくファイル名**。同じ日に複数の記録がある（収集ダイジェストが
+      // 1日に2本など）ため、date を route にすると別々の記録が同じ route を持ち、
+      // 一覧では React のキーが衝突して描画が壊れる（実際に 2026-08-24 で踏んだ）。
+      const sslug = s.slug || s.date;
+      const word = /-collect(-\d+)?$/.test(sslug) ? '収集' : '観測';
       push({
-        route: `/follow/${f.name}#${s.date}`, type: 'session', slug: `${f.name}/${s.date}`,
-        title: `${cleanTitle(f.title)}：${s.date} の観測`, short: `${s.date} の観測`,
+        route: `/follow/${f.name}#${sslug}`, type: 'session', slug: `${f.name}/${sslug}`,
+        title: `${cleanTitle(f.title)}：${s.date} の${word}`, short: `${s.date} の${word}`,
         tags: f.tags || [], created: s.date, updated: s.date,
         body: s.body, links: s.links, ref: s, parent: f,
       });
@@ -95,6 +101,16 @@ function collectNodes(site) {
         status: c.status, body: c.body, ref: c, parent: a,
       });
     }
+  }
+  // 作品（writings）。お題・全ての版・講評が1本の body に積まれているので、本文を丸ごと干し草にする
+  // ——「あの講評どこだっけ」は版をまたいで探すしかない。
+  for (const w of site.writings?.pieces || []) {
+    push({
+      route: `/piece/${w.slug}`, type: 'piece', slug: w.slug,
+      title: w.title, short: cleanTitle(w.title), tags: w.tags || [],
+      created: w.created, updated: w.updated || w.created,
+      status: w.status, body: w.body, ref: w,
+    });
   }
   for (const t of site.logtopics || []) {
     push({
@@ -187,13 +203,18 @@ const TAG_JA = {
   'dev/frontend': 'フロントエンド', 'dev/llm': 'LLM',
   math: '数学', 'math/algebra': '代数', 'math/analysis': '解析', 'math/discrete': '離散数学',
   'math/foundations': '数学の基礎', 'math/geometry': '幾何', 'math/probability': '確率',
-  'food/coffee': 'コーヒー', 'log/model-eval': 'モデル比較',
+  'food/coffee': 'コーヒー', 'log/model-eval': 'モデル比較の記録',
   'health/skincare': '肌', 'health/nutrition': '栄養', 'health/hair': '髪',
   'health/stress': 'ストレス', 'health/bathing': '入浴', 'health/sleep': '睡眠',
   'science/cosmology': '宇宙論', 'geopolitics/middle-east': '中東',
   'philosophy/ancient': '古代哲学', 'philosophy/epistemology': '認識論', philosophy: '哲学',
   'language/vocabulary': 'ことば', 'knowledge/zettelkasten': 'ノート術',
-  'log/coffee': 'コーヒー',
+  // テーマ名は画面で並ぶので、**同じ名前が2つ出ないようにする**。
+  // 記録帖側のタグ（log/*）は「〜の記録」と言い分ける（food/coffee と log/coffee が衝突していた）。
+  'log/coffee': 'コーヒーの記録',
+  ergonomics: '人間工学', 'ergonomics/workspace': 'デスク環境',
+  'ergonomics/cognitive': '認知人間工学', 'ergonomics/theory': '人間工学の理論',
+  'writing/craft': '文章の作法', 'writing/fiction': '小説',
 };
 export const tagLabel = (t) => TAG_JA[t] || (t || '').split('/').pop();
 

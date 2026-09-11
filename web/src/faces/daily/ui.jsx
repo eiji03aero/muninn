@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Box, Flex, HStack, VStack, Heading, Text, Button, Spinner } from '@chakra-ui/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useData } from '../../lib/ctx.js';
-import { typeLabel, tagLabel, tagToParam } from '../../lib/graph.js';
+import { typeLabel, tagLabel } from '../../lib/graph.js';
 import { copyText } from '../../shared/util.js';
 import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
 
@@ -54,10 +54,14 @@ export function AppBar({ title, subtitle, back = true, children }) {
 // 名前は**比喩ではなく、押す前に中身が分かる言葉**にする。
 // 「面」「棚」「デスク」は作り手の内輪の比喩で、読者には押してみるまで中身が分からなかった。
 // 比喩を画面から追い出したぶん、面のかたちの呼び名（→「画面のかたち」）とも衝突しなくなる。
+//
+// 5枠（今日/続きもの/テーマ/探す/依頼）から4枠に減らした。「続きもの」と「テーマ」は
+// どちらも網羅把握のための画面だったが、前者は記事と作品を含まず、後者は面積の絵で種類に答えず、
+// **どちらも「何があるんだっけ」に半分しか答えていなかった**。網羅は `一覧`（種類ごとの全件）に、
+// 絞り込みは `探す`（全件＋文字列・種別・テーマ）に寄せ、2枠で1問ずつ答える形にした（原則19）。
 const TABS = [
   { to: '/', label: '今日', icon: '▣', match: (p) => p === '/' },
-  { to: '/series', label: '続きもの', icon: '▤', match: (p) => p.startsWith('/series') },
-  { to: '/shelf', label: 'テーマ', icon: '▦', match: (p) => p.startsWith('/shelf') },
+  { to: '/groups', label: '一覧', icon: '▤', match: (p) => p.startsWith('/groups') },
   { to: '/search', label: '探す', icon: '⌕', match: (p) => p.startsWith('/search') },
   { to: '/desk', label: '依頼', icon: '✎', match: (p) => p.startsWith('/desk') },
 ];
@@ -101,7 +105,7 @@ export function BottomTabs() {
               className="press" textAlign="center" position="relative"
               aria-current={on ? 'page' : undefined}>
               <Text fontSize="22px" lineHeight="1.15" color={on ? C.ink : C.faint}>{t.icon}</Text>
-              {/* 5枠あるので、狭い端末で「続きもの」が2行に折れないよう nowrap で押さえる */}
+              {/* 狭い端末でラベルが2行に折れてタブの高さが揃わなくなるのを nowrap で押さえる */}
               <Text fontSize="11px" mt="1" lineHeight="1.1" fontWeight={on ? '700' : '500'}
                 whiteSpace="nowrap" color={on ? C.ink : C.faint}>
                 {t.label}
@@ -147,14 +151,14 @@ export function Chips({ items, color = C.muted }) {
   return <Flex wrap="wrap" gap="1.5">{items.map((it, i) => <Chip key={i} color={color}>{it}</Chip>)}</Flex>;
 }
 
-// タグは装飾ではなく入口。押すと棚板へ飛ぶ。
+// タグは装飾ではなく入口。押すと、そのテーマで絞った「探す」へ飛ぶ。
 export function TagChips({ tags }) {
   const navigate = useNavigate();
   if (!tags?.length) return null;
   return (
     <Flex wrap="wrap" gap="1.5">
       {tags.filter((t) => t !== 'moc').map((t) => (
-        <Chip key={t} color={C.sky} onClick={() => navigate(`/shelf/${tagToParam(t)}`)}>{tagLabel(t)}</Chip>
+        <Chip key={t} color={C.sky} onClick={() => navigate(`/search?tag=${encodeURIComponent(t)}`)}>{tagLabel(t)}</Chip>
       ))}
     </Flex>
   );

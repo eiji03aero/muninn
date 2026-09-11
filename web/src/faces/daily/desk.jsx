@@ -31,6 +31,11 @@ const CAN_DO = [
     example: '/mn-log これを記録して',
   },
   {
+    title: '書く',
+    desc: 'お題に沿って自分で書き、固定の5軸で講評を受けて改稿する（代筆はしない）',
+    example: '/mn-write お題をちょうだい',
+  },
+  {
     title: '思い出す',
     desc: '蓄積を横断して束ね、試合前などに予習する',
     example: '/mn-brief 〜の見どころをまとめて',
@@ -64,7 +69,7 @@ export function Desk() {
     {
       label: '数値未記入の観測', count: noMetrics.length,
       prompt: `/mn-follow 以下の観測セッションの frontmatter に \`metrics:\` を足して（本文の計測値の表から数値を起こす）。本文は変更しないこと。\n` +
-        noMetrics.map(({ f, s }) => `- follows/${f.name}/sessions/${s.date}.md`).join('\n'),
+        noMetrics.map(({ f, s }) => `- follows/${f.name}/sessions/${s.slug || s.date}.md`).join('\n'),
     },
     {
       label: 'どこからも辿れない記事', count: orphans.length,

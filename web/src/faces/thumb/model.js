@@ -155,6 +155,8 @@ export function previewOf(node, graph) {
       return { ...base, sub: `${node.ref.entries.length}件`, ex: (node.ref.fields || []).map((f) => f.label).join('・') };
     case 'atlas':
       return { ...base, sub: `${node.ref.concepts.length}章`, ex: plain(node.body, 140) };
+    case 'piece':
+      return { ...base, sub: `${(node.ref.rounds || []).length}稿`, ex: plain(node.ref.prompt || node.body, 140) };
     default:
       return base;
   }
@@ -217,6 +219,7 @@ export const CATS = [
   { id: 'atlas', label: '連載', unit: '本', desc: '読む順つきの読み物' },
   { id: 'follow', label: '定点', unit: '件', desc: '同じ条件で見つづける' },
   { id: 'log', label: '記録帖', unit: '冊', desc: '同じ項目で並べて比べる' },
+  { id: 'piece', label: '作品', unit: '本', desc: '書いて講評を受けたもの' },
   { id: 'moc', label: '索引', unit: '件', desc: '手で並べた索引' },
 ];
 
@@ -228,6 +231,7 @@ export function catCount(id, site, graph) {
     case 'atlas': return (site.atlases || []).length;
     case 'follow': return site.follows.length;
     case 'log': return (site.logtopics || []).length;
+    case 'piece': return (site.writings?.pieces || []).length;
     default: return site.mocs.length;
   }
 }
@@ -246,6 +250,10 @@ export function catRoutes(id, site) {
     case 'log': return (site.logtopics || []).map((t) => ({
       route: `/log/${t.slug}`, title: t.title,
       note: `記録 ${(t.entries || []).length}件`,
+    }));
+    case 'piece': return (site.writings?.pieces || []).map((w) => ({
+      route: `/piece/${w.slug}`, title: w.title,
+      note: `${(w.rounds || []).length}稿`,
     }));
     default: return site.mocs.map((m) => ({
       route: `/moc/${m.slug}`, title: m.title,

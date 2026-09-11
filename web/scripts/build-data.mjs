@@ -3,6 +3,7 @@
 //   follows/**  → follows（profile / entities / sessions）
 //   notes/*.md  → notes（kind: knowledge / insight、復習期限フラグ付き）
 //   moc/*.md    → mocs
+//   writings/** → writings（rubric ＋ pieces）
 // frontmatter を構造化データとして採り、body は生markdownのまま渡す（クライアントで描画）。
 // 出力: web/public/site.json（平文, dev）。環境変数 MN_SITE_PASSWORD があれば
 //        web/public/site.enc.json（AES-256-GCM 暗号化, 本番）のみを出力する。
@@ -158,14 +159,16 @@ const follows = (existsSync(followsDir) ? readdirSync(followsDir, { withFileType
       .map((sp) => {
         const { data, body } = read(sp);
         const d = D(data.date) || slugOf(sp);
+        // slug（ファイル名）も渡す。**同じ日に複数の記録がある**（例: 収集ダイジェストが
+        // `YYYY-MM-DD-collect.md` と `-collect-2.md` の2本）ので、date は識別子として使えない。
         return {
-          date: d, title: d, body,
+          slug: slugOf(sp), date: d, title: d, body,
           summary: data.summary || null,
           metrics: data.metrics || null,
           links: wikiTargets(body),
         };
       })
-      .sort((a, b) => (a.date < b.date ? 1 : -1));
+      .sort((a, b) => (a.date === b.date ? (a.slug < b.slug ? 1 : -1) : (a.date < b.date ? 1 : -1)));
 
     // 観測値の時系列（グラフ用）。metrics を持つ session を古い順に畳む。
     // { 総距離: [{date, value}, ...], ... } の形にして、キー順は最新 session の定義順を尊重する。
@@ -394,13 +397,81 @@ const logtopics = (existsSync(logsDir) ? readdirSync(logsDir, { withFileTypes: t
   })
   .filter(Boolean);
 
+// ---------- writings（創作） ----------
+// rubric.md（kind: rubric）が評価軸の正本で、pieces/*.md（kind: piece）が作品1本
+// （お題・全ての版・各版の講評が1ファイルに積まれる）。prompts.md はお題の在庫＝設定なので渡さない。
+// **点は軸が固定されていることに意味がある**ので、rubric に無い軸の点はビルドを落とす
+// （軸が増減した作品を混ぜると「前回の自分と比べる」という唯一の使い道が壊れる）。
+const writingsDir = join(ROOT, 'writings');
+const PIECE_STATUS = ['drafting', 'done', 'shelved'];
+const writings = (() => {
+  if (!existsSync(writingsDir)) return { rubric: null, pieces: [] };
+
+  const rubricPath = join(writingsDir, 'rubric.md');
+  let rubric = null;
+  if (existsSync(rubricPath)) {
+    const { data, body } = read(rubricPath);
+    if (data.kind !== 'rubric') fail('writings/rubric', `kind は rubric であるべき（実際: ${data.kind}）`);
+    rubric = {
+      title: data.title || '文章の評価軸', max: data.max || 5,
+      axes: arrOf(data.axes).map((a) => ({ key: a.key, label: a.label || a.key, desc: a.desc || '' })),
+      tags: data.tags || [], updated: updatedOf(rubricPath, D(data.created)),
+      body, links: wikiTargets(body),
+    };
+    for (const a of rubric.axes) if (!a.key) fail('writings/rubric', 'axis に key がない');
+  }
+  const axisKeys = new Set((rubric?.axes || []).map((a) => a.key));
+
+  const pieces = mdFiles(join(writingsDir, 'pieces')).map((pp) => {
+    const { data, body } = read(pp);
+    const slug = slugOf(pp);
+    if (data.kind !== 'piece') fail(`writings/pieces/${slug}`, 'kind は piece であるべき');
+    if (!data.title) fail(`writings/pieces/${slug}`, 'title 欠落');
+    const status = data.status || 'drafting';
+    if (!PIECE_STATUS.includes(status)) fail(`writings/pieces/${slug}`, `status が不正: ${status}`);
+
+    const rounds = arrOf(data.rounds)
+      .map((r) => {
+        const scores = {};
+        for (const [k, v] of Object.entries(r.scores || {})) {
+          if (axisKeys.size && !axisKeys.has(k)) fail(`writings/pieces/${slug}`, `v${r.v} の scores に rubric 外の軸: ${k}`);
+          if (typeof v !== 'number') fail(`writings/pieces/${slug}`, `v${r.v} の ${k} が数値でない: ${v}`);
+          scores[k] = v;
+        }
+        // total は「軸の合計」以外ではありえない。食い違うのは書き間違いなので落とす
+        // （点が信用できなくなると、前回の自分と比べるというこの仕組みの唯一の使い道が死ぬ）。
+        const sum = Object.values(scores).reduce((n, v) => n + (typeof v === 'number' ? v : 0), 0);
+        if (typeof r.total === 'number' && Object.keys(scores).length && r.total !== sum) {
+          fail(`writings/pieces/${slug}`, `v${r.v} の total(${r.total}) が scores の合計(${sum}) と合わない`);
+        }
+        return {
+          v: r.v ?? null, date: D(r.date) || null, scores,
+          total: typeof r.total === 'number' ? r.total : null,
+          focus: r.focus || '', note: r.note || '',
+        };
+      })
+      .sort((a, b) => (a.v || 0) - (b.v || 0));
+
+    return {
+      slug, title: data.title || slug, status,
+      form: data.form || '', targetAxes: arrOf(data.target_axes), tags: data.tags || [],
+      created: D(data.created) || null,
+      updated: updatedOf(pp, D(data.updated) || D(data.created)),
+      prompt: (data.prompt || '').trim(), rounds,
+      body, links: wikiTargets(body),
+    };
+  });
+
+  return { rubric, pieces };
+})();
+
 // ---------- 検証結果 ----------
 if (errors.length) {
   console.error('❌ build-data: スキーマ検証エラー\n' + errors.map((e) => '  - ' + e).join('\n'));
   process.exit(1);
 }
 
-const site = { generatedAt: today, follows, notes, mocs, atlases, logtopics };
+const site = { generatedAt: today, follows, notes, mocs, atlases, logtopics, writings };
 const json = JSON.stringify(site);
 
 mkdirSync(OUT, { recursive: true });
@@ -430,8 +501,8 @@ if (password) {
     ct: Buffer.concat([ct, cipher.getAuthTag()]).toString('base64'), // ct||tag（WebCrypto互換）
   };
   writeFileSync(join(OUT, 'site.enc.json'), JSON.stringify(payload));
-  console.log(`🔒 site.enc.json を出力（暗号化 / 鍵スロット ${keyslots?.slots?.length ?? 0}）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length}`);
+  console.log(`🔒 site.enc.json を出力（暗号化 / 鍵スロット ${keyslots?.slots?.length ?? 0}）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length} / pieces ${writings.pieces.length}`);
 } else {
   writeFileSync(join(OUT, 'site.json'), json);
-  console.log(`📄 site.json を出力（平文/dev）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length}`);
+  console.log(`📄 site.json を出力（平文/dev）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length} / pieces ${writings.pieces.length}`);
 }

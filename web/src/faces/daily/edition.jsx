@@ -5,7 +5,7 @@ import { useData } from '../../lib/ctx.js';
 import { AppBar, Page, Slot, Card, Chip, CopyButton, Sparkline, Delta, relDay, Md } from './ui.jsx';
 import { composeEdition, staleness } from '../../lib/edition.js';
 import { recordVerdict, loadPending, todayISO, doneThisWeek, daysBetween } from '../../lib/recall.js';
-import { cleanTitle, shortTitle, tagLabel, tagToParam, typeLabel } from '../../lib/graph.js';
+import { cleanTitle, shortTitle, tagLabel, typeLabel } from '../../lib/graph.js';
 import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
 
 // ---------------- 題字 ----------------
@@ -270,7 +270,7 @@ export function Edition() {
               <Slot action={
                 <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
                   _hover={{ color: C.ink, bg: 'transparent' }}
-                  onClick={() => navigate('/series')}>続きもの ›</Button>
+                  onClick={() => navigate('/groups/atlas')}>連載の一覧 ›</Button>
               }>連載</Slot>
               <Card onClick={() => navigate(`/atlas/${ed.chapter.atlas.slug}/concept/${ed.chapter.concept.slug}?route=${ed.chapter.route.id}`)}>
                 <Text fontSize="xs" color={C.faint}>{cleanTitle(ed.chapter.atlas.title)} — {ed.chapter.route.label}</Text>
@@ -299,7 +299,7 @@ export function Edition() {
                   {ed.feature.bundle.tag && (
                     <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
                       _hover={{ color: C.ink, bg: 'transparent' }}
-                      onClick={() => navigate(`/shelf/${tagToParam(ed.feature.bundle.tag)}`)}>テーマへ ›</Button>
+                      onClick={() => navigate(`/search?tag=${encodeURIComponent(ed.feature.bundle.tag)}`)}>このテーマを探す ›</Button>
                   )}
                 </HStack>
                 <VStack align="stretch" gap="0">
@@ -323,7 +323,7 @@ export function Edition() {
               <Slot action={
                 <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
                   _hover={{ color: C.ink, bg: 'transparent' }}
-                  onClick={() => navigate('/series')}>続きもの ›</Button>
+                  onClick={() => navigate('/groups')}>一覧 ›</Button>
               }>記録</Slot>
               <VStack align="stretch" gap="3">
                 {ed.records.map((r, i) =>
@@ -362,12 +362,12 @@ export function Edition() {
 
           <Box>
             <Slot>今号の在庫</Slot>
-            <Flex as="button" onClick={() => navigate('/shelf')} className="glass-soft press"
+            <Flex as="button" onClick={() => navigate('/groups')} className="glass-soft press"
               px="4" py="3" borderRadius="14px" align="center" justify="space-between" w="100%" textAlign="left">
               <Text fontSize="xs" color={C.muted} lineHeight="1.7">
                 {ed.inventory.notes}記事 / {ed.inventory.concepts}章 / {ed.inventory.sessions}観測 / {ed.inventory.entries}記録
               </Text>
-              <Text fontSize="sm" color={C.faint} flexShrink="0">テーマ ›</Text>
+              <Text fontSize="sm" color={C.faint} flexShrink="0">一覧 ›</Text>
             </Flex>
           </Box>
 

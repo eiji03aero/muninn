@@ -172,11 +172,13 @@ function Sessions({ follow }) {
   return (
     <VStack align="stretch" gap="2">
       {follow.sessions.map((s) => {
-        const on = open === s.date;
+        // 同じ日に複数の記録があり得るので、開閉の識別もファイル名で持つ（date だと同日が連動する）
+        const id = s.slug || s.date;
+        const on = open === id;
         return (
-          <Box key={s.date} className="glass-soft" borderRadius="14px" overflow="hidden">
+          <Box key={id} className="glass-soft" borderRadius="14px" overflow="hidden">
             <Flex as="button" w="100%" textAlign="left" className="press" px="4" py="3"
-              align="start" justify="space-between" gap="3" onClick={() => setOpen(on ? null : s.date)}>
+              align="start" justify="space-between" gap="3" onClick={() => setOpen(on ? null : id)}>
               <Box minW="0">
                 <Text fontSize="xs" color={C.sky} fontWeight="700">{s.date}</Text>
                 {s.summary && <Text fontSize="sm" color={C.ink} mt="1" lineHeight="1.6">{s.summary}</Text>}

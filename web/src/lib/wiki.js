@@ -10,7 +10,8 @@ export function buildIndex(site) {
   const concepts = new Map();
   for (const a of site.atlases || []) for (const c of a.concepts) concepts.set(c.slug, { concept: c, atlas: a.slug });
   const logtopics = new Map((site.logtopics || []).map((t) => [t.slug, t]));
-  return { notes, mocs, follows, entities, atlases, concepts, logtopics };
+  const pieces = new Map((site.writings?.pieces || []).map((w) => [w.slug, w]));
+  return { notes, mocs, follows, entities, atlases, concepts, logtopics, pieces };
 }
 
 // target（[[ ]] の中身）→ { route, label } or null
@@ -33,6 +34,7 @@ export function resolveTarget(target, idx) {
   if (idx.mocs.has(t)) return { route: `/moc/${t}`, label: idx.mocs.get(t).title };
   if (idx.atlases?.has(t)) return { route: `/atlas/${t}`, label: idx.atlases.get(t).title };
   if (idx.logtopics?.has(t)) return { route: `/log/${t}`, label: idx.logtopics.get(t).title };
+  if (idx.pieces?.has(t)) return { route: `/piece/${t}`, label: idx.pieces.get(t).title };
   if (idx.concepts?.has(t)) {
     const { concept, atlas } = idx.concepts.get(t);
     return { route: `/atlas/${atlas}/concept/${t}`, label: concept.title };
