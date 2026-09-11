@@ -127,9 +127,12 @@ mn-capture 経由でも上記フロー（特に**固定5軸での採点**と**�
 
 ## サイト（web/）との関係
 
-**2026-09-05 時点で `writings/` はサイトに出ていない**（`web/scripts/build-data.mjs` が読まない）。
-閲覧はリポジトリの markdown で行う。サイト対応は `docs/pbi/PBI-04-writings-face.md` にある。
-**この状態を「対応済み」と偽って報告しないこと。**
+**作品（pieces）はサイトで読める**（2026-09-11、PBI-04 完了）。`一覧 → 作品`、または `探す` から辿れる。
+`rubric.md` と `prompts.md` は**サイトに出さない運用**（軸は講評の道具、お題は運営の楽屋であって読み物ではない）。
+
+`web/scripts/build-data.mjs` が piece のスキーマを検証する。**rubric に無い軸の点・`status` 不正・
+`total` と `scores` の合計の不一致はビルドが落ちる**（軸が固定されていることに意味があるので、砦を置いてある）。
+piece を書いたら `npm --prefix web run build:data` を走らせ、`pieces N` が出ることを確認してから commit する。
 
 ## コミット運用（CLAUDE.md 準拠）
 
