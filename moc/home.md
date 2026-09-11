@@ -57,6 +57,7 @@ muninn の入口。テーマごとのMOCはここから辿る。
 
 - [[oyachumi-no-jikan|おやちゅみの時間]] `[完成 24/25]` — 小説の導入の一節。寝かしつけた娘が逆再生で戻ってくる。全5稿＋確定稿の推敲の軌跡つき（`writings/pieces/`）
 - [[zatsudan-waku|雑談枠]] `[既発表 19/25]` — 誰も来なくなった社内の雑談枠を書いた短い散文詩。公開済みのため改稿せず、講評のみ（`writings/pieces/`）
+- [[all-you-need-is-vim|All you need is Vim]] `[既発表 21/25]` — Vim に熱中した日々と、それが生活から消えた現在を書いたエッセイ。声が初めて5（`writings/pieces/`）
 
 ## ログ（logs/）
 
