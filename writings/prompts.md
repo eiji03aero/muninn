@@ -2,7 +2,7 @@
 title: お題ストック
 kind: prompts
 created: 2026-09-05
-updated: 2026-09-05
+updated: 2026-09-11
 tags: [writing/craft]
 ---
 
@@ -15,7 +15,7 @@ tags: [writing/craft]
 
 | 状態 | お題 | 狙う軸 | 作品 |
 |---|---|---|---|
-| **active** | 小説の導入の一節（「おやちゅみの時間だよ」に続けて、度肝を抜く展開へ繋ぐ） | 引き・具体 | [[oyachumi-no-jikan]] |
+| **done**（2026-09-11・24/25） | 小説の導入の一節（「おやちゅみの時間だよ」に続けて、度肝を抜く展開へ繋ぐ） | 引き・具体 | [[oyachumi-no-jikan]] |
 
 ## 在庫
 
