@@ -15,6 +15,7 @@ tags: [moc]
 - [[mocha-is-a-yemeni-port-name-that-now-labels-yemeni-and-ethiopian-coffee]] — 「モカ」は産地ではなく港の名前。指すのはイエメン・エチオピア産と果実味のある酸
 - [[brazil-coffee-is-the-nutty-low-acid-base-that-most-blends-are-built-on]] — ブラジルはナッツ・チョコ系の「土台の豆」。ブレンドの地の部分を担う
 - [[brazil-abic-grades-tradicional-superior-gourmet-are-printed-on-the-bag]] — 袋の Tradicional / Gourmet は商品名ではなく品質等級。欠点豆とロブスタの許容が違う
+- [[coffee-bag-origin-list-is-ordered-by-blend-ratio]] — 生豆生産国名は配合比率の多い順。先頭に書かれた国がその袋の主役
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 焙煎後の劣化。脂質酸化とCO2抜けで平坦・紙っぽくなる。飲み頃は焙煎後7〜21日
 
 ## 体への影響
