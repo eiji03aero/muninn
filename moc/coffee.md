@@ -17,6 +17,7 @@ tags: [moc]
 - [[brazil-abic-grades-tradicional-superior-gourmet-are-printed-on-the-bag]] — 袋の Tradicional / Gourmet は商品名ではなく品質等級。欠点豆とロブスタの許容が違う
 - [[coffee-bag-origin-list-is-ordered-by-blend-ratio]] — 生豆生産国名は配合比率の多い順。先頭に書かれた国がその袋の主役
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 焙煎後の劣化。脂質酸化とCO2抜けで平坦・紙っぽくなる。飲み頃は焙煎後7〜21日
+- [[dark-roasts-stale-faster-because-of-porosity-and-surface-oil]] — 深煎りほど劣化が速い。香りを失っても味が残るので気づきにくい
 
 ## 体への影響
 
