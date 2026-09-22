@@ -59,7 +59,7 @@ muninn の入口。テーマごとのMOCはここから辿る。
 - [[zatsudan-waku|雑談枠]] `[既発表 19/25]` — 誰も来なくなった社内の雑談枠を書いた短い散文詩。公開済みのため改稿せず、講評のみ（`writings/pieces/`）
 - [[all-you-need-is-vim|All you need is Vim]] `[既発表 21/25]` — Vim に熱中した日々と、それが生活から消えた現在を書いたエッセイ。声が初めて5（`writings/pieces/`）
 - [[tennis-influencers|静寂の中の実演]] `[完成 24/25]` — 静かなテニス会場で撮影を続ける人たちを笑った直後に、自分の過去が同じ構文で話しかけてくる掌編（`writings/pieces/`）
-- [[mada-sanjikan|まだ3時間（仮）]] `[推敲中 19/25]` — 誰もいない売り場で実演を続ける店員から逃げた記録。体言止めの列＋最終行（`writings/pieces/`）
+- [[mada-sanjikan|まだ3時間（仮）]] `[推敲中 21/25]` — 誰もいない売り場で実演を続ける店員から逃げた記録。体言止めの列＋最終行（`writings/pieces/`）
 
 ## ログ（logs/）
 
