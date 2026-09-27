@@ -28,3 +28,4 @@ srs:
 - [[golf-downblow-spin-loft-face-compresses-ball-not-scoop]] — 入射角×ロフト（スピンロフト）の一般原理。番手で入射角が変わる話の土台
 - [[golf-driver-shift-pressure-forward-keep-upper-body-back-to-hit-up]] — グラデーションのドライバー端（+入射角＝上り際は例外）
 - [[golf-my-3-iron-swing-like-driver-body-led-shallow-but-ball-first]] — このグラデーションを3番に当てはめた自分の実感
+- [[golf-iron-number-does-not-mean-loft-two-club-gap-between-eras]] — 前提の補足。このグラデーションは「番手の数字」でなくロフトの並びの話で、世代・カテゴリをまたぐと数字は2番手ずれる
