@@ -14,6 +14,7 @@ tags: [moc]
 - [[robusta-adds-bitterness-and-body-cheaply-and-vietnam-is-the-largest-producer]] — 生豆生産国名から配合を読む。ベトナムが入っていたらロブスタを疑う
 - [[mocha-is-a-yemeni-port-name-that-now-labels-yemeni-and-ethiopian-coffee]] — 「モカ」は産地ではなく港の名前。指すのはイエメン・エチオピア産と果実味のある酸
 - [[brazil-coffee-is-the-nutty-low-acid-base-that-most-blends-are-built-on]] — ブラジルはナッツ・チョコ系の「土台の豆」。ブレンドの地の部分を担う
+- [[uganda-is-the-native-home-of-robusta-but-its-specialty-coffee-is-highland-arabica]] — 同じ国名が安いロブスタにも高級アラビカにもなる。国名だけでは味は決まらない
 - [[brazil-abic-grades-tradicional-superior-gourmet-are-printed-on-the-bag]] — 袋の Tradicional / Gourmet は商品名ではなく品質等級。欠点豆とロブスタの許容が違う
 - [[coffee-bag-origin-list-is-ordered-by-blend-ratio]] — 生豆生産国名は配合比率の多い順。先頭に書かれた国がその袋の主役
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 焙煎後の劣化。脂質酸化とCO2抜けで平坦・紙っぽくなる。飲み頃は焙煎後7〜21日
@@ -37,6 +38,8 @@ tags: [moc]
 - [[coffee-strength-is-the-dose-ratio-while-extraction-yield-is-grind-temperature-and-time]] — 「薄い」は比率、「渋い」は抽出率。混同すると対処を間違える
 - [[coffee-reveals-acidity-and-sweetness-as-it-cools]] — 冷める過程で酸味と甘さが立つ。一杯を一度に判定しない
 - [[coffee-sweetness-comes-from-aroma-not-from-sugar-left-in-the-cup]] — 甘みの正体は糖ではなく香り。砂糖の甘さを探しても見つからない
+- [[mint-like-coolness-is-a-trigeminal-cold-sensation-not-a-taste]] — 冷涼感・辛さ・渋みは味覚ではなく三叉神経の感覚。味と混ぜて記録しない
+- [[coffee-finish-length-is-a-tasting-axis-and-a-short-clean-finish-is-by-design]] — 余韻の長さはコクとは別の軸。短く消えるのは欠点ではなく設計
 - [[french-press-metal-mesh-passes-oils-and-fines-so-it-needs-a-coarse-grind]] — 器具の差はフィルターが何を通すかの差。プレスはボディ、ペーパーはクリア
 - [[grind-size-has-to-match-the-contact-time-of-the-brewing-method]] — 挽き目と器具はセット。粗挽きを短時間のドリップに流用すると素通りする
 - [[coffee-extracts-acids-first-then-sweetness-then-bitterness]] — 酸→甘み→苦味の順に出る。抽出不足は酸っぱく、過抽出は渋い
