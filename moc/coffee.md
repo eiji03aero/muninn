@@ -19,6 +19,7 @@ tags: [moc]
 - [[coffee-bag-origin-list-is-ordered-by-blend-ratio]] — 生豆生産国名は配合比率の多い順。先頭に書かれた国がその袋の主役
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 焙煎後の劣化。脂質酸化とCO2抜けで平坦・紙っぽくなる。飲み頃は焙煎後7〜21日
 - [[dark-roasts-stale-faster-because-of-porosity-and-surface-oil]] — 深煎りほど劣化が速い。香りを失っても味が残るので気づきにくい
+- [[italian-roast-is-the-deepest-of-the-eight-japanese-roast-levels]] — 8段階の最深。酸を焼き切って苦味とボディに全振りし、ミルク・砂糖前提で設計される
 
 ## 体への影響
 
@@ -40,6 +41,8 @@ tags: [moc]
 - [[coffee-sweetness-comes-from-aroma-not-from-sugar-left-in-the-cup]] — 甘みの正体は糖ではなく香り。砂糖の甘さを探しても見つからない
 - [[mint-like-coolness-is-a-trigeminal-cold-sensation-not-a-taste]] — 冷涼感・辛さ・渋みは味覚ではなく三叉神経の感覚。味と混ぜて記録しない
 - [[coffee-finish-length-is-a-tasting-axis-and-a-short-clean-finish-is-by-design]] — 余韻の長さはコクとは別の軸。短く消えるのは欠点ではなく設計
+- [[koku-is-an-ambiguous-word-covering-body-strength-finish-and-complexity]] — 「コク」は4つの別物の総称。記録では使わず、ボディ／濃さ／余韻に分けて書く
+- [[coffee-body-is-a-tactile-sensation-made-by-insoluble-oils-and-fine-particles]] — ボディの正体は溶けていないもの（油分・微粉・高分子）が作る触覚
 - [[french-press-metal-mesh-passes-oils-and-fines-so-it-needs-a-coarse-grind]] — 器具の差はフィルターが何を通すかの差。プレスはボディ、ペーパーはクリア
 - [[grind-size-has-to-match-the-contact-time-of-the-brewing-method]] — 挽き目と器具はセット。粗挽きを短時間のドリップに流用すると素通りする
 - [[coffee-extracts-acids-first-then-sweetness-then-bitterness]] — 酸→甘み→苦味の順に出る。抽出不足は酸っぱく、過抽出は渋い
