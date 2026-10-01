@@ -18,6 +18,7 @@ tags: [moc]
 - [[argentina-2026-world-cup-runners-up]] — 2026 W杯準優勝（決勝スペインに0-1・延長）。連覇を逃す。
 - [[otamendi-retired-from-argentina-after-2026-world-cup]] — 大会後の世代交代第一歩。17年・139キャップの守備リーダーが代表引退。
 - [[messi-all-time-world-cup-top-scorer]] — メッシが2026で通算W杯得点王＆シルバーボール。
+- [[messi-retired-from-argentina-in-2026-after-21-years]] — 2026-08-31に代表引退を表明。最後の代表戦は10/6のベナン戦。
 - [[argentina-badge-three-stars-1978-1986-2022]] — エンブレム3つ星の意味。1986＝マラドーナ、2022＝メッシ。
 - [[mastantuono-youngest-official-debutant-for-argentina]] — 代表の「最年少デビュー」は公式戦か親善試合かで答えが変わる（マラドーナとの線引き）。
 - [[jorge-messi-father-and-lifelong-agent-died-in-2026]] — メッシの父は生涯の代理人でもあった。2026-08-08に死去。
@@ -26,6 +27,7 @@ tags: [moc]
 
 - [[fifa-merged-september-and-october-international-windows-from-2026]] — 2026年から9月と10月の代表ウィンドウが統合（9/21〜10/6の16日間・最大4試合）。代表の日程を読むときの前提。
 - [[buy-back-clause-lets-the-selling-club-reclaim-a-player-at-a-fixed-price]] — バイバック条項＝売った側が決まった額で買い戻せる一方的オプション。レンタルの買い取りOPとは方向が逆。
+- [[british-record-transfer-fee-125m-shared-by-isak-and-enzo]] — 英国の移籍金記録は£125mで2件が並ぶ。どちらもデッドラインデー成立。
 
 ## フォロー（時系列で追う側）
 
