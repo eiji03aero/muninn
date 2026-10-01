@@ -84,6 +84,7 @@ focus:
 
 ## Links
 
+- [[golf-score]] — 姉妹トラック。こちらは**レンジでの1打の質**、あちらは**18ホールの打数**。同じ日でも別の優先順位を指すことがある（2026-10-02 がその実例）
 - [[golf-my-driver-distance-roadmap-smash-first-then-speed]] — このトラックの方針の正本（現状値と優先順位）
 - [[golf-my-driver-speed-training-plan]] — 重点課題③スピードトレの具体メニュー
 - [[golf-my-swing-low-spin-loft-optimize-with-loft-and-vertical-strike]] — 弾道の癖と打ち出し/スピンの最適化
