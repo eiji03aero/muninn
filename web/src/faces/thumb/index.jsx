@@ -508,7 +508,7 @@ export default function ThumbRoot({ initialTarget }) {
                   <span aria-hidden="true">?</span>
                 </button>
                 <button type="button" aria-label="設定を開く（画面のかたちを選ぶ）" onClick={openSettings}>
-                  <span aria-hidden="true">⚙</span>
+                  <span aria-hidden="true">{'\u2699\uFE0E'}</span>
                 </button>
               </div>
             </div>

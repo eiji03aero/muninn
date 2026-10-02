@@ -65,7 +65,9 @@ const TABS = [
   { to: '/', label: '今日', icon: '▣', match: (p) => p === '/' },
   { to: '/groups', label: '一覧', icon: '▤', match: (p) => p.startsWith('/groups') },
   { to: '/search', label: '探す', icon: '⌕', match: (p) => p.startsWith('/search') },
-  { to: '/more', label: '設定', icon: '⚙', match: (p) => p.startsWith('/more') },
+  // ⚙ は素のままだと iOS がカラー絵文字で描き、他の3つ（▣ ▤ ⌕ の単色の記号）から浮く。
+  // 異体字セレクタ U+FE0E（テキスト表示）を付けて、文字色に従う単色の記号として描かせる。
+  { to: '/more', label: '設定', icon: '\u2699\uFE0E', match: (p) => p.startsWith('/more') },
 ];
 
 // ソフトキーボードに食われている高さ。
