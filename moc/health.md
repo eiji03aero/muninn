@@ -43,3 +43,11 @@ tags: [moc]
 
 - [[quick-wakefulness-methods-activate-sympathetic-nervous-system]] — 道具なしの眠気覚ましは交感神経賦活＋光で説明できる
 - [[breath-holding-raises-sympathetic-activity-via-chemoreflex]] — 息止めは交感神経・血圧を上げる（低酸素駆動）。眠気覚まし直接研究はない
+
+### カフェイン
+
+- [[caffeine-blocks-adenosine-receptors-and-coffee-doses-are-far-from-saturating-them]] — アデノシン受容体の競合的拮抗。1〜2杯では飽和せず、量を倍にすれば塞ぐ割合も増える
+- [[caffeine-alertness-gains-flatten-with-dose-while-side-effects-keep-rising]] — 覚醒効果は約40mgから出るが、量に比例しては伸びない。増やすほど副作用の比重が増える
+- [[splitting-coffee-into-two-cups-an-hour-apart-barely-differs-from-drinking-it-at-once]] — 半減期約5時間なので、1時間空けて分けても一気飲みとほぼ同じ曲線
+- [[caffeine-six-hours-before-bed-still-cuts-sleep-by-over-an-hour]] — 就寝6時間前でも睡眠は1時間以上削られ、本人は気づかない
+- [[caffeine-before-a-short-nap-beats-the-nap-alone]] — コーヒーナップ。カフェイン＋20分仮眠が仮眠だけより効く

@@ -25,6 +25,7 @@ tags: [moc]
 ## 体への影響
 
 - [[unfiltered-coffee-leaves-cafestol-and-kahweol-which-raise-ldl-cholesterol]] — 非濾過はLDLを上げる。厚いボディと同じ油分に由来するので片方だけは取れない
+- [[caffeine-blocks-adenosine-receptors-and-coffee-doses-are-far-from-saturating-them]] — カフェインが眠気を抑える仕組み。眠気対策の飲み方は [[health]] の「カフェイン」にまとめてある
 
 ## 欠点を読む
 

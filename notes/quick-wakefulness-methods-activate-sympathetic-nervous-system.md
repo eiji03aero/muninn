@@ -16,3 +16,4 @@ srs:
 ## Links
 - [[breath-holding-raises-sympathetic-activity-via-chemoreflex]] — 「息を止める」も交感神経を上げる一手段だが機序（低酸素）と効果の確からしさが別
 - [[bath-temperature-38-40c-relaxes-but-over-42c-stimulates]] — 42℃以上の熱い湯が交感神経を刺激して目覚めに向くのと同じ原理
+- [[caffeine-before-a-short-nap-beats-the-nap-alone]] — 仮眠の直前にカフェインを摂ると、仮眠だけより効く（コーヒーナップ）
