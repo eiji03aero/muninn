@@ -59,11 +59,13 @@ export function AppBar({ title, subtitle, back = true, children }) {
 // どちらも網羅把握のための画面だったが、前者は記事と作品を含まず、後者は面積の絵で種類に答えず、
 // **どちらも「何があるんだっけ」に半分しか答えていなかった**。網羅は `一覧`（種類ごとの全件）に、
 // 絞り込みは `探す`（全件＋文字列・種別・テーマ）に寄せ、2枠で1問ずつ答える形にした（原則19）。
+// 4枠目は `依頼` だったが、依頼文の見本や在庫の健康は開かれない説明書になっていたので畳み、
+// アプリそのもの（読み込み直し・画面のかたち・履歴・未送信の依頼）を扱う `設定` にした（2026-10-02）。
 const TABS = [
   { to: '/', label: '今日', icon: '▣', match: (p) => p === '/' },
   { to: '/groups', label: '一覧', icon: '▤', match: (p) => p.startsWith('/groups') },
   { to: '/search', label: '探す', icon: '⌕', match: (p) => p.startsWith('/search') },
-  { to: '/desk', label: '依頼', icon: '✎', match: (p) => p.startsWith('/desk') },
+  { to: '/more', label: '設定', icon: '⚙', match: (p) => p.startsWith('/more') },
 ];
 
 // ソフトキーボードに食われている高さ。

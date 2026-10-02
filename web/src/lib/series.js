@@ -16,9 +16,9 @@ import { cleanTitle, shortTitle } from './graph.js';
 
 // 画面に出す語。concern 名（atlas / logs / follows）は出さない。
 export const SERIES_KINDS = [
-  { id: 'atlas', label: '連載', lead: '順路に沿って章を読み進める', unit: '章' },
-  { id: 'log', label: '記録帖', lead: '同じ項目で貯めて、並べて比べる', unit: '件' },
-  { id: 'follow', label: '定点', lead: '同じ条件で観測して、前回と比べる', unit: '回' },
+  { id: 'atlas', label: 'Series', lead: '順路に沿って章を読み進める', unit: '章' },
+  { id: 'log', label: 'Logbook', lead: '同じ項目で貯めて、並べて比べる', unit: '件' },
+  { id: 'follow', label: 'Tracker', lead: '同じ条件で観測して、前回と比べる', unit: '回' },
 ];
 
 export const kindMeta = (id) => SERIES_KINDS.find((k) => k.id === id) || SERIES_KINDS[0];

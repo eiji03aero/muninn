@@ -32,10 +32,12 @@ export function linksWithReason(body) {
   return out;
 }
 
+// 入れ物の4種類（連載・記録帖・定点・作品）だけは英語で出す。日本語の訳語が野暮ったいと
+// オーナーに言われた（2026-10-02）。中身の単位（章・記録・観測）と記事は日本語のまま。
 const TYPE_LABEL = {
   note: '記事', concept: '章', entity: '人物', session: '観測',
-  logentry: '記録', follow: '定点', atlas: '連載', logtopic: '記録帖',
-  piece: '作品', moc: '索引',
+  logentry: '記録', follow: 'Tracker', atlas: 'Series', logtopic: 'Logbook',
+  piece: 'Writing', moc: '索引',
 };
 export const typeLabel = (t) => TYPE_LABEL[t] || t;
 

@@ -10,10 +10,10 @@ import { useData } from '../../lib/ctx.js';
 import { paramToTag } from '../../lib/graph.js';
 import { Note, Follow, Player } from './pages.jsx';
 import { Edition } from './edition.jsx';
-import { Groups, GroupList } from './groups.jsx';
+import { Groups } from './groups.jsx';
 import { Search } from './search.jsx';
 import { Piece } from './piece.jsx';
-import { Desk } from './desk.jsx';
+import { More } from './more.jsx';
 import { Atlas, Concept } from './atlas.jsx';
 import { LogTopic, LogEntry } from './logs.jsx';
 import { BottomTabs } from './ui.jsx';
@@ -56,6 +56,14 @@ function LegacyMoc({ graph }) {
   return <Navigate to={bundle ? `/search?tag=${encodeURIComponent(bundle.tag)}` : '/groups'} replace />;
 }
 
+// 旧「種類1つの全件」（/groups/:id）。種類の切り替えは一覧の中のタブになった。
+// 記事は一覧から外したので、記事だけで絞った「探す」へ送る。
+function LegacyGroup() {
+  const { id } = useParams();
+  if (id === 'note') return <Navigate to="/search?type=note" replace />;
+  return <Navigate to={`/groups?kind=${encodeURIComponent(id)}`} replace />;
+}
+
 // 旧「テーマ1枚」（/shelf/:tag）。テーマ指定の検索がその役目を継いだ。
 function LegacyShelfTag() {
   const { tag } = useParams();
@@ -73,9 +81,9 @@ export default function DailyRoot() {
           <Routes>
             <Route path="/" element={<Edition />} />
             <Route path="/groups" element={<Groups />} />
-            <Route path="/groups/:id" element={<GroupList />} />
+            <Route path="/groups/:id" element={<LegacyGroup />} />
             <Route path="/search" element={<Search />} />
-            <Route path="/desk" element={<Desk />} />
+            <Route path="/more" element={<More />} />
 
             <Route path="/note/:slug" element={<Note />} />
             <Route path="/follow/:name" element={<Follow />} />
@@ -86,9 +94,10 @@ export default function DailyRoot() {
             <Route path="/log/:topic/entry/:slug" element={<LogEntry />} />
             <Route path="/piece/:slug" element={<Piece />} />
 
-            {/* 廃止したルート。網羅は「一覧」に、絞り込みは「探す」に吸収された */}
-            <Route path="/notes" element={<Navigate to="/groups/note" replace />} />
-            <Route path="/logs" element={<Navigate to="/groups/logtopic" replace />} />
+            {/* 廃止したルート。網羅は「一覧」に、絞り込みは「探す」に、依頼は「設定」に吸収された */}
+            <Route path="/desk" element={<Navigate to="/more" replace />} />
+            <Route path="/notes" element={<Navigate to="/search?type=note" replace />} />
+            <Route path="/logs" element={<Navigate to="/groups?kind=logtopic" replace />} />
             <Route path="/series" element={<Navigate to="/groups" replace />} />
             <Route path="/shelf" element={<Navigate to="/search" replace />} />
             <Route path="/shelf/:tag" element={<LegacyShelfTag />} />

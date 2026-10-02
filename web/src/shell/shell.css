@@ -80,6 +80,7 @@
   cursor: pointer;
 }
 .mn-shell .sh-subtle:disabled { opacity: .6; }
+.mn-shell .sh-wide { width: 100%; }
 .mn-shell .sh-link {
   min-height: 44px;
   border: none;

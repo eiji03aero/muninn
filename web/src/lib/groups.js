@@ -7,17 +7,18 @@
 //
 // lib なので**面の名前を知らない**。読了だけは localStorage 由来なので呼び出し側から reads を渡す。
 
-import { cleanTitle, tagLabel } from './graph.js';
+import { cleanTitle } from './graph.js';
 import { buildSeries, countText, firstLine } from './series.js';
 
 // 画面に出す語。concern 名（notes / atlas / logs / follows / writings）は出さない。
 // id は検索の種別フィルタ（graph のノード型）と同じ語にして、一覧と検索で呼び名を割らせない。
+// 記事は一覧に出さない（2026-10-02）。90件超の単発の記事が並ぶと入れ物の4種類が埋もれ、
+// 記事は `探す` の既定（全件の作成順）で既に一覧できている。一覧は**増えていく入れ物**だけを扱う。
 export const GROUPS = [
-  { id: 'note', label: '記事', lead: '1件に1つの知識。調べた事実と、自分の言葉の気づき' },
-  { id: 'atlas', label: '連載', lead: '順路に沿って章を読み進める' },
-  { id: 'logtopic', label: '記録帖', lead: '同じ項目で貯めて、並べて比べる' },
-  { id: 'follow', label: '定点', lead: '同じ条件で観測して、前回と比べる' },
-  { id: 'piece', label: '作品', lead: 'お題に沿って書き、同じ5軸の講評で書き直す' },
+  { id: 'atlas', label: 'Series', lead: '順路に沿って章を読み進める' },
+  { id: 'logtopic', label: 'Logbook', lead: '同じ項目で貯めて、並べて比べる' },
+  { id: 'follow', label: 'Tracker', lead: '同じ条件で観測して、前回と比べる' },
+  { id: 'piece', label: 'Writing', lead: 'お題に沿って書き、同じ5軸の講評で書き直す' },
 ];
 
 export const groupById = (id) => GROUPS.find((g) => g.id === id) || null;
@@ -42,7 +43,7 @@ const byDateDesc = (key) => (a, b) => {
 };
 
 // グループごとの「並べられる形」。route / title / meta（件数や点）/ date で揃える。
-// `date` は**そのグループを並べている軸そのもの**を入れる（記事は作成日、増えていくものは最終更新）。
+// `date` は**そのグループを並べている軸そのもの**を入れる（どれも最終更新。全種類を混ぜて更新順に並べるため）。
 // 並び順と表示日が食い違うと、「動いた順」の先頭に古い日付が出て一覧が嘘をつく。
 export function buildGroups(site, reads = {}) {
   const series = buildSeries(site, reads);
@@ -55,15 +56,6 @@ export function buildGroups(site, reads = {}) {
     }));
 
   const items = {
-    note: (site.notes || [])
-      .map((n) => ({
-        key: `note:${n.slug}`, route: `/note/${n.slug}`, title: n.title,
-        gist: '', tags: n.tags || [],
-        meta: (n.tags || []).map(tagLabel).join(' · '),
-        badge: n.kind === 'insight' ? 'じぶんの言葉' : null,
-        created: n.created, updated: n.updated || n.created, date: n.created,
-      }))
-      .sort(byDateDesc('created')),
     atlas: fromSeries('atlas'),
     logtopic: fromSeries('log'),
     follow: fromSeries('follow'),
@@ -91,13 +83,4 @@ export function buildGroups(site, reads = {}) {
       updated: list.map((i) => i.updated).filter(Boolean).sort().pop() || null,
     };
   });
-}
-
-// 読みかけの連載（1章でも読んだもの）。一覧の先頭に「続きから」として差し出す材料。
-// 読みかけが1本も無いときだけ、いちばん新しい連載を1本だけ返す——未読を全部並べると
-// 下の一覧と丸ごと重複して嵩むだけになる。
-export function resumeChapters(site, reads = {}, limit = 3) {
-  const atlases = buildSeries(site, reads).filter((i) => i.kind === 'atlas' && i.next);
-  const reading = atlases.filter((i) => i.done > 0).slice(0, limit);
-  return { reading: reading.length > 0, items: reading.length ? reading : atlases.slice(0, 1) };
 }

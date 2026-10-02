@@ -239,7 +239,7 @@ export function Edition() {
                     <Text fontSize="sm" color={C.violet} fontWeight="700" flexShrink="0">あと{a.days}日 ›</Text>
                   </Flex>
                 ) : (
-                  <Flex as="button" key={i} onClick={() => navigate('/desk')}
+                  <Flex as="button" key={i} onClick={() => navigate('/more')}
                     className="glass-soft press" px="4" py="3" borderRadius="14px"
                     align="center" justify="space-between" w="100%" textAlign="left">
                     <Text fontSize="sm" color={C.ink} fontWeight="600">未送信の依頼</Text>
@@ -270,8 +270,8 @@ export function Edition() {
               <Slot action={
                 <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
                   _hover={{ color: C.ink, bg: 'transparent' }}
-                  onClick={() => navigate('/groups/atlas')}>連載の一覧 ›</Button>
-              }>連載</Slot>
+                  onClick={() => navigate('/groups?kind=atlas')}>一覧で見る ›</Button>
+              }>Series</Slot>
               <Card onClick={() => navigate(`/atlas/${ed.chapter.atlas.slug}/concept/${ed.chapter.concept.slug}?route=${ed.chapter.route.id}`)}>
                 <Text fontSize="xs" color={C.faint}>{cleanTitle(ed.chapter.atlas.title)} — {ed.chapter.route.label}</Text>
                 <Text fontSize="sm" color={C.ink} fontWeight="700" mt="1" mb="3">

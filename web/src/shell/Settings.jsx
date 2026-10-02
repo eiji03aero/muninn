@@ -5,6 +5,7 @@
 // ここが塞がると「面を試したら二度と元に戻せない」が普通に起きる。
 import { FACES, loadUsage } from './face.js';
 import { recallLog } from '../lib/recall.js';
+import { forceReload } from './reload.js';
 
 // 3面並行は実験。始め方より終わらせ方を先に決めておかないと、ただの負債になる。
 const TRIAL_FROM = '2026-08-01';
@@ -63,6 +64,13 @@ export function Settings({ faceId, onPick, onClose }) {
             どれに切り替えても積み上げは失われない。
           </p>
         </div>
+
+        {/* どの面からも来られる場所に置く。面ごとに置き場所を変えると、
+            「最新が出ない」ときに探し回ることになる。 */}
+        <div className="sh-slot">アプリ</div>
+        <button type="button" className="sh-subtle sh-wide" onClick={forceReload}>
+          最新の版を読み込み直す
+        </button>
       </div>
     </div>
   );
