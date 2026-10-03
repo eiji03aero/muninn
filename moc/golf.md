@@ -90,6 +90,7 @@ tags: [moc]
 - [[golf-driver-distance-is-ballspeed-smash-is-free-but-capped-300-needs-speed]] — 原則。飛距離＝HS×ミート率。芯化はタダの距離だが上限~1.5、大幅増はHS向上
 - [[golf-shaft-bends-multi-plane-but-dont-swing-to-it-fitting-handles-it]] — シャフトのしなりは多面的（前後＋トウダウン＋ねじれ）だが、方向はスイングで考えずフィッティングで処理
 - [[golf-driver-fitting-too-long-hurts-smash-draw-bias-and-upright-lie-push-face-left]] — 機材とミス傾向。長すぎ＝smash低下／ドローバイアス・アップライトは左ミス助長／ドライバーのライは影響小
+- [[golf-cg-angle-and-cg-distance-govern-face-closing-depth-raises-launch-and-moi]] — 原理。つかまりはヘッド重心の位置（重心角＝閉じる量／重心距離＝返しやすさ／重心深度＝打ち出し・MOI）。軽いほど手の操作が勝つ。トウに鉛＝閉じにくく＋重く
 - [[golf-taylormade-adjustable-hosel-loft-and-face-are-coupled-lower-opens-face-fade-higher-closes-draw]] — 可変ホーゼルはロフト×フェース連動。LOWER=開く/フェード、HIGHER=閉じる/ドロー。1メモリ0.75°/1.5°
 - [[golf-driver-loft-choice-set-by-aoa-and-spin-not-speed-9-vs-10-5]] — ロフト選択はAoA＋スピンで（速度でない）。9°は速い＋アッパー＋スピン過多向け、10.5°+は逆
 - [[golf-driver-vertical-gear-effect-high-face-high-launch-low-spin]] — 縦ギア効果。上側ヒット＝高打ち出し・低スピン。打点を中心に寄せるとスピンもミートも上がる

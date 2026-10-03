@@ -20,3 +20,4 @@ tags: [sports/golf]
 ## Links
 - [[golf-club-length-gradient-longer-shallower-flatter-ball-forward]] — ハイブリッドはドライバーと5Iの中間。地面からはボールファーストの原則
 - [[golf-my-3-iron-swing-like-driver-body-led-shallow-but-ball-first]] — 3IをUT化した経緯。同じ「体主導・広く浅く・ボールファースト」
+- [[golf-cg-angle-and-cg-distance-govern-face-closing-depth-raises-launch-and-moi]] — この3Uで「フェースが閉じる方に力が働きまくる」と感じる原因（重心角・重心距離＋軽量）。トウ側の鉛が対策

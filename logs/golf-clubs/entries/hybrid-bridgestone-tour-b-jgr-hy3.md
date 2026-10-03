@@ -50,6 +50,7 @@ fields:
 **次に確かめる観点**：まず**シャフトのスペック**（刻印を見る）。JGR HY の純正はカーボンで、フレックスによって振り感がかなり変わる。次に**同条件で5球打って距離の散らばりを見る**——180〜200の20yが、打点のバラつきなのか、意図的な打ち分けなのかで対処がまったく違う。
 
 ## Links
+- [[golf-cg-angle-and-cg-distance-govern-face-closing-depth-raises-launch-and-moi]] — 「閉じる方に力が働きまくる」の正体（重心角・重心距離・重心深度＋軽量の掛け算）
 - [[golf-my-3u-hybrid-address-ball-forward-of-center-ball-first-sole-flat]] — この3Uのアドレス基本（ボール位置・最下点・ソールを平らに）
 - [[golf-my-3-iron-swing-like-driver-body-led-shallow-but-ball-first]] — 3IをUT化した経緯と、長い番手のスイングイメージ
 - [[golf-club-length-gradient-longer-shallower-flatter-ball-forward]] — 「払う」と「すくう」は別物。地面からはどの番手もボールファースト
