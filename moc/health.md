@@ -30,6 +30,7 @@ tags: [moc]
 - [[collagen-is-the-dermis-scaffold-protein-made-by-fibroblasts]] — コラーゲンとは何か（真皮の足場・線維芽細胞・ビタミンC）
 - [[retinoids-work-as-a-gene-switch-building-collagen-and-blocking-mmp]] — レチノイドの機序（遺伝子スイッチ／作る＋守る）
 - [[pore-visibility-differs-by-facial-zone-sebum-density-anchoring-mobility]] — 毛穴の目立ちは部位で違う（皮脂腺密度・骨への固定・可動性・たるみ集中帯）
+- [[post-bath-is-the-best-moisturizing-window-but-only-within-3-minutes]] — 入浴直後は保湿の最良窓だが3分以内が条件、レチノールだけ時間をずらす
 - [[my-skincare-pore-plan-keep-sunscreen-niacinamide-add-retinol]] — 私の毛穴ケア方針（現行の評価と次の一手）
 - [[skincare-pores/profile|スキンケア（毛穴を目立たなくする）]] `[follow/goal]` — 毛穴ケアを定点観測するフォロー（`follows/skincare-pores/`）
 
