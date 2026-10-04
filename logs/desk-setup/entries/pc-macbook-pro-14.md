@@ -13,7 +13,7 @@ fields:
   in_use: true
 ---
 
-仕事のメイン機。3画面構成の右側に、スタンドで少し持ち上げて置いている。2026-08-15 の時点では**正中線上の主画面**だったが、BenQ を足したことで右に移った。
+仕事のメイン機。3画面構成の右側に、スタンドで少し持ち上げて置いている。
 
 ## 解説
 
@@ -33,4 +33,3 @@ fields:
 
 ## Links
 - [[laptop-couples-screen-and-keyboard-so-only-one-can-be-correct]] — スタンド＋外付けキーボードで剛結を外している理由
-- [[my-desk-lap-keyboard-frees-the-screen-height-constraint]] — 2026-08 時点の、MBP を主画面にした配置の検討

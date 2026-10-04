@@ -5,6 +5,8 @@ kind: insight
 tags: [ergonomics/workspace]
 ---
 
+（**これはサブの作業場所の構成**。自宅のメインデスクは [[desk-setup]] に別途記録している）
+
 実機構成は **MacBook Pro 14 ＋ JAPANNEXT 14インチ（FHD級）を昇降デスクに載せ、キーボードとトラックパッドは分離して Yogibo の作業板に載せ、膝の上**。
 
 ## キーボードを膝に移すと、高さの連立方程式が解ける

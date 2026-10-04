@@ -12,7 +12,7 @@ fields:
   in_use: true
 ---
 
-左側の縦2段の**下段**。2026-08-15 の時点ではMBPの隣にサブとして置いていたもの。
+左側の縦2段の**下段**。
 
 ## 解説
 
@@ -28,5 +28,4 @@ fields:
 - macOS 側の表示スケール（文字が寄らずに読める大きさか）
 
 ## Links
-- [[my-desk-lap-keyboard-frees-the-screen-height-constraint]] — 2026-08 時点でサブとして置いていたときの配置検討
 - [[comfortable-gaze-zone-is-15-to-30-degrees-below-horizontal]] — 下段が見やすい位置に来やすい理由
