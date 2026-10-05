@@ -111,3 +111,7 @@ tags: [moc]
 - [[putting-distance-control-is-the-priority-three-putts-are-distance-errors]] — 優先順位。方向より距離感が最重要（スリーパットの主因は距離ミス）
 - [[putting-aim-at-virtual-cup-and-stroke-straight]] — ライン取り。仮想カップにまっすぐ打ち出し、読みと打ちを分離する
 - [[golf-my-putter-arrowtube-rf-is-toe-hang-use-slight-arc]] — 実物のパター（Arrowtube RF）はトウハング＝ゆるいアークで振る（フェース回転を許す）
+
+## スコアとラウンド統計の読み方
+
+- [[golf-par-is-to-green-plus-two-putts-so-read-total-putts-against-36-not-as-lower-is-better]] — パー＝グリーンまで＋2パット。Par72は「36＋36」。総パット数は36基準で、必ずパーオン率とセットで読む（外すほどパットは減る）
