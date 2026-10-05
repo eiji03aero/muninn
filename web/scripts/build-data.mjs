@@ -165,6 +165,10 @@ const follows = (existsSync(followsDir) ? readdirSync(followsDir, { withFileType
           slug: slugOf(sp), date: d, title: d, body,
           summary: data.summary || null,
           metrics: data.metrics || null,
+          // 観測条件のラベル（任意）。定点の核は「同条件で観て前回と比べる」ことなので、
+          // 条件が変わると前回比が意味を失う（ゴルフならコースが違えば難易度が違う）。
+          // 本文に書くだけだと機械が読めず、推移を条件ごとに割れない。
+          condition: typeof data.condition === 'string' && data.condition.trim() ? data.condition.trim() : null,
           links: wikiTargets(body),
         };
       })
@@ -182,8 +186,10 @@ const follows = (existsSync(followsDir) ? readdirSync(followsDir, { withFileType
         // up=大きいほど良い / down=小さいほど良い / null=中立（良し悪しを判定しない）。
         // 宣言のない指標を勝手に「大きいほうが良い」と扱うと、悪化を自己ベストと表示してしまう。
         goal: goals[key] === 'up' || goals[key] === 'down' ? goals[key] : null,
+        // condition を点に持たせる。割るかどうかは面ではなく lib/series.js が決める
+        // （面ごとに割り方が違うと、同じ数字が面によって別の推移に見える＝原則12）。
         points: withM
-          .map((s) => ({ date: s.date, value: s.metrics[key] }))
+          .map((s) => ({ date: s.date, value: s.metrics[key], condition: s.condition || null }))
           .filter((p) => typeof p.value === 'number'),
       })).filter((s) => s.points.length > 0);
     })();

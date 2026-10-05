@@ -156,6 +156,8 @@ srs:
   - `profile.md` — 目的・前提・現状（基準値/スナップショット）・重点/見どころ・**変遷タイムライン**。frontmatter は `kind: follow` ＋ `follow_type`（`srs` は付けない＝クイズ対象外）。`templates/follow-profile.md` に従う。
   - `entities/<name>.md` — 任意。人物・構成要素の**ドシエ**（`kind: entity`、時系列で変化）。役割・強み・強化中の点・changelog・参考クリップ。`templates/follow-entity.md` に従う。
   - `sessions/YYYY-MM-DD.md` — 各回の観測（データ＋所見＋前回からの変化＋アドバイス/深掘り＋次回チェック）。`templates/follow-session.md` に従う。収集ダイジェストは `sessions/YYYY-MM-DD-collect.md`。
+    - `metrics`（任意）— 推移グラフの材料。`指標名: 数値`。
+    - `condition`（任意）— **観測条件のラベル**（例: コース名 `ピンクス EAST+NORTH`）。定点の核は「同条件で観て前回と比べる」ことなので、**比較の土台が複数あるフォローでは必ず立てる**（条件が違う観測を1本の推移に混ぜると、線が描くのは本人の変化ではなく条件の違いになる）。サイトは `condition` が2種類以上あるとき推移を条件ごとに割って描き、1種類／未宣言なら従来どおり1本にする。
   - `collect.md` — 収集スペック（`kind: collect`）。何を・誰を（watchlist / deep_dive）・どれくらい追うか。`/mn-collect` が読む。`templates/collect.md` に従う（任意）。
   - **写真・動画はリポジトリに保存・コミットしない**。vision で内容を読み取るだけにとどめ、読み取った計測値・所見を `sessions/`（や entity の changelog）にテキストで書き出す。
 - **定点観測の核は「同条件で観て前回と比べる」こと**。固定パラメータは profile に書き、条件が変わったらセッションに明記する。

@@ -110,3 +110,48 @@ export function countText(item) {
   if (item.kind === 'log') return `記録 ${item.total}件`;
   return `観測 ${item.total}回`;
 }
+
+// ---- 観測条件で推移を割る ----
+//
+// 定点観測の核は「**同条件で**観て前回と比べる」こと（CLAUDE.md）。だから条件が違う観測を
+// 1本の折れ線に混ぜると、線が描いているのは本人の変化ではなく**条件の違い**になる。
+// ゴルフのスコアが分かりやすい例で、やさしいコースと難しいコースの 102 → 110 は悪化ではない。
+// これは原則9（数字に嘘をつかせない）の、指標の向きではなく**比較の土台**の側の話。
+//
+// 条件は正本の session frontmatter `condition:`（任意）で宣言する。**宣言が無ければ従来どおり1本**
+// ——既存の定点を黙って割らないため、そして「条件を立てる価値があるか」は正本側の判断だから。
+//
+// 戻り値: [{ condition, series: [{key, goal, points}], latest }]（新しい観測を持つ条件が先）
+export function splitSeriesByCondition(follow) {
+  const all = follow?.series || [];
+  const whole = [{ condition: null, series: all, latest: null }];
+  if (!all.length) return whole;
+
+  const conds = new Set();
+  for (const s of all) for (const p of s.points) if (p.condition) conds.add(p.condition);
+  // 条件が1種類しかないなら割る意味がない（割ると見出しだけ増えて情報が増えない）。
+  if (conds.size < 2) return whole;
+
+  const buckets = new Map(); // condition(null可) -> series[]
+  for (const s of all) {
+    for (const p of s.points) {
+      const k = p.condition || null;
+      if (!buckets.has(k)) buckets.set(k, new Map());
+      const bs = buckets.get(k);
+      if (!bs.has(s.key)) bs.set(s.key, { key: s.key, goal: s.goal, points: [] });
+      bs.get(s.key).points.push(p);
+    }
+  }
+
+  return [...buckets.entries()]
+    .map(([condition, bs]) => {
+      const series = [...bs.values()];
+      const latest = series.flatMap((s) => s.points.map((p) => p.date)).sort().pop() || null;
+      return { condition, series, latest };
+    })
+    // 直近に観測した条件を先頭に。いま比べたいのはたいてい「この前やったやつ」。
+    .sort((a, b) => (a.latest === b.latest ? 0 : (a.latest || '') < (b.latest || '') ? 1 : -1));
+}
+
+// 条件の見出しに出す語。未宣言の観測が混ざったときに無言で消さない。
+export const conditionLabel = (c) => c || '条件の記録なし';

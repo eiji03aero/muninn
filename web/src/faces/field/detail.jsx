@@ -10,6 +10,7 @@ import { resolveTarget } from '../../lib/wiki.js';
 import { linksWithReason, tagLabel, typeLabel } from '../../lib/graph.js';
 import { relDay } from '../../shared/util.js';
 import { bodyForReading } from './items.js';
+import { splitSeriesByCondition, conditionLabel } from '../../lib/series.js';
 
 const EDGE_LABEL = {
   requires: '前提', contrasts: '対比', leadsTo: '発展', elaborates: '深掘り',
@@ -94,7 +95,12 @@ function Follow({ node }) {
       {(f.snapshot || []).length > 0 && (
         <ul className="fd-list">{f.snapshot.map((s) => <li key={s}>{s}</li>)}</ul>
       )}
-      {(f.series || []).map((s) => <Metric key={s.key} s={s} />)}
+      {splitSeriesByCondition(f).map((g, i, all) => (
+        <div key={g.condition || '—'}>
+          {all.length > 1 && <p className="fd-lede"><b>{conditionLabel(g.condition)}</b></p>}
+          {g.series.map((s) => <Metric key={s.key} s={s} />)}
+        </div>
+      ))}
       {(f.focus || []).length > 0 && (
         <>
           <p className="fd-lede"><b>いま見ているところ</b></p>

@@ -9,6 +9,7 @@ import {
   catCount, catOf, catRoutes, CATS,
   itemKey, kindOf, plain, previewOf, shelfBars, tagJa, wikiToPlainText,
 } from './model.js';
+import { splitSeriesByCondition, conditionLabel } from '../../lib/series.js';
 
 const HUD = '#ffc46b';
 const PATHC = '#7fd1e8';
@@ -434,10 +435,11 @@ function FollowView({ ctx, node, item, items }) {
           <ul className="tb-ul">{f.snapshot.map((x) => <li key={x}>{x}</li>)}</ul>
         </div>
       )}
-      {f.series?.length > 0 && (
-        <div className="tb-grp"><Kick note="良し悪しの向きは記録側の設定に従います">数字</Kick>
+      {f.series?.length > 0 && splitSeriesByCondition(f).map((g, _i, all) => (
+        <div className="tb-grp" key={g.condition || '—'}>
+          <Kick note={all.length > 1 ? conditionLabel(g.condition) : '良し悪しの向きは記録側の設定に従います'}>数字</Kick>
           <div className="tb-mets">
-            {f.series.map((s) => {
+            {g.series.map((s) => {
               const last = s.points[s.points.length - 1];
               const prev = s.points[s.points.length - 2];
               const d = prev ? Math.round((last.value - prev.value) * 100) / 100 : null;
@@ -455,7 +457,7 @@ function FollowView({ ctx, node, item, items }) {
             })}
           </div>
         </div>
-      )}
+      ))}
       {f.focus?.length > 0 && (
         <div className="tb-grp"><Kick>重点</Kick>
           <Rows>{f.focus.map((x) => (

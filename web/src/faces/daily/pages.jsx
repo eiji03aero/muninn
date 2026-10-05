@@ -11,6 +11,7 @@ import {
   effectiveSrs, recordVerdict, markSeen, todayISO, daysBetween, effectiveNext,
 } from '../../lib/recall.js';
 import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
+import { splitSeriesByCondition, conditionLabel } from '../../lib/series.js';
 
 const clipHref = (c) => (c.url ? c.url : `https://www.youtube.com/results?search_query=${encodeURIComponent(c.query || c.title || '')}`);
 const statusColor = (s) => (s === 'injured' ? C.pink : s === 'inactive' ? C.faint : C.green);
@@ -127,7 +128,24 @@ export function Note() {
 }
 
 // ---------------- 定点 ----------------
+// 観測条件（コースなど）が2種類以上あるときは、条件ごとに区切って出す。1本に混ぜない
+// ——混ぜた折れ線は本人の変化ではなく条件の違いを描いてしまう（lib/series.js の注を参照）。
 function SeriesBlock({ follow }) {
+  const groups = splitSeriesByCondition(follow);
+
+  if (groups.length > 1) {
+    return (
+      <VStack align="stretch" gap="6">
+        {groups.map((g) => (
+          <Box key={g.condition || '—'}>
+            <Slot>{conditionLabel(g.condition)}</Slot>
+            <MetricCards series={g.series} />
+          </Box>
+        ))}
+      </VStack>
+    );
+  }
+
   const usable = (follow.series || []).filter((s) => s.points.length >= 2);
   const single = (follow.series || []).filter((s) => s.points.length === 1);
 
@@ -147,6 +165,15 @@ function SeriesBlock({ follow }) {
     );
   }
 
+  return <MetricCards series={follow.series} />;
+}
+
+// 推移カードの中身。条件で割ったときは「この条件ではまだ1回」も起きるので、
+// 1点しかない指標は線を描かず値だけ出す（線が無いのは観測不足であって、不具合ではない）。
+function MetricCards({ series }) {
+  const usable = (series || []).filter((s) => s.points.length >= 2);
+  const single = (series || []).filter((s) => s.points.length === 1);
+
   return (
     <VStack align="stretch" gap="4">
       {usable.map((s) => (
@@ -162,6 +189,19 @@ function SeriesBlock({ follow }) {
           </HStack>
         </Card>
       ))}
+      {single.length > 0 && (
+        <Card soft>
+          <Text fontSize="11px" color={C.muted} mb="2">まだ1回（推移はもう1回から）</Text>
+          <VStack align="stretch" gap="1">
+            {single.map((s) => (
+              <HStack key={s.key} justify="space-between">
+                <Text fontSize="xs" color={C.muted}>{s.key}</Text>
+                <Text fontSize="sm" color={C.ink} fontWeight="700">{s.points[0].value}</Text>
+              </HStack>
+            ))}
+          </VStack>
+        </Card>
+      )}
     </VStack>
   );
 }
