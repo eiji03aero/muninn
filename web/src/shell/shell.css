@@ -207,3 +207,54 @@
 .mn-shell .sh-note strong { color: var(--sh-ink); font-weight: 700; }
 .mn-shell .sh-note p { margin: 0 0 .5rem; }
 .mn-shell .sh-note p:last-child { margin-bottom: 0; }
+
+/* ---- 新しい版の知らせ（UpdateBar） ----
+   面の上に重ねる1行。面ごとに置き場所を変えない——「最新が出ない」と思ったときに
+   探し回らせないのが目的なので、どの面でも同じ場所（画面の最上端）に出す。
+   出るのは waiting の Service Worker が居るときだけで、ふだんは DOM ごと存在しない。 */
+.mn-shell.mn-update {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .5rem .75rem;
+  padding-top: calc(.5rem + env(safe-area-inset-top));
+  background: rgba(14, 16, 32, .94);
+  backdrop-filter: saturate(140%) blur(10px);
+  -webkit-backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--sh-line);
+}
+.mn-shell .mn-update-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: .8125rem;
+  color: var(--sh-ink);
+  font-weight: 600;
+}
+.mn-shell .mn-update-go {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: .25rem .7rem;
+  font-size: .8125rem;
+  font-weight: 700;
+  color: var(--sh-sky);
+  background: rgba(110, 193, 255, .14);
+  border: 1px solid rgba(110, 193, 255, .34);
+  border-radius: 10px;
+  cursor: pointer;
+}
+.mn-shell .mn-update-go:disabled { opacity: .6; }
+.mn-shell .mn-update-x {
+  flex: 0 0 auto;
+  min-width: 34px;
+  min-height: 34px;
+  font-size: .75rem;
+  color: var(--sh-faint);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}

@@ -20,6 +20,7 @@ import { faceById, loadFaceId, saveFaceId, touchFace } from './shell/face.js';
 import { currentPath, setPath, parseTarget, SETTINGS_PATH } from './shell/hash.js';
 import { Settings } from './shell/Settings.jsx';
 import { clearReloadGuard, FaceBoundary, LockGate, ShellLoading, ShellError } from './shell/Gate.jsx';
+import { UpdateBar } from './shell/UpdateBar.jsx';
 import './shell/shell.css';
 
 export default function App() {
@@ -148,27 +149,36 @@ export default function App() {
     [face, openSettings, initialTarget],
   );
 
-  if (state.status === 'loading') return <ShellLoading />;
+  // 新しい版が配られたら1行で知らせる。押すのは読者（原則18）。
+  // **解錠前・失敗画面でも出す**——古い版のまま詰まっている可能性があるのはむしろそちらで、
+  // ここで出さないと「開けないときに最新へ更新する」手段が設定画面の奥にしか無くなる。
+  const bar = <UpdateBar />;
+
+  if (state.status === 'loading') return <>{bar}<ShellLoading /></>;
   if (state.status === 'locked') {
     return (
-      <LockGate
-        lock={state.lock}
-        error={state.error}
-        // WebAuthn は「中断した」と「この端末に鍵が無い」を区別できない（プライバシー上わざと同じ
-        // NotAllowedError にしている）。無言で戻すと壊れて見えるので、両方を含む言い方で伝える。
-        onPasskey={() => unlock(
-          (l) => unlockWithPasskey(l),
-          '鍵を取り出せなかったのだ',
-          '開けなかった。中断したか、この端末がまだ登録されていない',
-        )}
-        onPassword={(pw) => unlock((l) => unlockWithPassword(l, pw), 'パスワードが違うのだ')}
-      />
+      <>
+        {bar}
+        <LockGate
+          lock={state.lock}
+          error={state.error}
+          // WebAuthn は「中断した」と「この端末に鍵が無い」を区別できない（プライバシー上わざと同じ
+          // NotAllowedError にしている）。無言で戻すと壊れて見えるので、両方を含む言い方で伝える。
+          onPasskey={() => unlock(
+            (l) => unlockWithPasskey(l),
+            '鍵を取り出せなかったのだ',
+            '開けなかった。中断したか、この端末がまだ登録されていない',
+          )}
+          onPassword={(pw) => unlock((l) => unlockWithPassword(l, pw), 'パスワードが違うのだ')}
+        />
+      </>
     );
   }
-  if (state.status === 'error') return <ShellError message={state.error} />;
+  if (state.status === 'error') return <>{bar}<ShellError message={state.error} /></>;
 
   return (
     <DataCtx.Provider value={data}>
+      {bar}
       <ShellCtx.Provider value={shell}>
         {inSettings ? (
           <Settings faceId={faceId} onPick={pickFace} onClose={() => closeSettings()} />
