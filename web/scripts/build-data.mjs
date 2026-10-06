@@ -10,7 +10,7 @@
 //        あわせて web/keyslots.json（鍵スロットの正本）を public/ へ複写する。
 //
 // 依存: gray-matter（frontmatterのYAML解析）。Node標準の crypto で暗号化。
-import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, copyFileSync, statSync } from 'node:fs';
 import { join, dirname, basename, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { pbkdf2Sync, randomBytes, createCipheriv } from 'node:crypto';
@@ -508,6 +508,15 @@ if (password) {
   };
   writeFileSync(join(OUT, 'site.enc.json'), JSON.stringify(payload));
   console.log(`🔒 site.enc.json を出力（暗号化 / 鍵スロット ${keyslots?.slots?.length ?? 0}）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length} / pieces ${writings.pieces.length}`);
+  // サイズを必ず出す。2026-10-03、蓄積が増えて 2MiB（workbox の既定上限）を踏み、
+  // Pages のデプロイが6回連続で失敗していたのに気づかなかった——push は通り、
+  // サイトだけが古いまま、という黙り方をするため。数字が毎回ログに出ていれば気づける。
+  const encBytes = statSync(join(OUT, 'site.enc.json')).size;
+  const capBytes = 16 * 1024 * 1024; // vite.config.js の maximumFileSizeToCacheInBytes と揃える
+  console.log(`   サイズ ${(encBytes / 1024 / 1024).toFixed(2)} MiB（precache 上限 ${capBytes / 1024 / 1024} MiB）`);
+  if (encBytes > capBytes * 0.8) {
+    console.warn(`⚠️  precache 上限の80%を超えた。vite.config.js の maximumFileSizeToCacheInBytes を引き上げるか、precache の方針を見直すこと（超えるとビルドが落ちる）`);
+  }
 } else {
   writeFileSync(join(OUT, 'site.json'), json);
   console.log(`📄 site.json を出力（平文/dev）。follows ${follows.length} / notes ${notes.length} / mocs ${mocs.length} / atlases ${atlases.length} / logs ${logtopics.length} / pieces ${writings.pieces.length}`);

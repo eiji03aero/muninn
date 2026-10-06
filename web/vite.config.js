@@ -35,7 +35,21 @@ export default defineConfig({
           { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: { globPatterns: ['**/*.{js,css,html,svg,png,json}'] },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,png,json}'],
+        // **正本まるごと（site.enc.json）を precache する**のがこのサイトの前提。
+        // 読む面なので、開いた瞬間に全部読める／圏外でも読めることの価値が大きく、
+        // しかもコード（チャンク）とデータを**同じ版として一緒に差し替えられる**
+        // ——`registerType: 'prompt'` で足元を掘らない（原則18）ためには、
+        // データだけが先に新しくなる状態を作らないほうが安全。
+        //
+        // ところが workbox の既定は 1ファイル 2MiB までで、**超えると警告ではなくビルドが落ちる**。
+        // 2026-10-03、蓄積が増えて site.enc.json が 2.1MiB を踏み、
+        // **Pages のデプロイが6回連続で失敗していたのに誰も気づかなかった**
+        // （push は通る／サイトは古いまま、という最悪の黙り方をする）。
+        // 蓄積は増え続けるので、上限は「次に踏むのが当分先」の値まで引き上げておく。
+        maximumFileSizeToCacheInBytes: 16 * 1024 * 1024,
+      },
     }),
   ],
 });
