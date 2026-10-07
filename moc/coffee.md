@@ -46,6 +46,8 @@ tags: [moc]
 - [[koku-is-an-ambiguous-word-covering-body-strength-finish-and-complexity]] — 「コク」は4つの別物の総称。記録では使わず、ボディ／濃さ／余韻に分けて書く
 - [[coffee-body-is-a-tactile-sensation-made-by-insoluble-oils-and-fine-particles]] — ボディの正体は溶けていないもの（油分・微粉・高分子）が作る触覚
 - [[french-press-metal-mesh-passes-oils-and-fines-so-it-needs-a-coarse-grind]] — 器具の差はフィルターが何を通すかの差。プレスはボディ、ペーパーはクリア
+- [[brewing-unevenness-comes-from-flow-in-percolation-and-from-grind-spread-in-immersion]] — 器具の差のもう半分。不均一の原因が違うので、対策を取り違えると直らない
+- [[fines-over-extract-because-of-their-surface-area-so-removing-them-removes-astringency]] — 渋みの主犯は微粉。取り除くと渋みだけ落ちるが、ボディも一緒に痩せる
 - [[grind-size-has-to-match-the-contact-time-of-the-brewing-method]] — 挽き目と器具はセット。粗挽きを短時間のドリップに流用すると素通りする
 - [[coffee-extracts-acids-first-then-sweetness-then-bitterness]] — 酸→甘み→苦味の順に出る。抽出不足は酸っぱく、過抽出は渋い
 - [[coffee-extraction-yield-caps-near-30-percent-and-tastes-best-at-18-to-22]] — 溶けるのは約30%まで、うまいのは18〜22%。「2割」は限界ではなく最適点
