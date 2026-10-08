@@ -28,6 +28,7 @@ muninn の入口。テーマごとのMOCはここから辿る。
 ## 未分類
 
 - [[zettelkasten-one-note-one-idea]] — このナレッジベースの基本原則
+- [[a-corrected-note-is-not-a-corrected-habit-verify-the-image-not-the-record]] — 運用の穴。ノートを訂正しても身体の像は訂正されない。症状が続くときは訂正済みの項目を先に洗う
 - [[cliche-overused-not-necessarily-old]] — クリシェの意味（使い古されて陳腐が核）
 - [[claude-fable-5-costs-double-opus-5-per-token]] — Fable 5 と Opus 5 の単価差（総額は別）
 - [[llm-comparison-forgotten-criteria-flip-the-verdict]] — モデル比較の設計上の落とし穴
