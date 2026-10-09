@@ -15,6 +15,7 @@ tags: [moc]
 - [[mocha-is-a-yemeni-port-name-that-now-labels-yemeni-and-ethiopian-coffee]] — 「モカ」は産地ではなく港の名前。指すのはイエメン・エチオピア産と果実味のある酸
 - [[brazil-coffee-is-the-nutty-low-acid-base-that-most-blends-are-built-on]] — ブラジルはナッツ・チョコ系の「土台の豆」。ブレンドの地の部分を担う
 - [[uganda-is-the-native-home-of-robusta-but-its-specialty-coffee-is-highland-arabica]] — 同じ国名が安いロブスタにも高級アラビカにもなる。国名だけでは味は決まらない
+- [[peru-coffee-is-smallholder-organic-with-mild-rounded-chocolate-and-nut-flavors]] — ペルーは小規模農家の有機栽培。酸が丸いので深煎りの土台に向く
 - [[brazil-abic-grades-tradicional-superior-gourmet-are-printed-on-the-bag]] — 袋の Tradicional / Gourmet は商品名ではなく品質等級。欠点豆とロブスタの許容が違う
 - [[coffee-bag-origin-list-is-ordered-by-blend-ratio]] — 生豆生産国名は配合比率の多い順。先頭に書かれた国がその袋の主役
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 焙煎後の劣化。脂質酸化とCO2抜けで平坦・紙っぽくなる。飲み頃は焙煎後7〜21日
@@ -37,6 +38,7 @@ tags: [moc]
 - [[iridescent-bubbles-on-spent-grounds-are-thin-film-interference-from-coffee-oil]] — 虹色の泡は油分の薄膜干渉。泡の「量」より鮮度の手がかりになる
 
 - [[coffee-aroma-is-weak-when-cold-because-volatiles-need-heat]] — 冷やすと香りが立たないのは物理。豆の香りを評価するならホットで
+- [[orthonasal-and-retronasal-aroma-are-different-routes-and-can-disagree]] — 立ち上がり香と口中香は別経路。「淹れて香らない＝香りのない豆」ではない
 - [[ice-cooling-roughly-halves-iced-coffee-concentration]] — 氷で冷やすと濃度はほぼ半分。急冷式が「倍の濃さ」で淹れる理由
 - [[coffee-strength-is-the-dose-ratio-while-extraction-yield-is-grind-temperature-and-time]] — 「薄い」は比率、「渋い」は抽出率。混同すると対処を間違える
 - [[coffee-reveals-acidity-and-sweetness-as-it-cools]] — 冷める過程で酸味と甘さが立つ。一杯を一度に判定しない
