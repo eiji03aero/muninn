@@ -19,5 +19,10 @@ srs:
 
 **より確実なのは「アラビカ◯%使用」表記**。これは裏を返せば**残りがロブスタだという開示**で、「アラビカ豆75%使用」なら25%がロブスタということ。産地名から推測するより直接的なので、この表記があれば比率まで読める。同じ産地構成でも、比率を明示するメーカーとしないメーカーがある。
 
+ただしここで書いた「評価が高くない」は**市場での扱われ方**の話であって、**種の限界ではない**（→ Links）。
+
 ## Links
+- [[robusta-quality-is-a-matter-of-care-not-of-species]] — 上の但し書きの中身。品質差の多くは種ではなく手間の差で、ファインロブスタがその証拠
+- [[commercial-coffee-is-two-species-and-robusta-is-a-cultivar-group-not-a-species]] — 「ロブスタ種」は厳密には誤りで、カネフォラ種の品種群の呼び名
+- [[species-sets-the-ceiling-and-floor-while-roast-level-decides-where-you-stand]] — 種が味のどこを決めてどこを決めないか（酸味は焙煎度が支配する）
 - [[after-mix-blending-roasts-each-bean-separately-so-one-origin-can-appear-at-two-roast-levels]] — ブレンドの設計をラベルから読むもう一つの手がかり（焙煎度の内訳）

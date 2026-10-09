@@ -8,6 +8,10 @@ tags: [moc]
 
 ## 味が決まる要因
 
+- [[commercial-coffee-is-two-species-and-robusta-is-a-cultivar-group-not-a-species]] — 属130種以上／商業は2種／「ロブスタ」は品種群の呼び名。分類の土台
+- [[species-sets-the-ceiling-and-floor-while-roast-level-decides-where-you-stand]] — 種は天井と床、焙煎度が位置を決める。酸味は種では決まらない
+- [[robusta-quality-is-a-matter-of-care-not-of-species]] — 「ロブスタ＝低品質」は誤り。雑に作られがちだっただけ
+
 - [[natural-process-brings-sweetness-body-and-fruit-versus-clean-washed]] — 精製は味の方向を選ぶスイッチ。ナチュラル＝甘み・ボディ・果実感／ウォッシュト＝クリーンな酸
 - [[natural-process-in-humid-climates-risks-musty-earthy-defects]] — その裏側。精製の向き不向きは産地の気候で決まり、雨の多い土地のナチュラルはカビ由来の土っぽさが出やすい
 - [[after-mix-blending-roasts-each-bean-separately-so-one-origin-can-appear-at-two-roast-levels]] — ブレンドの配合表は味の設計図。焙煎度の内訳から苦味と酸味の配分が読める（＝UCCの「単品焙煎」）
