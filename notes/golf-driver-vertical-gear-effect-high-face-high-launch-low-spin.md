@@ -23,6 +23,7 @@ srs:
 - **注意**: スピン欲しさに**ハンドファースト（シャフトを立てる）で増やそうとしない**——ロフトが減って打ち出しもスピンも落ちる。クリーンなスピン調整はロフト（機材）と打点で。
 
 ## Links
+- [[golf-launch-and-spin-together-diagnose-attack-angle-strike-height-and-deloft]] — このノートは「高打ち出し＋低スピン」の2つの原因のうち片方。表の全体と、アッパーとの切り分け方はこちら
 - [[golf-driver-distance-is-ballspeed-smash-is-free-but-capped-300-needs-speed]] — 芯（smash）が距離の要。中心ヒットがスピンもsmashも上げる
 - [[golf-my-swing-low-spin-loft-optimize-with-loft-and-vertical-strike]] — 「縦の打点」で最適化、という自分の低スピン体質の対応
 - [[golf-driver-address-no-shaft-lean-neutral-hands-for-upward-strike]] — スピン欲しさにシャフトを立てない（ドライバーはリーン不要）の根拠

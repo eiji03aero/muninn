@@ -36,6 +36,7 @@ tags: [moc]
 
 - [[golf-iron-downblow-preset-impact-then-swing-drill]] — インパクトの形を先に作ってから振るプリセット・ドリル（＋ポンプ）。前に乗って覆ってダウンに打つ
 - [[golf-downblow-spin-loft-face-compresses-ball-not-scoop]] — 原理。すくわず、スピンロフトで面を擦り上げてバックスピン。ロフトより低く斜め上へ
+- [[golf-launch-and-spin-together-diagnose-attack-angle-strike-height-and-deloft]] — 診断。打ち出しとスピンを並べると入射角・縦の打点・デロフトが切り分けられる（2×2）。高打ち出し＋低スピンはアッパーか上側ヒットで、判定器はミート率とばらつき
 - [[golf-club-length-gradient-longer-shallower-flatter-ball-forward]] — 番手のグラデーション。長い番手ほど浅く/広く/ボール前（払う）。地面からは全番手ボールファースト
 - [[golf-iron-number-does-not-mean-loft-two-club-gap-between-eras]] — 番手の数字はロフトではない。世代・カテゴリで2番手ずれる（旧ブレード5番≒現代ディスタンス系7番）。立てられたのは低深重心とセットだから
 - [[golf-my-3-iron-swing-like-driver-body-led-shallow-but-ball-first]] — 3番はドライバー寄りのイメージ（体主導・広く浅く）でミートしやすい

@@ -24,6 +24,7 @@ srs:
 **ドライバーと同じ"スピンロフト"の枠**で説明できる: ドライバー＝アッパー＋**低スピンロフト**（高launch・低spin）／アイアン＝ダウン＋**大きめスピンロフト**（バックスピン・コントロール）。設定が逆なだけ。
 
 ## Links
+- [[golf-launch-and-spin-together-diagnose-attack-angle-strike-height-and-deloft]] — このスピンロフトの式を診断に使う形（打ち出し×スピンの2×2）
 - [[golf-iron-downblow-preset-impact-then-swing-drill]] — この物理を体で作るドリル（前に乗ってダウンに打つ）
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — ハンドファースト＝デロフトの構え。ダイナミックロフトを立てる側
 - [[golf-my-swing-low-spin-loft-optimize-with-loft-and-vertical-strike]] — ドライバー側のスピンロフト（低スピンロフト体質）。同じ枠の対比
