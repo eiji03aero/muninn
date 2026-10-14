@@ -55,6 +55,9 @@ tags: [moc]
 - [[brewing-unevenness-comes-from-flow-in-percolation-and-from-grind-spread-in-immersion]] — 器具の差のもう半分。不均一の原因が違うので、対策を取り違えると直らない
 - [[fines-over-extract-because-of-their-surface-area-so-removing-them-removes-astringency]] — 渋みの主犯は微粉。取り除くと渋みだけ落ちるが、ボディも一緒に痩せる
 - [[grind-size-has-to-match-the-contact-time-of-the-brewing-method]] — 挽き目と器具はセット。粗挽きを短時間のドリップに流用すると素通りする
+- [[a-coarse-grind-lacks-surface-area-so-compensate-with-time-heat-and-agitation]] — 挽き直せないときの対処。温度を下げるのは逆効果（過抽出の対策）
+- [[steeping-first-then-filtering-through-paper-combines-immersion-time-with-paper-clarity]] — 浸漬の時間と紙のクリーンさを両取りする。ただし濾過の時間も抽出に乗る
+- [[dripper-flow-rate-is-set-by-the-device-so-it-has-to-match-the-grind]] — 流速はドリッパーの形で決まっている。V60は速く敏感、カリタウェーブは寛容
 - [[coffee-extracts-acids-first-then-sweetness-then-bitterness]] — 酸→甘み→苦味の順に出る。抽出不足は酸っぱく、過抽出は渋い
 - [[coffee-extraction-yield-caps-near-30-percent-and-tastes-best-at-18-to-22]] — 溶けるのは約30%まで、うまいのは18〜22%。「2割」は限界ではなく最適点
 - [[blooming-releases-co2-first-so-water-can-wet-the-grounds-evenly]] — 蒸らしはCO2を先に逃がす手順。効くのはドリップで、浸漬式では重要度が下がる
