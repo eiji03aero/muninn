@@ -206,6 +206,24 @@ export function composeEdition({ site, graph, shadow, reads, pendingCount, today
   return { lead, aside, recall, chapter, feature, records, inventory, today };
 }
 
+// ---- 今日（日報の `今日` タブ。2026-10-17 に紙面から作り直した） ----
+// 今日の画面がやることは2つだけ: **再読を数枚こなす** と **読みかけの続きに戻る**。
+// リード・特集・記録・在庫のように「並べられるから並べていた」段は持たない（web/DESIGN.md §5）。
+// 空にならない保証（原則5）は「続きから」が持つ: 連載があれば次の章が必ず出て、
+// 新着が無い日は復刻（最終更新が古い群からの日替わり）に落ちるので、記事が1件でもあれば2行目も埋まる。
+function freshNoteCard(site, today) {
+  const fresh = site.notes
+    .filter((n) => n.created && daysBetween(today, n.created) >= 0 && daysBetween(today, n.created) <= 7)
+    .sort((a, b) => (a.created === b.created ? a.slug.localeCompare(b.slug) : (a.created < b.created ? 1 : -1)));
+  return fresh.length ? { type: 'fresh', note: fresh[0], ago: daysBetween(today, fresh[0].created) } : null;
+}
+
+export function composeToday({ site, graph, shadow, reads, today = todayISO() }) {
+  const recall = recallQueue(site, graph, shadow, today, 3);
+  const cont = [chapterCard(site, reads), freshNoteCard(site, today) || revivalCard(site, today)].filter(Boolean);
+  return { recall, cont, today };
+}
+
 // 「更新 N日前」。ビルド日と閲覧日の差を出して、面が古びていないことを可視化する
 export const staleness = (generatedAt, today = todayISO()) => daysBetween(today, generatedAt);
 

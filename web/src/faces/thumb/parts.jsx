@@ -136,7 +136,7 @@ export function Intro({ onClose, onSettings }) {
         ボタン・候補・メニューはすべてボタンとして読み上げられます。
       </p>
       <div className="tb-introbtns">
-        <button type="button" className="tb-introsub" onClick={onSettings}>画面のかたちを選ぶ</button>
+        <button type="button" className="tb-introsub" onClick={onSettings}>アプリレイアウトを選ぶ</button>
         <button type="button" className="tb-introgo" onClick={onClose}>はじめる</button>
       </div>
     </div>

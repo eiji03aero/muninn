@@ -1,16 +1,17 @@
-// 面「日報」——刷新時に作った現行のかたち。今日の紙面を上から読み、下のタブで横に移る。
+// 面「日報」——刷新時に作った現行のかたち。今日の再読と続きを上から読み、下のタブで横に移る。
 //
 // この面だけが HashRouter を持つ（面Aは方向で、面Bは欄の中身で移動するのでルータを持たない）。
 // したがって**ルータに依存する仕組みはこの面の中で完結させる**こと。
 // 逆に、shell に置いてよいのは「どの面でも同じ意味を持つもの」だけ。
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { HashRouter, Routes, Route, Navigate, useLocation, useNavigationType, useParams } from 'react-router-dom';
+import {
+  HashRouter, Routes, Route, Navigate, useLocation, useNavigationType, useParams, useSearchParams,
+} from 'react-router-dom';
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react';
 import { useData } from '../../lib/ctx.js';
 import { paramToTag } from '../../lib/graph.js';
 import { Note, Follow, Player } from './pages.jsx';
 import { Edition } from './edition.jsx';
-import { Groups } from './groups.jsx';
 import { Search } from './search.jsx';
 import { Piece } from './piece.jsx';
 import { More } from './more.jsx';
@@ -53,15 +54,21 @@ function ScrollManager() {
 function LegacyMoc({ graph }) {
   const { slug } = useParams();
   const bundle = graph.bundles.find((b) => b.moc === slug && b.tag);
-  return <Navigate to={bundle ? `/search?tag=${encodeURIComponent(bundle.tag)}` : '/groups'} replace />;
+  return <Navigate to={bundle ? `/search?tag=${encodeURIComponent(bundle.tag)}` : '/search'} replace />;
 }
 
-// 旧「種類1つの全件」（/groups/:id）。種類の切り替えは一覧の中のタブになった。
-// 記事は一覧から外したので、記事だけで絞った「探す」へ送る。
+// 旧「一覧」（/groups?kind=… と /groups/:id）。2026-10-17 に畳み、種類の切り替えは「探す」の種別になった。
+// 一覧の kind と探すの type は同じ語（graph のノード型）なので、そのまま渡せば同じ全件に着く。
+const toTypeSearch = (id) => (id ? `/search?type=${encodeURIComponent(id)}` : '/search');
+
+function LegacyGroups() {
+  const [params] = useSearchParams();
+  return <Navigate to={toTypeSearch(params.get('kind'))} replace />;
+}
+
 function LegacyGroup() {
   const { id } = useParams();
-  if (id === 'note') return <Navigate to="/search?type=note" replace />;
-  return <Navigate to={`/groups?kind=${encodeURIComponent(id)}`} replace />;
+  return <Navigate to={toTypeSearch(id)} replace />;
 }
 
 // 旧「テーマ1枚」（/shelf/:tag）。テーマ指定の検索がその役目を継いだ。
@@ -80,8 +87,6 @@ export default function DailyRoot() {
           <ScrollManager />
           <Routes>
             <Route path="/" element={<Edition />} />
-            <Route path="/groups" element={<Groups />} />
-            <Route path="/groups/:id" element={<LegacyGroup />} />
             <Route path="/search" element={<Search />} />
             <Route path="/more" element={<More />} />
 
@@ -94,11 +99,13 @@ export default function DailyRoot() {
             <Route path="/log/:topic/entry/:slug" element={<LogEntry />} />
             <Route path="/piece/:slug" element={<Piece />} />
 
-            {/* 廃止したルート。網羅は「一覧」に、絞り込みは「探す」に、依頼は「設定」に吸収された */}
+            {/* 廃止したルート。網羅と絞り込みは「探す」に、アプリの操作は「設定」に吸収された */}
+            <Route path="/groups" element={<LegacyGroups />} />
+            <Route path="/groups/:id" element={<LegacyGroup />} />
             <Route path="/desk" element={<Navigate to="/more" replace />} />
             <Route path="/notes" element={<Navigate to="/search?type=note" replace />} />
-            <Route path="/logs" element={<Navigate to="/groups?kind=logtopic" replace />} />
-            <Route path="/series" element={<Navigate to="/groups" replace />} />
+            <Route path="/logs" element={<Navigate to="/search?type=logtopic" replace />} />
+            <Route path="/series" element={<Navigate to="/search?type=atlas" replace />} />
             <Route path="/shelf" element={<Navigate to="/search" replace />} />
             <Route path="/shelf/:tag" element={<LegacyShelfTag />} />
             <Route path="/moc/:slug" element={<LegacyMoc graph={graph} />} />

@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Flex, HStack, VStack, SimpleGrid, Text, Button } from '@chakra-ui/react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useData } from '../../lib/ctx.js';
-import { AppBar, Page, Slot, Card, Chip, Chips, CopyButton, Backlinks, NotFound, Md } from './ui.jsx';
+import { AppBar, Page, Card, Chip, Chips, CopyButton, Backlinks, NotFound, Md } from './ui.jsx';
 import { markSeen } from '../../lib/recall.js';
 import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
 
@@ -34,82 +34,6 @@ function FieldValue({ field, value }) {
 const fieldOf = (topic, key) => topic.fields.find((f) => f.key === key);
 const valOf = (entry, key) => entry.fields?.[key];
 
-// 比較テーブル。logs の設計思想は「並べて比べる」なのに、現状はグリッドと絞り込みしか無く
-// 思想が UI に到達していなかった。number / rating / enum / bool を列にしてソート可能にする。
-function CompareTable({ topic, entries, onOpen }) {
-  const cols = topic.fields.filter((f) => ['number', 'rating', 'enum', 'bool'].includes(f.type));
-  const [sort, setSort] = useState({ key: null, asc: false });
-
-  const rows = useMemo(() => {
-    if (!sort.key) return entries;
-    const kv = (e) => valOf(e, sort.key);
-    return [...entries].sort((a, b) => {
-      const av = kv(a), bv = kv(b);
-      if (av == null && bv == null) return 0;
-      if (av == null) return 1;
-      if (bv == null) return -1;
-      return (av < bv ? -1 : av > bv ? 1 : 0) * (sort.asc ? 1 : -1);
-    });
-  }, [entries, sort]);
-
-  const toggle = (key) => setSort((s) => (s.key === key ? { key, asc: !s.asc } : { key, asc: false }));
-  const flag = topic.fields.find((f) => f.type === 'bool');
-
-  return (
-    <Box className="glass" borderRadius="16px" overflowX="auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-      <Box as="table" w="100%" style={{ borderCollapse: 'collapse', minWidth: `${140 + cols.length * 86}px` }}>
-        <Box as="thead">
-          <Box as="tr">
-            <Box as="th" position="sticky" left="0" zIndex="1" textAlign="left" px="3" py="2.5"
-              fontSize="10px" letterSpacing="0.08em" color={C.faint} fontWeight="600"
-              style={{ background: 'rgba(16,18,32,.94)', borderBottom: `1px solid ${C.line}` }}>
-              {topic.title.replace(/の記録$/, '')}
-            </Box>
-            {cols.map((f) => (
-              <Box as="th" key={f.key} textAlign="left" px="3" py="2.5" whiteSpace="nowrap"
-                fontSize="10px" letterSpacing="0.08em" fontWeight="600"
-                color={sort.key === f.key ? C.sky : C.faint} cursor="pointer"
-                onClick={() => toggle(f.key)} style={{ borderBottom: `1px solid ${C.line}` }}>
-                {f.label}{sort.key === f.key ? (sort.asc ? ' ▲' : ' ▼') : ''}
-              </Box>
-            ))}
-          </Box>
-        </Box>
-        <Box as="tbody">
-          {rows.map((e) => {
-            const on = flag && valOf(e, flag.key) === true;
-            return (
-              <Box as="tr" key={e.slug} className="press" cursor="pointer" onClick={() => onOpen(e)}
-                style={{ background: on ? tint(C.green, 10) : 'transparent' }}>
-                <Box as="td" position="sticky" left="0" zIndex="1" px="3" py="2.5" minW="140px"
-                  style={{ background: on ? 'rgba(22,34,32,.96)' : 'rgba(16,18,32,.94)', borderBottom: `1px solid ${C.line}` }}>
-                  <Text fontSize="xs" color={C.ink} fontWeight="600" lineHeight="1.4">{e.title}</Text>
-                </Box>
-                {cols.map((f) => {
-                  const v = valOf(e, f.key);
-                  return (
-                    <Box as="td" key={f.key} px="3" py="2.5" whiteSpace="nowrap"
-                      style={{ borderBottom: `1px solid ${C.line}` }}>
-                      {f.type === 'rating' && typeof v === 'number' ? (
-                        <Text fontSize="xs" color={C.amber} style={{ fontVariantNumeric: 'tabular-nums' }}>★{v}</Text>
-                      ) : f.type === 'bool' ? (
-                        <Text fontSize="xs" color={v ? C.green : C.faint}>{v ? '○' : '—'}</Text>
-                      ) : (
-                        <Text fontSize="xs" color={v == null ? C.faint : C.ink} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {v == null ? '—' : `${v}${f.unit ? ` ${f.unit}` : ''}`}
-                        </Text>
-                      )}
-                    </Box>
-                  );
-                })}
-              </Box>
-            );
-          })}
-        </Box>
-      </Box>
-    </Box>
-  );
-}
 
 function EntryCard({ topic, entry, onClick }) {
   const badge = topic.display.badge ? fieldOf(topic, topic.display.badge) : null;
@@ -141,107 +65,194 @@ function EntryCard({ topic, entry, onClick }) {
   );
 }
 
+// ---------------- 軸で並べる ----------------
+// logs の設計思想は「並べて比べる」。以前は number / rating / enum / bool を列にした比較表だったが、
+// スマホ幅では3列目から先が横スクロールの外に出て、**比べたい列が画面に入らなかった**（2026-10-17、オーナー指摘）。
+// 表は全部の値を見せるが、「どれが良いか」の答えは読む人が自分で出すしかない。
+// だから表をやめ、**軸（enum / bool / rating の項目）を1つ選ぶとその値ごとに束ね、束ごとの平均評価を並べる**。
+// 比べた結果（どの束がいちばん高いか）を先に1行で言い切り、1件ずつの値は記録ページに任せる。
+const AXIS_TYPES = ['enum', 'bool', 'rating'];
+const isBlank = (v) => v == null || v === '' || (Array.isArray(v) && !v.length);
+
+// 既定の軸: 記入の多い enum → 無ければ bool → 無ければ rating。記入の少ない軸を既定にすると
+// ほぼ全件が「未記入」の1束に落ちて、何も比べていない画面になる。同数ならスキーマの順（原則10）。
+function defaultAxis(topic, fields) {
+  const filled = (f) => topic.entries.filter((e) => !isBlank(valOf(e, f.key))).length;
+  for (const t of AXIS_TYPES) {
+    const c = fields.filter((f) => f.type === t);
+    if (c.length) return c.reduce((best, f) => (filled(f) > filled(best) ? f : best), c[0]).key;
+  }
+  return null;
+}
+
+// 平均を取る項目。サイトのカードで主役にしている rating（display.badge）を優先する。
+function scoreFieldOf(topic) {
+  const badge = topic.display.badge ? fieldOf(topic, topic.display.badge) : null;
+  return badge?.type === 'rating' ? badge : topic.fields.find((f) => f.type === 'rating') || null;
+}
+
+function groupByAxis(topic, field, score) {
+  const buckets = field.type === 'enum'
+    ? (field.options || []).map((o) => ({ v: o, label: String(o) }))
+    : field.type === 'bool'
+      ? [{ v: true, label: `${field.label}：はい` }, { v: false, label: `${field.label}：いいえ` }]
+      : Array.from({ length: field.max || 5 }, (_, i) => (field.max || 5) - i).map((n) => ({ v: n, label: `★${n}` }));
+  const groups = buckets.map((b) => ({ ...b, entries: topic.entries.filter((e) => valOf(e, field.key) === b.v) }));
+  groups.push({ v: null, label: '未記入', blank: true, entries: topic.entries.filter((e) => isBlank(valOf(e, field.key))) });
+  return groups.filter((g) => g.entries.length).map((g) => {
+    const vals = score ? g.entries.map((e) => valOf(e, score.key)).filter((v) => typeof v === 'number') : [];
+    const avg = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+    // 束の中は評価の高い順。同点は元の並び（スキーマの display.sort）を保つ
+    const entries = score
+      ? [...g.entries].sort((a, b) => (valOf(b, score.key) ?? -1) - (valOf(a, score.key) ?? -1))
+      : g.entries;
+    return { ...g, avg, entries };
+  });
+}
+
+// 一覧に出す名前。タイトルが「商品名 / 店」で、店が副題の項目として別にあるなら商品名だけにする
+// （同じ店名を2行続けて読ませない）。
+function entryName(topic, e) {
+  const sub = topic.display.subtitle ? valOf(e, topic.display.subtitle) : null;
+  const name = sub && e.title.includes(' / ') ? e.title.split(' / ')[0] : e.title;
+  return { name, sub };
+}
+
+function AxisView({ topic, onOpen }) {
+  const fields = topic.fields.filter((f) => AXIS_TYPES.includes(f.type));
+  const [axisKey, setAxisKey] = useState(() => defaultAxis(topic, fields));
+  const axis = fields.find((f) => f.key === axisKey) || fields[0];
+  const score = scoreFieldOf(topic);
+  const flag = topic.fields.find((f) => f.type === 'bool');
+  const groups = groupByAxis(topic, axis, score);
+  const max = score?.max || 5;
+
+  const ranked = groups.filter((g) => !g.blank && g.entries.length >= 2 && g.avg != null).sort((a, b) => b.avg - a.avg);
+  const insight = !score ? null
+    : axis.key === score.key ? `${axis.label}ごとに並べています`
+      : ranked.length ? `${ranked[0].label}（平均 ★${ranked[0].avg.toFixed(1)}・${ranked[0].entries.length}件）`
+        : '比べられるほど記録がまだない';
+
+  return (
+    <VStack align="stretch" gap="3.5">
+      <Box>
+        <Text fontSize="11px" color={C.faint} letterSpacing="0.08em" mb="1.5">並べる軸</Text>
+        <Flex role="group" aria-label="並べる軸" p="3px" borderRadius="12px" overflowX="auto"
+          bg="rgba(255,255,255,.06)" border="1px solid rgba(255,255,255,.10)" style={{ scrollbarWidth: 'none' }}>
+          {fields.map((f) => {
+            const on = f.key === axis.key;
+            return (
+              <Box as="button" type="button" key={f.key} flex="1 0 auto" h="36px" px="3" borderRadius="9px"
+                fontSize="13px" fontWeight="600" whiteSpace="nowrap" aria-pressed={on}
+                color={on ? '#08111f' : C.muted} bg={on ? ACCENT_GRADIENT : 'transparent'}
+                onClick={() => setAxisKey(f.key)}>
+                {f.label}
+              </Box>
+            );
+          })}
+        </Flex>
+      </Box>
+
+      {insight && (
+        <Box className="glass" px="4" py="3.5" borderRadius="16px">
+          {axis.key !== score.key && ranked.length > 0 && (
+            <Text fontSize="11px" color={C.faint}>この軸でいちばん高いのは</Text>
+          )}
+          <Text fontSize="md" fontWeight="700" color={C.ink} mt="1">{insight}</Text>
+        </Box>
+      )}
+
+      {groups.map((g) => (
+        <Box as="section" key={String(g.v)} className="glass-soft" overflow="hidden" aria-label={g.label}>
+          <Flex align="center" gap="2.5" px="4" pt="3.5" pb="2.5">
+            <Text fontSize="sm" fontWeight="700" color={g.blank ? C.muted : C.ink}>{g.label}</Text>
+            <Text fontSize="11px" color={C.faint}>{g.entries.length}件</Text>
+            {g.avg != null && axis.key !== score?.key && (
+              <Flex ml="auto" align="center" gap="2" fontSize="12px" fontWeight="700" color={C.amber}
+                style={{ fontVariantNumeric: 'tabular-nums' }}>
+                平均 ★{g.avg.toFixed(1)}
+                <Box w="56px" h="5px" borderRadius="full" bg="rgba(255,255,255,.08)" overflow="hidden">
+                  <Box h="100%" borderRadius="full" bg={C.amber} style={{ width: `${Math.round((g.avg / max) * 100)}%` }} />
+                </Box>
+              </Flex>
+            )}
+          </Flex>
+          {g.entries.map((e) => {
+            const { name, sub } = entryName(topic, e);
+            const s = score ? valOf(e, score.key) : null;
+            return (
+              <Flex as="button" type="button" key={e.slug} w="100%" textAlign="left" className="press"
+                align="center" gap="3" px="4" py="2.5" borderTop={`1px solid ${C.line}`} onClick={() => onOpen(e)}>
+                {score && (
+                  <Flex w="38px" h="38px" borderRadius="10px" flexShrink="0" direction="column" align="center" justify="center"
+                    lineHeight="1" color={C.amber} bg={tint(C.amber, 12)} border="1px solid" borderColor={tint(C.amber, 28)}>
+                    <Text fontSize="15px" fontWeight="800">{typeof s === 'number' ? s : '—'}</Text>
+                    <Text fontSize="9px" mt="0.5">★</Text>
+                  </Flex>
+                )}
+                <Box flex="1" minW="0">
+                  <Text fontSize="13px" fontWeight="600" color={C.ink} lineHeight="1.4" truncate>{name}</Text>
+                  {sub && <Text fontSize="11px" color={C.faint} mt="0.5" truncate>{sub}</Text>}
+                </Box>
+                {flag && valOf(e, flag.key) === true && (
+                  <Box flexShrink="0"><Chip color={C.green}>{flag.label}</Chip></Box>
+                )}
+              </Flex>
+            );
+          })}
+        </Box>
+      ))}
+    </VStack>
+  );
+}
+
 export function LogTopic() {
   const { idx } = useData();
   const navigate = useNavigate();
   const { topic: slug } = useParams();
   const topic = idx.logtopics?.get(slug);
-  const [filters, setFilters] = useState({});
-  const [view, setView] = useState('compare');
   if (!topic) return <NotFound what="記録帖" />;
 
   const many = topic.entries.length >= 2;
-  const filterFields = many ? (topic.display.filters || []).map((k) => fieldOf(topic, k)).filter(Boolean) : [];
-  const setF = (key, value) => setFilters((p) => ({ ...p, [key]: p[key] === value ? undefined : value }));
-
-  const entries = topic.entries.filter((e) =>
-    filterFields.every((f) => {
-      const sel = filters[f.key];
-      if (sel == null) return true;
-      const v = valOf(e, f.key);
-      return f.type === 'rating' ? (typeof v === 'number' && v >= sel) : v === sel;
-    }),
-  );
-
+  const canGroup = topic.fields.some((f) => AXIS_TYPES.includes(f.type));
+  const open = (e) => navigate(`/log/${slug}/entry/${e.slug}`);
   const addPrompt = `/mn-log ${topic.title} に1件記録して。写真とひと言を渡すので、スキーマ（${topic.fields.map((f) => f.label).join(' / ')}）に整形して追加して。`;
 
   return (
     <>
       <AppBar title={topic.title} subtitle={`${topic.entries.length}件の記録`} />
       <Page>
-        {topic.intro && <Box mb="5"><Md text={topic.intro} /></Box>}
+        {/* 説明は折り畳む。開いた瞬間に見えるべきなのは比べた結果で、帳面の説明ではない */}
+        {topic.intro && (
+          <Box as="details" className="glass-soft" px="4" mb="4">
+            <Box as="summary" display="flex" justifyContent="space-between" alignItems="center" minH="44px"
+              fontSize="13px" color={C.muted} cursor="pointer" style={{ listStyle: 'none' }}>
+              この記録帖について<span aria-hidden="true">▾</span>
+            </Box>
+            <Box pb="3"><Md text={topic.intro} /></Box>
+          </Box>
+        )}
 
-        {!many ? (
-          // 記録が1件のときは比較を出さない。絞り込みも出さない（絞る意味がない）。
+        {!many || !canGroup ? (
+          // 記録が1件のとき（または束ねられる項目が無いとき）は比べない。カードで並べるだけにする。
           <VStack align="stretch" gap="4">
             <SimpleGrid columns={2} gap="3">
               {topic.entries.map((e) => (
-                <EntryCard key={e.slug} topic={topic} entry={e}
-                  onClick={() => navigate(`/log/${slug}/entry/${e.slug}`)} />
+                <EntryCard key={e.slug} topic={topic} entry={e} onClick={() => open(e)} />
               ))}
             </SimpleGrid>
-            <Card soft>
-              <Text fontSize="sm" color={C.ink} fontWeight="600">もう1件記録すると比べられる</Text>
-              <Text fontSize="xs" color={C.muted} mt="1.5" lineHeight="1.7">
-                この記録帖は「並べて比べる」ためのもの。2件目から比較表が出る。
-              </Text>
-              <Box mt="3"><CopyButton text={addPrompt}>記録を依頼</CopyButton></Box>
-            </Card>
+            {!many && (
+              <Card soft>
+                <Text fontSize="sm" color={C.ink} fontWeight="600">もう1件記録すると比べられる</Text>
+                <Text fontSize="xs" color={C.muted} mt="1.5" lineHeight="1.7">
+                  この記録帖は「並べて比べる」ためのもの。2件目から軸ごとに束ねて比べられる。
+                </Text>
+                <Box mt="3"><CopyButton text={addPrompt}>記録を依頼</CopyButton></Box>
+              </Card>
+            )}
           </VStack>
         ) : (
-          <VStack align="stretch" gap="4">
-            <Flex wrap="wrap" gap="2">
-              {[{ id: 'compare', label: '比較' }, { id: 'grid', label: 'グリッド' }].map((t) => {
-                const on = view === t.id;
-                return (
-                  <Button key={t.id} size="xs" borderRadius="full" fontWeight="600" onClick={() => setView(t.id)}
-                    color={on ? '#08111f' : C.muted} bg={on ? ACCENT_GRADIENT : 'transparent'}
-                    border="1px solid" borderColor={on ? 'transparent' : C.line}
-                    _hover={{ color: on ? '#08111f' : C.ink }}>{t.label}</Button>
-                );
-              })}
-            </Flex>
-
-            {filterFields.length > 0 && (
-              <VStack align="stretch" gap="2.5">
-                {filterFields.map((f) => {
-                  const values = f.type === 'rating'
-                    ? [5, 4, 3].map((n) => ({ v: n, label: `★${n}${n < 5 ? '+' : ''}` }))
-                    : [...new Set(topic.entries.map((e) => valOf(e, f.key)).filter((v) => v != null))].map((v) => ({ v, label: f.type === 'bool' ? (v ? 'はい' : 'いいえ') : String(v) }));
-                  if (!values.length) return null;
-                  return (
-                    <Box key={f.key}>
-                      <Text fontSize="11px" color={C.faint} mb="1.5">{f.label}</Text>
-                      <Flex wrap="wrap" gap="2">
-                        {values.map(({ v, label }) => {
-                          const on = filters[f.key] === v;
-                          return (
-                            <Button key={String(v)} size="xs" borderRadius="full" fontWeight="600" onClick={() => setF(f.key, v)}
-                              color={on ? '#08111f' : C.muted} bg={on ? ACCENT_GRADIENT : 'transparent'}
-                              border="1px solid" borderColor={on ? 'transparent' : C.line}
-                              _hover={{ color: on ? '#08111f' : C.ink }}>{label}</Button>
-                          );
-                        })}
-                      </Flex>
-                    </Box>
-                  );
-                })}
-              </VStack>
-            )}
-
-            {entries.length === 0 ? (
-              <Text fontSize="sm" color={C.muted}>条件に合う記録がないのだ</Text>
-            ) : view === 'compare' ? (
-              <CompareTable topic={topic} entries={entries} onOpen={(e) => navigate(`/log/${slug}/entry/${e.slug}`)} />
-            ) : (
-              <SimpleGrid columns={2} gap="3">
-                {entries.map((e) => (
-                  <EntryCard key={e.slug} topic={topic} entry={e}
-                    onClick={() => navigate(`/log/${slug}/entry/${e.slug}`)} />
-                ))}
-              </SimpleGrid>
-            )}
-          </VStack>
+          <AxisView key={topic.slug} topic={topic} onOpen={open} />
         )}
 
         <Backlinks route={`/log/${topic.slug}`} title={topic.title} />

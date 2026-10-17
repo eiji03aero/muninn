@@ -507,7 +507,7 @@ export default function ThumbRoot({ initialTarget }) {
                 <button type="button" aria-label="使い方を見る" onClick={() => setIntro(true)}>
                   <span aria-hidden="true">?</span>
                 </button>
-                <button type="button" aria-label="設定を開く（画面のかたちを選ぶ）" onClick={openSettings}>
+                <button type="button" aria-label="設定を開く（アプリレイアウトを選ぶ）" onClick={openSettings}>
                   <span aria-hidden="true">{'\u2699\uFE0E'}</span>
                 </button>
               </div>

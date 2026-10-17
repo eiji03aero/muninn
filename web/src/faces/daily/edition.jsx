@@ -1,377 +1,286 @@
+// 「今日」——日報の入口。2026-10-17 に紙面（リード・袖・特集・記録・在庫の段組み）から作り直した。
+//
+// 毎朝ここでやることは2つしかない: **再読を数枚こなす** と **読みかけの続きに戻る**。
+// 以前の紙面は「並べられるものを全部並べた」結果、1画面に7種類のカードが積まれ、
+// オーナーに「ごちゃごちゃ色々並びすぎ」と言われた。並べる段を2つに絞り、1画面に収める。
+// 再読は1枚ずつ重ねて出す——3枚を縦に並べると、めくる前から「残り」が壁になる。
 import { useMemo, useState } from 'react';
-import { Box, Flex, HStack, VStack, Heading, Text, Button, Textarea } from '@chakra-ui/react';
+import { Box, Flex, HStack, Heading, Text, Button, Textarea } from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { useData } from '../../lib/ctx.js';
-import { AppBar, Page, Slot, Card, Chip, CopyButton, Sparkline, Delta, relDay, Md } from './ui.jsx';
-import { composeEdition, staleness } from '../../lib/edition.js';
-import { recordVerdict, loadPending, todayISO, doneThisWeek, daysBetween } from '../../lib/recall.js';
-import { cleanTitle, shortTitle, tagLabel, typeLabel } from '../../lib/graph.js';
-import { C, ACCENT_GRADIENT, tint } from '../../shared/theme.js';
+import { Page, Card, Chip, CopyButton, Md } from './ui.jsx';
+import { composeToday } from '../../lib/edition.js';
+import {
+  recordVerdict, loadPending, loadSlips, clearPending, clearSlips, slipsPrompt, todayISO, doneThisWeek,
+} from '../../lib/recall.js';
+import { cleanTitle, shortTitle, tagLabel } from '../../lib/graph.js';
+import { C, ACCENT_GRADIENT } from '../../shared/theme.js';
 
-// ---------------- 題字 ----------------
-// 「更新 N日前」を出すのは、面が閲覧日で組まれている（＝押していなくても今日の面である）ことの表明。
-function Masthead({ site, today }) {
-  const stale = staleness(site.generatedAt, today);
+const WEEKDAY = '日月火水木金土';
+
+function Masthead({ today }) {
   const d = new Date(`${today}T00:00:00`);
-  const wd = '日月火水木金土'[d.getDay()];
   return (
-    <Box className="glass-bar" position="sticky" top="0" zIndex="20" px="4" pt="3" pb="2.5"
-      style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
-      <Flex align="baseline" justify="space-between" gap="3">
-        <Heading size="lg" color={C.ink} letterSpacing="0.34em" fontWeight="600" lineHeight="1">muninn</Heading>
-        <Text fontSize="10px" color={C.faint} flexShrink="0">
-          {stale === 0 ? '更新 今日' : `更新 ${stale}日前`}
-        </Text>
-      </Flex>
-      <Text fontSize="11px" color={C.muted} mt="1.5">{today}（{wd}）</Text>
-    </Box>
+    <Flex as="header" align="baseline" justify="space-between" gap="3" px="4" pb="1"
+      style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+      <Heading as="h1" size="lg" color={C.ink} letterSpacing="0.34em" fontWeight="600" lineHeight="1">muninn</Heading>
+      <Text fontSize="11px" color={C.muted} flexShrink="0">
+        {d.getMonth() + 1}月{d.getDate()}日（{WEEKDAY[d.getDay()]}）
+      </Text>
+    </Flex>
   );
 }
 
-// ---------------- リード ----------------
-function Lead({ card }) {
-  const navigate = useNavigate();
-  if (!card) return null;
-
-  // 中に個別リンク（特集の箇条書き）を持つカードは button にしない。入れ子ボタンは不正な DOM で、
-  // クリック判定も壊れる。遷移先が1つに決まるカードだけを button にする。
-  const Frame = ({ kicker, kickColor = C.amber, title, children, to }) => (
-    <Box as={to ? 'button' : 'div'} w="100%" textAlign="left"
-      className={`glass${to ? ' press' : ''}`} p="4" borderRadius="20px"
-      onClick={to ? () => navigate(to) : undefined} cursor={to ? 'pointer' : 'default'}
-      style={{ borderTop: `2px solid ${kickColor}` }}>
-      <Text fontSize="10px" fontWeight="800" letterSpacing="0.12em" color={kickColor} mb="2">{kicker}</Text>
-      <Heading size="sm" color={C.ink} lineHeight="1.5" letterSpacing="-0.01em">{title}</Heading>
+function SectionTitle({ children }) {
+  return (
+    <Heading as="h2" fontSize="13px" fontWeight="700" letterSpacing="0.08em" color={C.muted} lineHeight="1.4">
       {children}
-    </Box>
+    </Heading>
   );
-
-  switch (card.type) {
-    case 'speed':
-      return (
-        <Frame kicker={`速報 · ${relDay(card.node.updated, todayISO())}`} kickColor={C.green}
-          title={card.node.short} to={card.node.route}>
-          <Text fontSize="xs" color={C.faint} mt="2.5">{typeLabel(card.node.type)}</Text>
-        </Frame>
-      );
-    case 'milestone': {
-      const pts = card.series.points;
-      return (
-        <Frame kicker={`自己ベスト · ${card.point.date}`} kickColor={C.amber}
-          title={`${card.series.key} ${card.point.value} — ${cleanTitle(card.follow.title)}`}
-          to={`/follow/${card.follow.name}`}>
-          <Box mt="3"><Sparkline points={pts} color={C.amber} goal={card.series.goal} /></Box>
-        </Frame>
-      );
-    }
-    case 'chapter-new':
-      return (
-        <Frame kicker="新章 · 未読" kickColor={C.violet} title={shortTitle(card.concept.title)}
-          to={`/atlas/${card.atlas.slug}/concept/${card.concept.slug}`}>
-          <Text fontSize="sm" color={C.muted} mt="2" lineHeight="1.7">{card.concept.gist}</Text>
-        </Frame>
-      );
-    case 'brief':
-      return (
-        <Frame kicker={`予習 · あと${card.days}日`} kickColor={C.violet}
-          title={`${cleanTitle(card.follow.title)} vs ${card.match.opponent}`}
-          to={`/follow/${card.follow.name}`}>
-          <VStack align="stretch" gap="1.5" mt="3">
-            {(card.follow.snapshot || []).slice(0, 2).map((s, i) => (
-              <Text key={i} fontSize="xs" color={C.muted} lineHeight="1.65">○ {s}</Text>
-            ))}
-          </VStack>
-        </Frame>
-      );
-    case 'feature':
-      return (
-        <Frame kicker="特集" kickColor={C.sky} title={`${card.bundle.title} — ${card.bundle.items.length}本`}>
-          <VStack align="stretch" gap="0" mt="3">
-            {card.bundle.items.slice(0, 3).map((it) => (
-              <Box as="button" key={it.node.route} textAlign="left" className="press" py="1.5"
-                onClick={() => navigate(it.node.route)}>
-                <Text fontSize="sm" color={C.sky} lineHeight="1.5">○ {it.label || it.node.short}</Text>
-              </Box>
-            ))}
-            {card.bundle.items.length > 3 && (
-              <Text fontSize="xs" color={C.faint} mt="1">＋{card.bundle.items.length - 3}本</Text>
-            )}
-          </VStack>
-        </Frame>
-      );
-    case 'revival':
-      return (
-        <Frame kicker={`復刻 · ${card.ago}日ぶり`} kickColor={C.orange} title={card.note.title}
-          to={`/note/${card.note.slug}`}>
-          <Flex wrap="wrap" gap="1.5" mt="3">
-            {(card.note.tags || []).map((t) => <Chip key={t} color={C.faint}>{tagLabel(t)}</Chip>)}
-          </Flex>
-        </Frame>
-      );
-    default:
-      return null;
-  }
 }
 
-// ---------------- 再読カード（伏せ記事） ----------------
+// ---------------- 再読（1枚ずつめくる束） ----------------
 // クイズUIではなく読み物として出す。muninn のタイトルは言い切り形＝答えそのものなので、
-// タイトルを伏せて recall の問いだけを見せる。「クイズを始める」というモード切替が無いので
-// 起動コストがゼロ——ここが、ターミナルを開いて /mn-review を打つ現状との決定的な差。
-export function RecallCard({ note, index, total, onDone }) {
+// タイトルを伏せて recall の問いだけを見せる（web/DESIGN.md §6）。
+function RecallStack({ queue }) {
   const navigate = useNavigate();
-  const { shadow } = useData();
+  const { shadow, refresh } = useData();
+  const [i, setI] = useState(0);
   const [flipped, setFlipped] = useState(false);
+  const [memoOpen, setMemoOpen] = useState(false);
   const [memo, setMemo] = useState('');
-  const [done, setDone] = useState(null);
+  const [last, setLast] = useState(null);
+  const total = queue.length;
+  const week = doneThisWeek();
 
-  const judge = (ok) => {
-    const next = recordVerdict(note, ok, memo.trim().length > 0, shadow);
-    setDone({ ok, next });
-    setTimeout(() => onDone?.(), 900);
-  };
-
-  if (done) {
+  if (!total) {
     return (
-      <Card soft>
-        <HStack justify="space-between">
-          <Text fontSize="sm" color={done.ok ? C.green : C.amber} fontWeight="700">
-            {done.ok ? '✓ わかった' : '△ あやしい'}
-          </Text>
-          <Text fontSize="xs" color={C.faint}>次は {done.next.next}</Text>
-        </HStack>
-      </Card>
+      <Box as="section" aria-label="今日の再読">
+        <SectionTitle>今日の再読</SectionTitle>
+        <Box mt="2.5"><Card soft><Text fontSize="sm" color={C.muted}>今日は期日が来た記事がない</Text></Card></Box>
+      </Box>
     );
   }
 
+  const finished = i >= total;
+  const note = finished ? null : queue[i].note;
+  const behind = finished ? 0 : total - i - 1;
+
+  // 一言を書いたかで q を分ける（書いて わかった=5 / 書かず=4 / あやしい=2）。§6 の自己申告の補正。
+  const judge = (ok) => {
+    const r = recordVerdict(note, ok, memo.trim().length > 0, shadow);
+    setLast({ ok, next: r.next });
+    setI(i + 1);
+    setFlipped(false);
+    setMemo('');
+    setMemoOpen(false);
+    refresh?.();
+  };
+
   return (
-    <Card>
-      <HStack justify="space-between" align="center" mb="2.5">
-        <Flex wrap="wrap" gap="1.5">
-          {(note.tags || []).slice(0, 2).map((t) => <Chip key={t} color={C.sky}>{tagLabel(t)}</Chip>)}
-        </Flex>
-        {total > 1 && <Text fontSize="10px" color={C.faint} flexShrink="0">{index + 1}/{total}</Text>}
-      </HStack>
+    <Box as="section" aria-label="今日の再読">
+      <Flex align="center" justify="space-between" mb="2.5">
+        <SectionTitle>今日の再読</SectionTitle>
+        <HStack gap="1.5">
+          {queue.map((q, k) => (
+            <Box key={q.note.slug} w="6px" h="6px" borderRadius="full"
+              bg={k < i ? C.green : k === i ? C.ink : 'rgba(255,255,255,.16)'} />
+          ))}
+          <Text fontSize="11px" color={C.faint} ml="1">{Math.min(i + 1, total)} / {total}</Text>
+        </HStack>
+      </Flex>
 
-      {!flipped ? (
-        <>
-          {note.recall ? (
-            <Text fontSize="sm" color={C.ink} lineHeight="1.8">{note.recall}</Text>
-          ) : (
-            // recall 未設定のフォールバック。劣化するが壊れない。
-            <>
-              <Text fontSize="xs" color={C.faint} mb="1.5">{note.created} に書いた記事</Text>
-              <Text fontSize="sm" color={C.ink} lineHeight="1.8">これ、何の話だったか？</Text>
-            </>
-          )}
-          <Button mt="4" w="100%" size="sm" borderRadius="12px" fontWeight="700"
-            color={C.ink} bg="transparent" border="1px solid" borderColor={C.line}
-            _hover={{ bg: 'rgba(255,255,255,.06)' }} onClick={() => setFlipped(true)}>
-            めくる
-          </Button>
-        </>
+      {finished ? (
+        <Box className="glass-soft" px="5" py="6" textAlign="center">
+          <Text fontSize="15px" fontWeight="700" color={C.ink}>今日の再読はおしまい</Text>
+          <Text fontSize="xs" color={C.muted} mt="1.5">明日また、期日が来た記事から出します</Text>
+        </Box>
       ) : (
-        <>
-          <Heading size="sm" color={C.ink} lineHeight="1.55" mb="2">{note.title}</Heading>
-          <Box maxH="260px" overflowY="auto" pr="1"><Md text={note.body} /></Box>
+        <Box position="relative" pb={behind > 0 ? '4' : '0'}>
+          {behind > 1 && (
+            <Box className="glass" position="absolute" left="4" right="4" bottom="0" h="40px" opacity="0.35" aria-hidden="true" />
+          )}
+          {behind > 0 && (
+            <Box className="glass" position="absolute" left="2" right="2" bottom="2" h="40px" opacity="0.6" aria-hidden="true" />
+          )}
+          <Box className="glass" position="relative" p="5" minH="300px" display="flex" flexDirection="column"
+            style={{ background: 'linear-gradient(160deg,rgba(30,34,56,.97),rgba(18,20,36,.97))' }}>
+            <Flex wrap="wrap" gap="1.5">
+              {(note.tags || []).slice(0, 2).map((t) => <Chip key={t} color={C.sky}>{tagLabel(t)}</Chip>)}
+            </Flex>
 
-          <Box mt="4" pt="3.5" borderTop={`1px dashed ${C.line}`}>
-            <Text fontSize="11px" color={C.faint} mb="1.5">思い出せる範囲で一言（任意）</Text>
-            <Textarea value={memo} onChange={(e) => setMemo(e.target.value)} rows={2} fontSize="13px"
-              placeholder="自分の言葉で書くと、わかった＝q5 として記録する"
-              color={C.ink} bg="rgba(255,255,255,.04)" border="1px solid" borderColor={C.line}
-              borderRadius="12px" _placeholder={{ color: C.faint, fontSize: '11px' }}
-              _focus={{ borderColor: C.sky, outline: 'none' }} />
-            <HStack gap="2" mt="3">
-              <Button flex="1" size="sm" borderRadius="12px" fontWeight="700" color="#08111f"
-                bg={ACCENT_GRADIENT} _hover={{ opacity: 0.92 }} onClick={() => judge(true)}>
-                わかった
-              </Button>
-              <Button flex="1" size="sm" borderRadius="12px" fontWeight="600" color={C.muted}
-                bg="transparent" border="1px solid" borderColor={C.line}
-                _hover={{ color: C.ink }} onClick={() => judge(false)}>
-                あやしい
-              </Button>
-            </HStack>
+            {!flipped ? (
+              <>
+                <Box flex="1" mt="4">
+                  {note.recall ? (
+                    <Text fontSize="17px" color={C.ink} lineHeight="1.8">{note.recall}</Text>
+                  ) : (
+                    // recall 未設定のフォールバック。劣化するが壊れない。
+                    <>
+                      <Text fontSize="xs" color={C.faint} mb="1.5">{note.created} に書いた記事</Text>
+                      <Text fontSize="17px" color={C.ink} lineHeight="1.8">これ、何の話だったか？</Text>
+                    </>
+                  )}
+                </Box>
+                <Button mt="5" w="100%" h="48px" borderRadius="14px" fontSize="15px" fontWeight="700"
+                  color={C.ink} bg="transparent" border="1px solid" borderColor="rgba(255,255,255,.18)"
+                  _hover={{ bg: 'rgba(255,255,255,.06)' }} onClick={() => setFlipped(true)}>
+                  めくる
+                </Button>
+              </>
+            ) : (
+              <>
+                <Heading as="h3" fontSize="15px" color={C.ink} lineHeight="1.6" mt="4">{note.title}</Heading>
+                <Box flex="1" maxH="240px" overflowY="auto" mt="1" pr="1"><Md text={note.body} /></Box>
+                {memoOpen ? (
+                  <Textarea mt="3" value={memo} onChange={(e) => setMemo(e.target.value)} rows={2} fontSize="13px"
+                    aria-label="思い出せる範囲で一言"
+                    placeholder="自分の言葉で書くと、わかった＝q5 として記録する"
+                    color={C.ink} bg="rgba(255,255,255,.04)" border="1px solid" borderColor={C.line}
+                    borderRadius="12px" _placeholder={{ color: C.faint, fontSize: '11px' }}
+                    _focus={{ borderColor: C.sky, outline: 'none' }} />
+                ) : (
+                  <Button mt="2" size="xs" variant="ghost" color={C.faint} alignSelf="flex-start" px="1"
+                    _hover={{ color: C.ink, bg: 'transparent' }} onClick={() => setMemoOpen(true)}>
+                    ＋ 一言書く（任意）
+                  </Button>
+                )}
+                <HStack gap="2" mt="3">
+                  <Button flex="1" h="48px" borderRadius="14px" fontSize="15px" fontWeight="700" color="#08111f"
+                    bg={ACCENT_GRADIENT} _hover={{ opacity: 0.92 }} onClick={() => judge(true)}>
+                    わかった
+                  </Button>
+                  <Button flex="1" h="48px" borderRadius="14px" fontSize="15px" fontWeight="600" color={C.muted}
+                    bg="transparent" border="1px solid" borderColor="rgba(255,255,255,.18)"
+                    _hover={{ color: C.ink }} onClick={() => judge(false)}>
+                    あやしい
+                  </Button>
+                </HStack>
+                <Button mt="2" size="xs" variant="ghost" color={C.faint} w="100%"
+                  _hover={{ color: C.ink, bg: 'transparent' }} onClick={() => navigate(`/note/${note.slug}`)}>
+                  記事を開く ›
+                </Button>
+              </>
+            )}
           </Box>
-
-          <Button mt="2.5" size="xs" variant="ghost" color={C.faint} w="100%"
-            _hover={{ color: C.ink, bg: 'transparent' }} onClick={() => navigate(`/note/${note.slug}`)}>
-            記事を開く ›
-          </Button>
-        </>
+        </Box>
       )}
-    </Card>
+
+      <Flex mt="2.5" gap="3" wrap="wrap">
+        {last && (
+          <Text fontSize="11px" color={last.ok ? C.green : C.amber}>
+            {last.ok ? '✓ わかった' : '△ あやしい'} · 次は {last.next}
+          </Text>
+        )}
+        {week > 0 && <Text fontSize="11px" color={C.green}>今週 {week}件 再読した</Text>}
+      </Flex>
+    </Box>
   );
 }
 
-// ---------------- 今日の紙面 ----------------
-export function Edition() {
-  const navigate = useNavigate();
-  const { site, graph, shadow, reads, refresh } = useData();
-  const today = todayISO();
-  const pending = loadPending();
+// ---------------- 続きから ----------------
+function contRow(c) {
+  if (c.type === 'chapter') {
+    return {
+      key: `ch:${c.atlas.slug}`,
+      kicker: `次の章 · ${cleanTitle(c.atlas.title)}（${c.readCount}/${c.total} 読了）`,
+      title: shortTitle(c.concept.title),
+      to: `/atlas/${c.atlas.slug}/concept/${c.concept.slug}?route=${c.route.id}`,
+    };
+  }
+  if (c.type === 'fresh') return { key: `n:${c.note.slug}`, kicker: '新着の記事', title: c.note.title, to: `/note/${c.note.slug}` };
+  return { key: `n:${c.note.slug}`, kicker: `${c.ago}日ぶりの記事`, title: c.note.title, to: `/note/${c.note.slug}` };
+}
 
-  const ed = useMemo(
-    () => composeEdition({ site, graph, shadow, reads, pendingCount: pending.length, today }),
-    [site, graph, shadow, reads, pending.length, today],
+function ContinueList({ items }) {
+  const navigate = useNavigate();
+  if (!items.length) return null;
+  return (
+    <Box as="section" aria-label="続きから">
+      <Box mb="1.5"><SectionTitle>続きから</SectionTitle></Box>
+      <Box className="glass-soft" px="4">
+        {items.map(contRow).map((r, k) => (
+          <Flex as="button" key={r.key} w="100%" textAlign="left" className="press" align="center" gap="3" py="3.5"
+            borderTop={k ? `1px solid ${C.line}` : 'none'} onClick={() => navigate(r.to)}>
+            <Box flex="1" minW="0">
+              <Text fontSize="11px" color={C.faint}>{r.kicker}</Text>
+              <Text fontSize="sm" color={C.ink} fontWeight="600" lineHeight="1.5" mt="0.5" truncate>{r.title}</Text>
+            </Box>
+            <Text fontSize="md" color={C.faint} flexShrink="0">›</Text>
+          </Flex>
+        ))}
+      </Box>
+    </Box>
   );
-  const week = doneThisWeek();
+}
+
+// ---------------- Claude に渡す依頼 ----------------
+// サイトは書き込めないので、再読の判定や深掘りの依頼は端末に溜まる。その出口。
+// 判定が生まれるのはこの画面なので、出口もここに置く（2026-10-17 に `設定` から移した）。
+// 溜まっていないときは出さない。件数は「未消化の借金」ではなく「渡せば消える荷物」なので出してよい。
+const SLIP_KIND = { deepdive: '深掘り' };
+
+function PendingRow() {
+  const { refresh } = useData();
+  const [, setTick] = useState(0);
+  const pending = loadPending();
+  const slips = loadSlips();
+  const total = pending.length + slips.length;
+  if (!total) return null;
+
+  const counts = {};
+  for (const s of slips) {
+    const k = SLIP_KIND[s.kind] || '依頼';
+    counts[k] = (counts[k] || 0) + 1;
+  }
+  const parts = [
+    ...(pending.length ? [`再読の判定 ${pending.length}`] : []),
+    ...Object.entries(counts).map(([k, n]) => `${k} ${n}`),
+  ];
+
+  return (
+    <Box as="section" aria-label="Claude に渡す依頼">
+      <Flex className="glass-soft" align="center" gap="3" pl="4" pr="3" py="2.5">
+        <Box flex="1" minW="0">
+          <Text fontSize="13px" color={C.ink} fontWeight="600">
+            Claude に渡す依頼 <Box as="span" color={C.amber}>{total}件</Box>
+          </Text>
+          <Text fontSize="11px" color={C.faint} mt="0.5">{parts.join('・')}</Text>
+        </Box>
+        <CopyButton text={slipsPrompt(slips, pending)}>コピー</CopyButton>
+      </Flex>
+      <Flex justify="flex-end">
+        <Button size="xs" variant="ghost" color={C.faint} px="1" mt="1"
+          _hover={{ color: C.ink, bg: 'transparent' }}
+          onClick={() => { clearPending(); clearSlips(); setTick((t) => t + 1); refresh?.(); }}>
+          渡し終わったので消す
+        </Button>
+      </Flex>
+    </Box>
+  );
+}
+
+// ---------------- 今日 ----------------
+export function Edition() {
+  const { site, graph, shadow, reads } = useData();
+  const today = todayISO();
+  // 再読の3枚は開いた時点で固定する。判定のたびに組み直すと、判定した札の代わりに
+  // 次の期日の札が繰り上がってきて「今日の3枚」が終わらなくなる。
+  const [queue] = useState(() => composeToday({ site, graph, shadow, reads, today }).recall);
+  const cont = useMemo(
+    () => composeToday({ site, graph, shadow, reads, today }).cont,
+    [site, graph, shadow, reads, today],
+  );
 
   return (
     <>
-      <Masthead site={site} today={today} />
+      <Masthead today={today} />
       <Page>
-        <VStack align="stretch" gap="6">
-
-          {ed.lead && <Box><Lead card={ed.lead} /></Box>}
-
-          {ed.aside.length > 0 && (
-            <VStack align="stretch" gap="2">
-              {ed.aside.map((a, i) =>
-                a.type === 'countdown' ? (
-                  <Flex as="button" key={i} onClick={() => navigate(`/follow/${a.follow.name}`)}
-                    className="glass-soft press" px="4" py="3" borderRadius="14px"
-                    align="center" justify="space-between" w="100%" textAlign="left">
-                    <Box minW="0">
-                      <Text fontSize="10px" color={C.faint}>次戦 · {cleanTitle(a.follow.title)}</Text>
-                      <Text fontSize="sm" color={C.ink} fontWeight="600" mt="0.5">vs {a.match.opponent}</Text>
-                    </Box>
-                    <Text fontSize="sm" color={C.violet} fontWeight="700" flexShrink="0">あと{a.days}日 ›</Text>
-                  </Flex>
-                ) : (
-                  <Flex as="button" key={i} onClick={() => navigate('/more')}
-                    className="glass-soft press" px="4" py="3" borderRadius="14px"
-                    align="center" justify="space-between" w="100%" textAlign="left">
-                    <Text fontSize="sm" color={C.ink} fontWeight="600">未送信の依頼</Text>
-                    <Text fontSize="sm" color={C.amber} fontWeight="700" flexShrink="0">{a.count}件 ›</Text>
-                  </Flex>
-                ),
-              )}
-            </VStack>
-          )}
-
-          <Box>
-            <Slot action={week > 0 ? <Text fontSize="11px" color={C.green}>今週 {week}件</Text> : null}>
-              今日の再読
-            </Slot>
-            {ed.recall.length === 0 ? (
-              <Card soft><Text fontSize="sm" color={C.muted}>今日の再読はない</Text></Card>
-            ) : (
-              <VStack align="stretch" gap="3">
-                {ed.recall.map((r, i) => (
-                  <RecallCard key={r.note.slug} note={r.note} index={i} total={ed.recall.length} onDone={refresh} />
-                ))}
-              </VStack>
-            )}
-          </Box>
-
-          {ed.chapter && (
-            <Box>
-              <Slot action={
-                <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
-                  _hover={{ color: C.ink, bg: 'transparent' }}
-                  onClick={() => navigate('/groups?kind=atlas')}>一覧で見る ›</Button>
-              }>Series</Slot>
-              <Card onClick={() => navigate(`/atlas/${ed.chapter.atlas.slug}/concept/${ed.chapter.concept.slug}?route=${ed.chapter.route.id}`)}>
-                <Text fontSize="xs" color={C.faint}>{cleanTitle(ed.chapter.atlas.title)} — {ed.chapter.route.label}</Text>
-                <Text fontSize="sm" color={C.ink} fontWeight="700" mt="1" mb="3">
-                  次の章：{shortTitle(ed.chapter.concept.title)}
-                </Text>
-                <Flex align="center" gap="2.5">
-                  <Box flex="1" h="6px" borderRadius="full" bg="rgba(255,255,255,.08)" overflow="hidden">
-                    <Box h="100%" borderRadius="full" bg={ACCENT_GRADIENT}
-                      style={{ width: `${Math.round((ed.chapter.readCount / ed.chapter.total) * 100)}%` }} />
-                  </Box>
-                  <Text fontSize="xs" color={C.faint} flexShrink="0">
-                    読了 {ed.chapter.readCount}/{ed.chapter.total}
-                  </Text>
-                </Flex>
-              </Card>
-            </Box>
-          )}
-
-          {ed.feature && (
-            <Box>
-              <Slot count={`${ed.feature.bundle.items.length}本`}>特集</Slot>
-              <Card>
-                <HStack justify="space-between" align="baseline" mb="2.5">
-                  <Text fontSize="sm" color={C.ink} fontWeight="700">{ed.feature.bundle.title}</Text>
-                  {ed.feature.bundle.tag && (
-                    <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
-                      _hover={{ color: C.ink, bg: 'transparent' }}
-                      onClick={() => navigate(`/search?tag=${encodeURIComponent(ed.feature.bundle.tag)}`)}>このテーマを探す ›</Button>
-                  )}
-                </HStack>
-                <VStack align="stretch" gap="0">
-                  {ed.feature.bundle.items.slice(0, 4).map((it) => (
-                    <Box as="button" key={it.node.route} textAlign="left" className="press" py="1.5"
-                      onClick={() => navigate(it.node.route)}>
-                      <Text fontSize="sm" color={C.sky} lineHeight="1.5">○ {it.label || it.node.short}</Text>
-                      {it.reason && <Text fontSize="11px" color={C.faint} lineHeight="1.5">{it.reason}</Text>}
-                    </Box>
-                  ))}
-                </VStack>
-                {ed.feature.bundle.items.length > 4 && (
-                  <Text fontSize="xs" color={C.faint} mt="2">＋{ed.feature.bundle.items.length - 4}本</Text>
-                )}
-              </Card>
-            </Box>
-          )}
-
-          {ed.records.length > 0 && (
-            <Box>
-              <Slot action={
-                <Button size="xs" variant="ghost" color={C.faint} px="1" flexShrink="0"
-                  _hover={{ color: C.ink, bg: 'transparent' }}
-                  onClick={() => navigate('/groups')}>一覧 ›</Button>
-              }>記録</Slot>
-              <VStack align="stretch" gap="3">
-                {ed.records.map((r, i) =>
-                  r.type === 'series' ? (
-                    <Card key={i} onClick={() => navigate(`/follow/${r.follow.name}`)}>
-                      <HStack justify="space-between" mb="2">
-                        <Text fontSize="sm" color={C.ink} fontWeight="700">{cleanTitle(r.follow.title)}</Text>
-                        <Text fontSize="10px" color={C.faint}>{r.follow.sessions[0]?.date}</Text>
-                      </HStack>
-                      <VStack align="stretch" gap="2.5">
-                        {/* 良し悪しを判定できる指標（goal 宣言あり）を先に見せる */}
-                        {r.follow.series
-                          .filter((s) => s.points.length >= 2)
-                          .sort((a, b) => (b.goal ? 1 : 0) - (a.goal ? 1 : 0))
-                          .slice(0, 3).map((s) => (
-                            <Box key={s.key}>
-                              <HStack justify="space-between" align="baseline" mb="0.5">
-                                <Text fontSize="11px" color={C.muted}>{s.key}</Text>
-                                <Delta points={s.points} goal={s.goal} />
-                              </HStack>
-                              <Sparkline points={s.points} height={30} goal={s.goal} />
-                            </Box>
-                          ))}
-                      </VStack>
-                    </Card>
-                  ) : (
-                    <Card key={i} onClick={() => navigate(`/log/${r.topic.slug}`)}>
-                      <Text fontSize="sm" color={C.ink} fontWeight="700">{r.topic.title}</Text>
-                      <Text fontSize="xs" color={C.muted} mt="1">{r.topic.entries.length}件を比べる ›</Text>
-                    </Card>
-                  ),
-                )}
-              </VStack>
-            </Box>
-          )}
-
-          <Box>
-            <Slot>今号の在庫</Slot>
-            <Flex as="button" onClick={() => navigate('/groups')} className="glass-soft press"
-              px="4" py="3" borderRadius="14px" align="center" justify="space-between" w="100%" textAlign="left">
-              <Text fontSize="xs" color={C.muted} lineHeight="1.7">
-                {ed.inventory.notes}記事 / {ed.inventory.concepts}章 / {ed.inventory.sessions}観測 / {ed.inventory.entries}記録
-              </Text>
-              <Text fontSize="sm" color={C.faint} flexShrink="0">一覧 ›</Text>
-            </Flex>
-          </Box>
-
-        </VStack>
+        <Flex direction="column" gap="7" pt="2">
+          <RecallStack queue={queue} />
+          <ContinueList items={cont} />
+          <PendingRow />
+        </Flex>
       </Page>
     </>
   );
