@@ -18,6 +18,7 @@ tags: [moc]
 ## フェース管理（向き・スクエアに返す）
 
 - [[golf-ball-flight-start-line-is-mostly-face-curve-is-face-minus-path-tolerance-asymmetry]] — 法則（D-プレーン）。打ち出し≒フェース（約85%）／曲がり＝フェースと軌道の差。許容差はフェース1〜2度・軌道は数度＝精度はフェースへ
+- [[golf-zero-sidespin-face-angle-is-the-club-path-so-regression-zero-crossing-estimates-path]] — その系。**サイドスピンが0になるフェース角＝クラブ軌道**なので、軌道を表示しない計測器でも複数球の回帰で軌道が推定できる
 - [[golf-face-angle-governed-by-lead-wrist-and-forearm-not-hinge-direction]] — 原理。フェースの開閉はコックの方向ではなくリード手首の掌背屈・前腕回旋で決まる
 - [[golf-iron-square-face-takeaway-keep-lead-wrist-flat]] — アイアンのセットアップ〜テークアウェイの具体策。スクエア＋軽いハンドファースト＋リード手首フラット
 - [[golf-slice-comes-from-open-face-not-hand-lead]] — 切り分け。スライスは手の先行ではなくフェースが開いていることが原因

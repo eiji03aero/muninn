@@ -32,3 +32,4 @@ srs:
 - [[golf-driver-stop-forcing-extreme-inside-out-deliver-neutral-through-ball]] — 軌道側の運用（極端インからをやめ中立に）
 - [[golf-my-plane-is-a-result-not-a-target-severity-depends-on-control-model-invest-precision-in-face]] — この非対称を自分のスイング観に落とした版
 - [[golf-swing-is-not-a-single-plane-kwon-functional-swing-plane-clubhead-plane-hands-tighter-circle-shaft-cone]] — 「プレーン」は結果として生まれる面という前提
+- [[golf-zero-sidespin-face-angle-is-the-club-path-so-regression-zero-crossing-estimates-path]] — この法則の系。曲がり＝フェース−軌道なので、曲がりが0になるフェース角が軌道そのもの＝軌道を表示しない計測器でも推定できる
