@@ -17,6 +17,8 @@ tags: [moc]
 - [[after-mix-blending-roasts-each-bean-separately-so-one-origin-can-appear-at-two-roast-levels]] — ブレンドの配合表は味の設計図。焙煎度の内訳から苦味と酸味の配分が読める（＝UCCの「単品焙煎」）
 - [[robusta-adds-bitterness-and-body-cheaply-and-vietnam-is-the-largest-producer]] — 生豆生産国名から配合を読む。ベトナムが入っていたらロブスタを疑う
 - [[mocha-is-a-yemeni-port-name-that-now-labels-yemeni-and-ethiopian-coffee]] — 「モカ」は産地ではなく港の名前。指すのはイエメン・エチオピア産と果実味のある酸
+- [[kilimanjaro-is-a-trade-name-for-tanzanian-arabica-not-a-place-on-the-mountain]] — 「キリマンジャロ」も山ではなく規約上の銘柄名＝タンザニア産アラビカ
+- [[a-blend-named-after-an-origin-must-contain-at-least-30-percent-of-it]] — 「◯◯ブレンド」を名乗れるのは30%以上から。並び順と組み合わせると配合が絞れる
 - [[brazil-coffee-is-the-nutty-low-acid-base-that-most-blends-are-built-on]] — ブラジルはナッツ・チョコ系の「土台の豆」。ブレンドの地の部分を担う
 - [[uganda-is-the-native-home-of-robusta-but-its-specialty-coffee-is-highland-arabica]] — 同じ国名が安いロブスタにも高級アラビカにもなる。国名だけでは味は決まらない
 - [[peru-coffee-is-smallholder-organic-with-mild-rounded-chocolate-and-nut-flavors]] — ペルーは小規模農家の有機栽培。酸が丸いので深煎りの土台に向く
@@ -37,6 +39,8 @@ tags: [moc]
 - [[green-vegetative-flavors-signal-underdeveloped-roasting]] — 青臭さ・野菜っぽさは焙煎不足のサイン。抽出不足との切り分けは「青さの有無」
 
 ## 味わい方・評価のしかた
+
+- [[what-decides-my-coffee-rating-is-body-and-finish-with-aroma-as-the-tiebreaker]] — 記録帖15本から読んだ自分の採点の構造（insight）。★3は欠点ではなく「立つものがない」の印
 
 - [[light-bodied-acidic-coffee-works-with-tonic-water]] — 酸が主役で軽い豆はトニックで割ると活きる。深煎りは苦味がぶつかる
 - [[iridescent-bubbles-on-spent-grounds-are-thin-film-interference-from-coffee-oil]] — 虹色の泡は油分の薄膜干渉。泡の「量」より鮮度の手がかりになる
