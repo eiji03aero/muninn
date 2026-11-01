@@ -11,8 +11,8 @@ routes:
     order: [what-is-philosophy, birth-of-philosophy, socrates, platonic-forms, aristotle, branches-of-philosophy]
   - id: branches
     label: 分野でたどる
-    desc: 哲学の地図（5分野）を起点に、「知るとは何か」を巡って合理論・経験論・カントへ。
-    order: [what-is-philosophy, branches-of-philosophy, epistemology, rationalism, empiricism, kant-synthesis]
+    desc: 哲学の地図（5分野）を起点に、「知るとは何か」を巡って合理論・経験論・カントへ、そしてカントの主著『純粋理性批判』の中身まで。
+    order: [what-is-philosophy, branches-of-philosophy, epistemology, rationalism, empiricism, kant-synthesis, critique-of-pure-reason]
 ---
 
 ## このアトラスについて
