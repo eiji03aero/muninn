@@ -68,3 +68,5 @@ tags: [moc]
 - [[pouring-in-stages-builds-the-cup-because-each-pour-extracts-a-different-flavor]] — 分割注湯は投ごとに違う味を重ねる作業。一気注ぎは後半の甘み・コクを取り逃す
 - [[more-pours-raises-extraction-so-adding-pours-is-the-wrong-fix-for-astringency]] — 回数を増やすのは抽出を上げる操作。渋みの対策に増やすのは逆向き
 - [[percolation-breaks-when-you-scale-up-because-the-bed-gets-deeper]] — 透過式は量を増やすと層が深くなって崩れる。浸漬式はスケールに強い
+- [[splitting-into-smaller-batches-is-a-valid-way-to-brew-more-with-a-small-dripper]] — 器具を買わずにスケールする手。層が浅いまま既知のレシピを使い回せる
+- [[room-temperature-gear-steals-heat-from-the-first-pour-so-preheating-beats-waiting]] — 1投目だけ冷える理由。「冷まして待つ」は制御になっていない

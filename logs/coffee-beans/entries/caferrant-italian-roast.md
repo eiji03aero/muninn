@@ -288,6 +288,7 @@ fields:
 ## Links
 - [[steeping-first-then-filtering-through-paper-combines-immersion-time-with-paper-clarity]] — 5回目の方式そのもの。濾過の時間が加算される落とし穴も含めて
 - [[a-coarse-grind-lacks-surface-area-so-compensate-with-time-heat-and-agitation]] — 粗挽きのままペーパーで飲むための考え方（この5回目の出発点）
+- [[room-temperature-gear-steals-heat-from-the-first-pour-so-preheating-beats-waiting]] — 3回目で「1投目だけ抽出不足だったのでは」と見た現象。冷ますより予熱するほうが制御になる
 - [[fines-over-extract-because-of-their-surface-area-so-removing-them-removes-astringency]] — 渋みの主犯が微粉である理由。4回目で効いた対策の根拠
 - [[brewing-unevenness-comes-from-flow-in-percolation-and-from-grind-spread-in-immersion]] — 器具ごとに不均一の原因が違う。この豆から得た一番大きい一般則
 - [[koku-is-an-ambiguous-word-covering-body-strength-finish-and-complexity]] — 「コクあるのか？」の正体。一語が4つの別物を指している（1回目の核心）
