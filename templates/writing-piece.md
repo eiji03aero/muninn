@@ -1,5 +1,5 @@
 ---
-title: <作品名（仮でよい。完成時に見直す）>
+title: <仮題でよい。末尾に（仮）を付ける。確定時に必ず簡潔な本題へ付け直す>
 kind: piece                 # 作品1本。クイズ対象外・srsは付けない
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
