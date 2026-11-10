@@ -141,7 +141,7 @@ UCC公式のフレーバーマップは、リッチブレンドをこう位置�
 - [[koku-is-an-ambiguous-word-covering-body-strength-finish-and-complexity]] — 袋の「コク★5」が4軸のどこを指すかを検証した回。自力で分解できた
 - [[coffee-body-is-a-tactile-sensation-made-by-insoluble-oils-and-fine-particles]] — 口当たりの「重さ」と「なめらかさ」が別々に動くこと
 - [[coffee-strength-is-the-dose-ratio-while-extraction-yield-is-grind-temperature-and-time]] — 「薄い」の直し方は挽き目ではなく比率。2本連続で同じ診断になった
-- [[one-way-degassing-valve-keeps-ground-coffee-fresh-until-the-bag-is-opened]] — 粉なのに一投目から泡が出た理由
+- [[one-way-degassing-valve-keeps-ground-coffee-fresh-until-the-bag-is-opened]] — 粉なのに一投目から泡が出た理由。**ただし後日訂正あり**——バルブ一般の性質ではなく、UCCが謳う「一般のバルブよりガスが抜けにくい」仕様のほうが効いていた（バルブ付き・製造2ヶ月で泡が出なかった反例が出たため。→ Chill break レギュラーコーヒー）
 - [[coffee-aroma-is-weak-when-cold-because-volatiles-need-heat]] — 乾いた粉は香るのに淹れると控えめ、の容疑者
 - [[after-mix-blending-roasts-each-bean-separately-so-one-origin-can-appear-at-two-roast-levels]] — 「単品焙煎」の正体
 - [[coffee-bag-origin-list-is-ordered-by-blend-ratio]] — 「ブラジル、ベトナム他」＝土台はブラジル
