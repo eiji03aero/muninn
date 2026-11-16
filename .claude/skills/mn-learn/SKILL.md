@@ -120,6 +120,14 @@ ls atlas/*/concepts/ | ...      # 近い概念が stub で置かれていない�
   `node scripts/mn-validate.mjs <書かれたファイル…>` で受け入れ検査 → **自分の目で本文を通す** →
   CLAUDE.md の手順で `main` にコミット → remote `main` に push → 報告。
 
+**エージェントが走っている間の git の作法**: 他の章のファイルが未ステージのまま作業ツリーに残るので、
+`git pull --rebase` は「unstaged changes がある」と言って必ず失敗する。`stash` もしてはいけない
+（走っているエージェントの書きかけを巻き上げる）。`git fetch origin` →
+`git rev-list --left-right --count origin/main...HEAD` で**behind が 0 なら rebase せずそのまま push**。
+behind があるときだけ、全エージェントの完了を待ってから最新化する。
+コミットは `git add <そのエージェントのファイルだけ>` で、`git add -A` は絶対に使わない
+（書きかけの他章を巻き込む）。
+
 コミット権を1箇所に集めるのは、同じワークツリーを共有しているから。複数エージェントが同時に commit すると
 index が競合し履歴も混ざる。「ローカル `main` 経由で remote `main`」という安全装置も、**守る場所が1つなら破られない**。
 
