@@ -18,6 +18,7 @@ tags: [moc]
 - [[robusta-adds-bitterness-and-body-cheaply-and-vietnam-is-the-largest-producer]] — 生豆生産国名から配合を読む。ベトナムが入っていたらロブスタを疑う
 - [[mocha-is-a-yemeni-port-name-that-now-labels-yemeni-and-ethiopian-coffee]] — 「モカ」は産地ではなく港の名前。指すのはイエメン・エチオピア産と果実味のある酸
 - [[kilimanjaro-is-a-trade-name-for-tanzanian-arabica-not-a-place-on-the-mountain]] — 「キリマンジャロ」も山ではなく規約上の銘柄名＝タンザニア産アラビカ
+- [[emerald-mountain-is-an-fnc-certified-grade-not-a-place]] — 「エメラルドマウンテン」はFNCの認定グレード。銘柄名は誰が定義しているかで中身が違う
 - [[a-blend-named-after-an-origin-must-contain-at-least-30-percent-of-it]] — 「◯◯ブレンド」を名乗れるのは30%以上から。並び順と組み合わせると配合が絞れる
 - [[brazil-coffee-is-the-nutty-low-acid-base-that-most-blends-are-built-on]] — ブラジルはナッツ・チョコ系の「土台の豆」。ブレンドの地の部分を担う
 - [[uganda-is-the-native-home-of-robusta-but-its-specialty-coffee-is-highland-arabica]] — 同じ国名が安いロブスタにも高級アラビカにもなる。国名だけでは味は決まらない
@@ -26,6 +27,7 @@ tags: [moc]
 - [[coffee-bag-origin-list-is-ordered-by-blend-ratio]] — 生豆生産国名は配合比率の多い順。先頭に書かれた国がその袋の主役
 - [[roasted-coffee-goes-flat-and-papery-as-it-stales]] — 焙煎後の劣化。脂質酸化とCO2抜けで平坦・紙っぽくなる。飲み頃は焙煎後7〜21日
 - [[one-way-degassing-valve-keeps-ground-coffee-fresh-until-the-bag-is-opened]] — バルブが止めるのは酸化の時計だけ。ガス（泡）の時計は袋の中でも進む
+- [[freshly-roasted-coffee-is-closed-and-needs-a-few-days-to-open-up]] — 鮮度には山がある。新しすぎても味は出ない（失敗は2種類）
 - [[dark-roasts-stale-faster-because-of-porosity-and-surface-oil]] — 深煎りほど劣化が速い。香りを失っても味が残るので気づきにくい
 - [[italian-roast-is-the-deepest-of-the-eight-japanese-roast-levels]] — 8段階の最深。酸を焼き切って苦味とボディに全振りし、ミルク・砂糖前提で設計される
 
